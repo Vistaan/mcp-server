@@ -38,7 +38,7 @@ export async function readWorkflowFile(fileName: string): Promise<string> {
  */
 export function extractMarkdownSection(markdown: string, heading: string): string {
   const escapedHeading = escapeRegex(heading);
-  const pattern = new RegExp(`${escapedHeading}[\\s\\S]*?(?=\\n###\\s\\d\\.\\d|$)`, 'm');
+  const pattern = new RegExp(`${escapedHeading}[\\s\\S]*?(?=\\n###\\s\\d\\.\\d|$)`);
   const match = markdown.match(pattern);
   return match?.[0] ?? `${heading}\n\nSection not found.`;
 }
