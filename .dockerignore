@@ -10,5 +10,7 @@ tests/
 .prettierrc.json
 vitest.config.ts
 tsconfig.json
+!tsconfig.json
+!tsconfig.build.json
 *.md
 !workflows/*.md

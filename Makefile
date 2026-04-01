@@ -4,7 +4,7 @@
 
 IMAGE_NAME  ?= workflow-os-mcp
 IMAGE_TAG   ?= 1.0.0
-REGISTRY    ?= ""
+REGISTRY    ?=
 FULL_IMAGE  := $(if $(REGISTRY),$(REGISTRY)/$(IMAGE_NAME):$(IMAGE_TAG),$(IMAGE_NAME):$(IMAGE_TAG))
 K8S_NS      := workflow-os
 PORT        ?= 3000
