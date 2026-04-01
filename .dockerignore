@@ -1,0 +1,14 @@
+node_modules/
+dist/
+.env
+coverage/
+*.tsbuildinfo
+internal-docs/
+docs/
+tests/
+.eslintrc.cjs
+.prettierrc.json
+vitest.config.ts
+tsconfig.json
+*.md
+!workflows/*.md

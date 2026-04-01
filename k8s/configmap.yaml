@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: workflow-os-mcp-config
+  namespace: workflow-os
+  labels:
+    app.kubernetes.io/name: workflow-os-mcp
+data:
+  MCP_TRANSPORT: "http"
+  MCP_PORT: "3000"
+  NODE_ENV: "production"

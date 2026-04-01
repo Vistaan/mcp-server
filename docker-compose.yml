@@ -1,0 +1,21 @@
+services:
+  workflow-os-mcp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime
+    image: workflow-os-mcp:local
+    container_name: workflow-os-mcp
+    ports:
+      - "3000:3000"
+    environment:
+      MCP_TRANSPORT: http
+      MCP_PORT: "3000"
+      NODE_ENV: production
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
