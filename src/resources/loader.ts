@@ -1,12 +1,15 @@
 import { readFile } from 'node:fs/promises';
 import * as path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { escapeRegex } from '../core/normalizer.js';
 
 /**
- * Root directory where the seven v4 workflow markdown files live.
- * Override via WORKFLOW_ROOT environment variable.
+ * Bundled workflows directory — co-located in the project at /workflows.
+ * Can be overridden via WORKFLOW_ROOT for custom deployments.
  */
-export const WORKFLOW_ROOT: string = process.env['WORKFLOW_ROOT'] ?? process.cwd();
+const BUNDLED_WORKFLOWS = path.resolve(fileURLToPath(import.meta.url), '../../../workflows');
+
+export const WORKFLOW_ROOT: string = process.env['WORKFLOW_ROOT'] ?? BUNDLED_WORKFLOWS;
 
 /**
  * Reads a workflow file from WORKFLOW_ROOT.
@@ -23,7 +26,8 @@ export async function readWorkflowFile(fileName: string): Promise<string> {
       `Expected file: ${absolutePath}`,
       `Error: ${error instanceof Error ? error.message : String(error)}`,
       '',
-      'Set the WORKFLOW_ROOT environment variable to the directory containing the v4 workflow files.',
+      'Workflow files are bundled in the /workflows directory.',
+      'Override via WORKFLOW_ROOT environment variable if needed.',
     ].join('\n');
   }
 }
