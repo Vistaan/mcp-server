@@ -28,14 +28,14 @@ describe('startStdioTransport', () => {
     let stdinHandler: (() => void) | undefined;
     let sigtermHandler: (() => void) | undefined;
 
-    vi.spyOn(process.stdin, 'on').mockImplementation(((event, handler) => {
+    vi.spyOn(process.stdin, 'on').mockImplementation(((event: string, handler: (...args: unknown[]) => void) => {
       if (event === 'close') {
         stdinHandler = handler as () => void;
       }
       return process.stdin;
     }) as never);
 
-    vi.spyOn(process, 'on').mockImplementation(((event, handler) => {
+    vi.spyOn(process, 'on').mockImplementation(((event: string, handler: (...args: unknown[]) => void) => {
       if (event === 'SIGTERM') {
         sigtermHandler = handler as () => void;
       }
