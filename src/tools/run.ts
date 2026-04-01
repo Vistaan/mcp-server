@@ -17,7 +17,7 @@ export function registerRunTool(server: McpServer): void {
       inputSchema: runWorkflowSequenceInputSchema,
       outputSchema: runWorkflowSequenceOutputSchema,
     },
-    async (args) => {
+    (args) => {
       const route = routeTask({
         task: args.task,
         preferred_mode: args.mode,

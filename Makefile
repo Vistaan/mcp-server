@@ -31,7 +31,7 @@ lint: ## Run ESLint
 	pnpm run lint
 
 lint-fix: ## Run ESLint with auto-fix
-	pnpm run lint-fix
+	pnpm run lint:fix
 
 format: ## Format source files with Prettier
 	pnpm run format

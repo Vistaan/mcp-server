@@ -13,7 +13,7 @@ export function registerSelectTool(server: McpServer): void {
       inputSchema: selectDomainWorkflowInputSchema,
       outputSchema: selectDomainWorkflowOutputSchema,
     },
-    async (args) => {
+    (args) => {
       const stage = normalizeStage(args.domain, args.stage);
       const resourceUri = DOMAIN_URI_MAP[args.domain];
 

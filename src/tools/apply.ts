@@ -13,7 +13,7 @@ export function registerApplyTool(server: McpServer): void {
       inputSchema: applyUtilityPromptInputSchema,
       outputSchema: applyUtilityPromptOutputSchema,
     },
-    async (args) => {
+    (args) => {
       const issuesFound = inferUtilityIssues(args.utility_name, args.content);
       const revisedContent = [
         args.content,

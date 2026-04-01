@@ -13,7 +13,7 @@ export function registerRouteTool(server: McpServer): void {
       inputSchema: routeTaskInputSchema,
       outputSchema: routeTaskOutputSchema,
     },
-    async (args) => {
+    (args) => {
       const routed = routeTask(args);
       log.info('route_task', { mode: routed.mode, domain: routed.domain, confidence: routed.confidence });
 

@@ -12,9 +12,8 @@ export function registerDomainPrompts(server: McpServer): void {
       description: 'Run the freelancing chain from skill or niche through premium offer growth.',
       argsSchema: {
         task: z.string().min(1).describe('Freelancing task or challenge'),
-        stage: completable(
-          z.string().default('auto'),
-          (value: string | undefined) => ['auto', ...DOMAIN_SEQUENCES.freelancing].filter((s) => s.startsWith(value ?? '')),
+        stage: completable(z.string().default('auto'), (value: string | undefined) =>
+          ['auto', ...DOMAIN_SEQUENCES.freelancing].filter((s) => s.startsWith(value ?? '')),
         ),
         context: z.string().optional().describe('Skills, niche, constraints'),
       },
@@ -36,9 +35,8 @@ export function registerDomainPrompts(server: McpServer): void {
       description: 'Run the products chain from idea through first sale.',
       argsSchema: {
         task: z.string().min(1).describe('Product idea or challenge'),
-        stage: completable(
-          z.string().default('auto'),
-          (value: string | undefined) => ['auto', ...DOMAIN_SEQUENCES.products].filter((s) => s.startsWith(value ?? '')),
+        stage: completable(z.string().default('auto'), (value: string | undefined) =>
+          ['auto', ...DOMAIN_SEQUENCES.products].filter((s) => s.startsWith(value ?? '')),
         ),
         context: z.string().optional().describe('Audience, constraints, idea details'),
       },
@@ -60,9 +58,8 @@ export function registerDomainPrompts(server: McpServer): void {
       description: 'Run the content chain from audience pain through optimization.',
       argsSchema: {
         task: z.string().min(1).describe('Content goal or copy challenge'),
-        stage: completable(
-          z.string().default('auto'),
-          (value: string | undefined) => ['auto', ...DOMAIN_SEQUENCES.content].filter((s) => s.startsWith(value ?? '')),
+        stage: completable(z.string().default('auto'), (value: string | undefined) =>
+          ['auto', ...DOMAIN_SEQUENCES.content].filter((s) => s.startsWith(value ?? '')),
         ),
         platform: z.string().optional().describe('Publishing platform (e.g. LinkedIn, Twitter)'),
         audience: z.string().optional().describe('Target audience description'),
@@ -72,7 +69,10 @@ export function registerDomainPrompts(server: McpServer): void {
       messages: [
         {
           role: 'user',
-          content: { type: 'text', text: buildPromptText('persuasion', 'content', task, { stage, platform, audience }) },
+          content: {
+            type: 'text',
+            text: buildPromptText('persuasion', 'content', task, { stage, platform, audience }),
+          },
         },
       ],
     }),
@@ -85,9 +85,8 @@ export function registerDomainPrompts(server: McpServer): void {
       description: 'Run the execution chain from do-now triage through momentum.',
       argsSchema: {
         task: z.string().min(1).describe('Blocked task, procrastination, or overwhelm situation'),
-        stage: completable(
-          z.string().default('auto'),
-          (value: string | undefined) => ['auto', ...DOMAIN_SEQUENCES.execution].filter((s) => s.startsWith(value ?? '')),
+        stage: completable(z.string().default('auto'), (value: string | undefined) =>
+          ['auto', ...DOMAIN_SEQUENCES.execution].filter((s) => s.startsWith(value ?? '')),
         ),
         energy_level: z.enum(['low', 'medium', 'high']).default('medium').describe('Current energy level'),
       },
@@ -112,9 +111,8 @@ export function registerDomainPrompts(server: McpServer): void {
       description: 'Run the investing chain from analysis through a repeatable system.',
       argsSchema: {
         task: z.string().min(1).describe('Investing task, stock analysis, or trade setup'),
-        stage: completable(
-          z.string().default('auto'),
-          (value: string | undefined) => ['auto', ...DOMAIN_SEQUENCES.investing].filter((s) => s.startsWith(value ?? '')),
+        stage: completable(z.string().default('auto'), (value: string | undefined) =>
+          ['auto', ...DOMAIN_SEQUENCES.investing].filter((s) => s.startsWith(value ?? '')),
         ),
         ticker: z.string().optional().describe('Stock ticker symbol'),
       },
@@ -136,9 +134,8 @@ export function registerDomainPrompts(server: McpServer): void {
       description: 'Apply one supporting utility after a primary workflow.',
       argsSchema: {
         task: z.string().min(1).describe('Utility task description'),
-        utility_name: completable(
-          z.string(),
-          (value: string | undefined) => DOMAIN_SEQUENCES.utility.filter((s) => s.startsWith(value ?? '')),
+        utility_name: completable(z.string(), (value: string | undefined) =>
+          DOMAIN_SEQUENCES.utility.filter((s) => s.startsWith(value ?? '')),
         ),
         content: z.string().optional().describe('Draft or output to apply the utility to'),
       },

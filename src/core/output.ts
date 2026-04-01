@@ -8,12 +8,7 @@ export function toToolResult<T extends Record<string, unknown>>(output: T): Tool
   };
 }
 
-export function buildPromptText(
-  mode: Mode,
-  domain: RouteDomain,
-  task: string,
-  meta?: Record<string, unknown>,
-): string {
+export function buildPromptText(mode: Mode, domain: RouteDomain, task: string, meta?: Record<string, unknown>): string {
   const lines = [`Mode: ${mode}`, `Domain: ${domain}`, `Task: ${task}`];
 
   if (meta) {

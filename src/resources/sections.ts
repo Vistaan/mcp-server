@@ -9,7 +9,7 @@ export function registerSectionResources(server: McpServer): void {
   server.registerResource(
     'workflow-sections',
     new ResourceTemplate('workflow://{domain}/v4/{sectionGroup}/{sectionName}', {
-      list: async () => ({
+      list: () => ({
         resources: SECTION_SEGMENTS.flatMap((segment) =>
           (Object.keys(DOMAIN_URI_MAP) as Domain[]).map((domain) => ({
             uri: `${DOMAIN_URI_MAP[domain]}/${segment.key}`,

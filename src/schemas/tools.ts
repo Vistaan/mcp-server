@@ -9,9 +9,7 @@ export const routeTaskInputSchema = z.object({
   goal: z.string().optional(),
   audience: z.string().optional(),
   constraints: z.array(z.string()).default([]),
-  preferred_mode: z
-    .enum(['auto', 'clarify', 'strategy', 'build', 'persuasion', 'execution', 'review'])
-    .default('auto'),
+  preferred_mode: z.enum(['auto', 'clarify', 'strategy', 'build', 'persuasion', 'execution', 'review']).default('auto'),
   preferred_domain: z
     .enum(['auto', 'os', 'freelancing', 'products', 'content', 'execution', 'investing', 'utility'])
     .default('auto'),
@@ -99,9 +97,7 @@ export const applyUtilityPromptOutputSchema = z.object({
 // ---------------------------------------------------------------------------
 
 export const generateNextActionInputSchema = z.object({
-  domain: z
-    .enum(['os', 'freelancing', 'products', 'content', 'execution', 'investing', 'utility'])
-    .optional(),
+  domain: z.enum(['os', 'freelancing', 'products', 'content', 'execution', 'investing', 'utility']).optional(),
   current_output: z.string().min(1),
   constraints: z.array(z.string()).default([]),
 });

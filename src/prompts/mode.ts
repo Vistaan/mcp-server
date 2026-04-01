@@ -2,7 +2,6 @@ import { z } from 'zod';
 import { completable } from '@modelcontextprotocol/sdk/server/completable.js';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { buildPromptText } from '../core/output.js';
-import { DOMAIN_SEQUENCES } from '../core/catalog.js';
 
 const DOMAINS = ['os', 'freelancing', 'products', 'content', 'execution', 'investing', 'utility'] as const;
 
@@ -36,9 +35,8 @@ export function registerModePrompts(server: McpServer): void {
       description: 'Select the strongest direction, priorities, or plan.',
       argsSchema: {
         task: z.string().min(1).describe('Task or challenge to strategize'),
-        domain: completable(
-          z.enum(DOMAINS).default('products'),
-          (value: string | undefined) => DOMAINS.filter((d) => d.startsWith(value ?? '')),
+        domain: completable(z.enum(DOMAINS).default('products'), (value: string | undefined) =>
+          DOMAINS.filter((d) => d.startsWith(value ?? '')),
         ),
         context: z.string().optional().describe('Additional context'),
       },

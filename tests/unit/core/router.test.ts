@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { inferDomain, inferMode, routeTask, utilityCandidatesForMode, buildRouteReason } from '../../../src/core/router.js';
+import {
+  inferDomain,
+  inferMode,
+  routeTask,
+  utilityCandidatesForMode,
+  buildRouteReason,
+} from '../../../src/core/router.js';
 import { DOMAIN_SEQUENCES } from '../../../src/core/catalog.js';
 
 describe('inferDomain', () => {

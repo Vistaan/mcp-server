@@ -14,7 +14,7 @@ module.exports = {
   ],
   rules: {
     // MCP protocol uses stdout for JSON-RPC — no console allowed
-    'no-console': ['error', { allow: [] }],
+    'no-console': 'error',
 
     '@typescript-eslint/no-explicit-any': 'error',
     '@typescript-eslint/no-floating-promises': 'error',

@@ -11,7 +11,7 @@ export function registerGenerateTool(server: McpServer): void {
       inputSchema: generateNextActionInputSchema,
       outputSchema: generateNextActionOutputSchema,
     },
-    async (args) => {
+    (args) => {
       const nextAction = makeNextAction(args.domain ?? 'os', args.current_output, args.constraints);
 
       return toToolResult({

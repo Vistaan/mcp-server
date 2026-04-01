@@ -1,6 +1,7 @@
 import express from 'express';
 import type { Request, Response } from 'express';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
+import type { Transport } from '@modelcontextprotocol/sdk/shared/transport.js';
 import { createServer } from '../server.js';
 import { log } from '../logger.js';
 
@@ -28,11 +29,12 @@ export async function startHttpTransport(port: number): Promise<void> {
   // ── MCP handler (POST + GET + DELETE) ─────────────────────────────────────────
   async function handleMcp(req: Request, res: Response): Promise<void> {
     try {
-      const transport = new StreamableHTTPServerTransport({
-        sessionIdGenerator: undefined, // stateless — no session affinity needed
-      });
+      const transport = new StreamableHTTPServerTransport();
       const server = createServer();
-      await server.connect(transport);
+
+      // The SDK transport is runtime-compatible with `Transport`, but its current
+      // declarations do not satisfy `exactOptionalPropertyTypes` cleanly.
+      await server.connect(transport as unknown as Transport);
       await transport.handleRequest(req, res, req.body as Record<string, unknown> | undefined);
       void server.close();
     } catch (error) {
@@ -43,9 +45,15 @@ export async function startHttpTransport(port: number): Promise<void> {
     }
   }
 
-  app.post('/mcp', (req, res) => { void handleMcp(req, res); });
-  app.get('/mcp', (req, res) => { void handleMcp(req, res); });
-  app.delete('/mcp', (req, res) => { void handleMcp(req, res); });
+  app.post('/mcp', (req, res) => {
+    void handleMcp(req, res);
+  });
+  app.get('/mcp', (req, res) => {
+    void handleMcp(req, res);
+  });
+  app.delete('/mcp', (req, res) => {
+    void handleMcp(req, res);
+  });
 
   await new Promise<void>((resolve) => {
     app.listen(port, () => {

@@ -1,13 +1,6 @@
 export type Mode = 'clarify' | 'strategy' | 'build' | 'persuasion' | 'execution' | 'review';
 
-export type Domain =
-  | 'os'
-  | 'freelancing'
-  | 'products'
-  | 'content'
-  | 'execution'
-  | 'investing'
-  | 'utility';
+export type Domain = 'os' | 'freelancing' | 'products' | 'content' | 'execution' | 'investing' | 'utility';
 
 export type RouteDomain = Domain | 'auto';
 
