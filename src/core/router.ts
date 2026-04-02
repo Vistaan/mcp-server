@@ -3,12 +3,78 @@ import type { Domain, Mode, RouteResult } from '../schemas/types.js';
 import { routeTaskInputSchema } from '../schemas/tools.js';
 import { DOMAIN_SEQUENCES } from './catalog.js';
 
+type SignalDefinition<TLabel extends string> = Record<TLabel, Array<{ pattern: RegExp; weight: number; label: string }>>;
+
+type RankedChoice<TLabel extends string> = {
+  label: TLabel;
+  score: number;
+  evidence: string[];
+};
+
+const DOMAIN_SIGNALS: SignalDefinition<Domain> = {
+  os: [
+    { pattern: /\b(route|workflow os|front door|classify)\b/, weight: 3, label: 'router language' },
+    { pattern: /\b(system|operating mode|dispatch)\b/, weight: 2, label: 'system language' },
+  ],
+  freelancing: [
+    { pattern: /\b(freelance|client|retainer|proposal|portfolio)\b/, weight: 4, label: 'freelancing language' },
+    { pattern: /\b(outreach|niche|service offer|discovery call)\b/, weight: 3, label: 'client acquisition language' },
+  ],
+  products: [
+    { pattern: /\b(product|offer|pricing|validate|first sale)\b/, weight: 4, label: 'product language' },
+    { pattern: /\b(digital product|buyer result|productized)\b/, weight: 3, label: 'product build language' },
+  ],
+  content: [
+    { pattern: /\b(copy|hook|cta|landing page|headline)\b/, weight: 4, label: 'content language' },
+    { pattern: /\b(post|audience|story|persuasion|email)\b/, weight: 3, label: 'persuasion language' },
+  ],
+  execution: [
+    { pattern: /\b(stuck|overwhelm|priority|focus|sprint)\b/, weight: 4, label: 'execution language' },
+    { pattern: /\b(unblock|do now|momentum|procrastinat)\b/, weight: 3, label: 'momentum language' },
+  ],
+  investing: [
+    { pattern: /\b(stock|ticker|earnings|trade|watchlist)\b/, weight: 4, label: 'investing language' },
+    { pattern: /\b(market|news|entry criteria|portfolio)\b/, weight: 3, label: 'market language' },
+  ],
+  utility: [
+    { pattern: /\b(rewrite|compress|tighten|simplify|adapt)\b/, weight: 4, label: 'utility language' },
+    { pattern: /\b(optimi[sz]e|blind spot|leverage|improve)\b/, weight: 3, label: 'optimization language' },
+  ],
+};
+
+const MODE_SIGNALS: SignalDefinition<Mode> = {
+  clarify: [
+    { pattern: /\b(confused|unclear|fuzzy|clarify|not sure)\b/, weight: 4, label: 'clarify language' },
+    { pattern: /\b(understand|figure out|define)\b/, weight: 2, label: 'discovery language' },
+  ],
+  strategy: [
+    { pattern: /\b(strategy|direction|choose|best|opportunity)\b/, weight: 4, label: 'strategy language' },
+    { pattern: /\b(validate|position|niche)\b/, weight: 2, label: 'strategic decision language' },
+  ],
+  build: [
+    { pattern: /\b(build|create|launch|ship|plan)\b/, weight: 3, label: 'build language' },
+    { pattern: /\b(set up|assemble|develop)\b/, weight: 2, label: 'implementation language' },
+  ],
+  persuasion: [
+    { pattern: /\b(copy|hook|persuasion|convert|cta)\b/, weight: 4, label: 'persuasion language' },
+    { pattern: /\b(rewrite|headline|offer copy)\b/, weight: 3, label: 'conversion language' },
+  ],
+  execution: [
+    { pattern: /\b(stuck|do now|sprint|focus|execute)\b/, weight: 4, label: 'execution language' },
+    { pattern: /\b(priority|unblock|momentum)\b/, weight: 3, label: 'action language' },
+  ],
+  review: [
+    { pattern: /\b(review|audit|tighten|improve|optimi[sz]e)\b/, weight: 4, label: 'review language' },
+    { pattern: /\b(check|refine|polish)\b/, weight: 2, label: 'refinement language' },
+  ],
+};
+
 export function routeTask(input: z.infer<typeof routeTaskInputSchema>): RouteResult {
   if (input.preferred_mode !== 'auto' && input.preferred_domain !== 'auto') {
     return {
       mode: input.preferred_mode,
       domain: input.preferred_domain,
-      confidence: 0.99,
+      confidence: 1,
       reason: 'Explicit preferred mode and domain were provided.',
       sequence: DOMAIN_SEQUENCES[input.preferred_domain],
       useUtility: input.preferred_domain !== 'utility',
@@ -21,14 +87,19 @@ export function routeTask(input: z.infer<typeof routeTaskInputSchema>): RouteRes
     .join(' ')
     .toLowerCase();
 
-  const inferredDomain = input.preferred_domain !== 'auto' ? input.preferred_domain : inferDomain(text);
-  const inferredMode = input.preferred_mode !== 'auto' ? input.preferred_mode : inferMode(text, inferredDomain);
+  const domainResult = input.preferred_domain !== 'auto' ? explicitChoice(input.preferred_domain) : scoreDomain(text);
+  const inferredDomain = domainResult.label;
+  const modeResult = input.preferred_mode !== 'auto' ? explicitChoice(input.preferred_mode) : scoreMode(text, inferredDomain);
+  const inferredMode = modeResult.label;
 
   return {
     mode: inferredMode,
     domain: inferredDomain,
-    confidence: 0.82,
-    reason: buildRouteReason(inferredMode, inferredDomain, text),
+    confidence: deriveConfidence(domainResult.score, modeResult.score, domainResult.evidence.length, modeResult.evidence.length),
+    reason: buildRouteReason(inferredMode, inferredDomain, text, {
+      domainEvidence: domainResult.evidence,
+      modeEvidence: modeResult.evidence,
+    }),
     sequence: DOMAIN_SEQUENCES[inferredDomain],
     useUtility: inferredDomain !== 'utility',
     utilityCandidates: utilityCandidatesForMode(inferredMode),
@@ -36,29 +107,25 @@ export function routeTask(input: z.infer<typeof routeTaskInputSchema>): RouteRes
 }
 
 export function inferDomain(text: string): Domain {
-  if (/(stock|ticker|watchlist|trade|earnings|market|invest)/.test(text)) return 'investing';
-  if (/(hook|copy|content|post|cta|audience|landing page|offer copy)/.test(text)) return 'content';
-  if (/(stuck|overwhelm|procrastinat|priority|sprint|focus|execution)/.test(text)) return 'execution';
-  if (/(product|idea|validate|first sale|pricing|buyer|digital product)/.test(text)) return 'products';
-  if (/(freelance|client|portfolio|outreach|retainer|niche|service offer)/.test(text)) return 'freelancing';
-  if (/(rewrite|compress|tone|blind spot|leverage|optimi[sz]e|improve)/.test(text)) return 'utility';
-  return 'os';
+  return scoreDomain(text).label;
 }
 
 export function inferMode(text: string, domain: Domain): Mode {
-  if (/(confused|unclear|fuzzy|clarify|not sure)/.test(text)) return 'clarify';
-  if (/(stuck|overwhelm|do now|procrastinat|sprint|focus)/.test(text)) return 'execution';
-  if (/(rewrite|improve|optimi[sz]e|review|tighten)/.test(text)) {
-    return domain === 'content' ? 'persuasion' : 'review';
-  }
-  if (/(strategy|direction|choose|best|validate|niche|opportunity)/.test(text)) return 'strategy';
-  if (domain === 'content') return 'persuasion';
-  if (domain === 'execution') return 'execution';
-  return 'build';
+  return scoreMode(text, domain).label;
 }
 
-export function buildRouteReason(mode: Mode, domain: Domain, text: string): string {
-  return `Detected ${mode} mode for the ${domain} domain from task language: ${text.slice(0, 160) || 'n/a'}`;
+export function buildRouteReason(
+  mode: Mode,
+  domain: Domain,
+  text: string,
+  details?: { domainEvidence?: string[]; modeEvidence?: string[] },
+): string {
+  const domainEvidence = details?.domainEvidence?.slice(0, 2).join(', ');
+  const modeEvidence = details?.modeEvidence?.slice(0, 2).join(', ');
+  const evidence = [domainEvidence ? `domain evidence: ${domainEvidence}` : undefined, modeEvidence ? `mode evidence: ${modeEvidence}` : undefined]
+    .filter(Boolean)
+    .join('; ');
+  return `Detected ${mode} mode for the ${domain} domain from task language: ${text.slice(0, 160) || 'n/a'}${evidence ? ` (${evidence})` : ''}`;
 }
 
 export function utilityCandidatesForMode(mode: Mode): string[] {
@@ -76,4 +143,66 @@ export function utilityCandidatesForMode(mode: Mode): string[] {
     case 'review':
       return ['clarity_rewrite', 'impact_compressor', 'blind_spot_finder'];
   }
+}
+
+function scoreDomain(text: string): RankedChoice<Domain> {
+  const ranked = rankSignals(text, DOMAIN_SIGNALS, 'os');
+  return ranked;
+}
+
+function scoreMode(text: string, domain: Domain): RankedChoice<Mode> {
+  const ranked = rankSignals(text, MODE_SIGNALS, defaultModeForDomain(domain));
+  if (ranked.score > 0) {
+    return ranked;
+  }
+
+  return explicitChoice(defaultModeForDomain(domain));
+}
+
+function rankSignals<TLabel extends string>(
+  text: string,
+  definitions: SignalDefinition<TLabel>,
+  fallback: TLabel,
+): RankedChoice<TLabel> {
+  const rankedChoices = (Object.entries(definitions) as Array<[TLabel, SignalDefinition<TLabel>[TLabel]]>).map(([label, signals]) => {
+    const evidence: string[] = [];
+    const score = signals.reduce((total: number, signal) => {
+      if (signal.pattern.test(text)) {
+        evidence.push(signal.label);
+        return total + signal.weight;
+      }
+      return total;
+    }, 0);
+
+    return { label: label as TLabel, score, evidence };
+  });
+
+  rankedChoices.sort((left, right) => {
+    if (right.score !== left.score) {
+      return right.score - left.score;
+    }
+    return left.label.localeCompare(right.label);
+  });
+
+  const best = rankedChoices[0];
+  if (!best || best.score === 0) {
+    return explicitChoice(fallback);
+  }
+
+  return best;
+}
+
+function defaultModeForDomain(domain: Domain): Mode {
+  if (domain === 'content') return 'persuasion';
+  if (domain === 'execution') return 'execution';
+  return 'build';
+}
+
+function explicitChoice<TLabel extends string>(label: TLabel): RankedChoice<TLabel> {
+  return { label, score: 10, evidence: ['explicit preference'] };
+}
+
+function deriveConfidence(domainScore: number, modeScore: number, domainEvidenceCount: number, modeEvidenceCount: number): number {
+  const raw = 0.45 + Math.min(0.5, domainScore * 0.03 + modeScore * 0.03 + domainEvidenceCount * 0.04 + modeEvidenceCount * 0.04);
+  return Number(raw.toFixed(2));
 }

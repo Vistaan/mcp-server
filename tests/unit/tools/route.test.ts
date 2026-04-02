@@ -40,7 +40,7 @@ describe('route_task logic', () => {
     });
     expect(result.mode).toBe('strategy');
     expect(result.domain).toBe('investing');
-    expect(result.confidence).toBe(0.99);
+    expect(result.confidence).toBe(1);
   });
 
   it('schema validation rejects missing task', () => {

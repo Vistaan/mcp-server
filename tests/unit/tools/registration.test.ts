@@ -67,14 +67,14 @@ describe('tool registration', () => {
     expect(result.structuredContent['subsection_uri']).toBe('workflow://products/v4/execution/sequence');
   });
 
-  it('registers run_workflow_sequence and returns a deliverable plus optional next action', () => {
+  it('registers run_workflow_sequence and returns structured execution output', async () => {
     const { server, tools } = createToolServer();
 
     registerRunTool(server as never);
 
     expect(server.registerTool).toHaveBeenCalledTimes(1);
 
-    const withNext = tools.get('run_workflow_sequence')?.({
+    const withNext = (await tools.get('run_workflow_sequence')?.({
       mode: 'build',
       domain: 'products',
       task: 'launch a productized service',
@@ -82,40 +82,43 @@ describe('tool registration', () => {
       context: 'for solo founders',
       optimize_once: true,
       next_action_required: true,
-    }) as { structuredContent: Record<string, unknown> };
+    })) as { structuredContent: Record<string, unknown> };
 
-    const withoutNext = tools.get('run_workflow_sequence')?.({
+    const withoutNext = (await tools.get('run_workflow_sequence')?.({
       mode: 'build',
       domain: 'products',
       task: 'launch a productized service',
       stage: 'auto',
       optimize_once: false,
       next_action_required: false,
-    }) as { structuredContent: Record<string, unknown> };
+    })) as { structuredContent: Record<string, unknown> };
 
-    expect(String(withNext.structuredContent['main_deliverable'])).toContain('launch a productized service');
+    expect(String(withNext.structuredContent['execution_summary'])).toContain('launch a productized service');
+    expect(withNext.structuredContent['workflow_reference']).toBe('workflow://products/v4');
+    expect(Array.isArray(withNext.structuredContent['recommendations'])).toBe(true);
     expect(withNext.structuredContent['optimization_applied']).toBe(true);
     expect(withNext.structuredContent['next_action']).not.toBe('No next action requested.');
     expect(withoutNext.structuredContent['next_action']).toBe('No next action requested.');
     expect(infoMock).toHaveBeenCalledWith('run_workflow_sequence', expect.objectContaining({ domain: 'products' }));
   });
 
-  it('registers apply_utility_prompt and returns revised content with issues', () => {
+  it('registers apply_utility_prompt and returns a transformed asset with issues', async () => {
     const { server, tools } = createToolServer();
 
     registerApplyTool(server as never);
 
     expect(server.registerTool).toHaveBeenCalledTimes(1);
 
-    const result = tools.get('apply_utility_prompt')?.({
+    const result = (await tools.get('apply_utility_prompt')?.({
       utility_name: 'clarity_rewrite',
       content: 'maybe this could work',
       context: 'for landing page copy',
-    }) as { structuredContent: Record<string, unknown> };
+    })) as { structuredContent: Record<string, unknown> };
 
-    expect(String(result.structuredContent['revised_content'])).toContain('[Utility applied: clarity_rewrite]');
+    expect(String(result.structuredContent['revised_content'])).not.toContain('[Utility applied: clarity_rewrite]');
     expect(String(result.structuredContent['revised_content'])).toContain('for landing page copy');
     expect(Array.isArray(result.structuredContent['issues_found'])).toBe(true);
+    expect(Array.isArray(result.structuredContent['changes_applied'])).toBe(true);
   });
 
   it('registers generate_next_action and produces one immediate next step', () => {

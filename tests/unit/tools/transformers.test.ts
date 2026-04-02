@@ -35,7 +35,10 @@ describe('tool transformers', () => {
     const runResult = buildRunWorkflowSequenceResult({
       mode: 'build',
       domain: 'products',
-      main_deliverable: 'deliverable',
+      stage: 'idea',
+      workflow_reference: 'workflow://products/v4',
+      execution_summary: 'deliverable',
+      recommendations: ['validate demand'],
       applied_sequence: ['idea'],
       optimization_applied: true,
       next_action: 'next',
@@ -43,13 +46,18 @@ describe('tool transformers', () => {
 
     expect(selectResult.structuredContent['resource_uri']).toBe('workflow://products/v4');
     expect(runResult.structuredContent['next_action']).toBe('next');
+    expect(runResult.structuredContent['workflow_reference']).toBe('workflow://products/v4');
   });
 
   it('validates utility and next-action DTOs before returning them', () => {
     const applyResult = buildApplyUtilityPromptResult({
       utility_name: 'clarity_rewrite',
+      operation: 'clarity rewrite',
+      original_content: 'original',
       revised_content: 'revised',
       issues_found: ['issue'],
+      changes_applied: ['tightened phrasing'],
+      next_action: 'Use the improved asset',
     });
     const nextActionResult = buildGenerateNextActionResult({
       next_action: 'Do the thing',
@@ -57,6 +65,7 @@ describe('tool transformers', () => {
     });
 
     expect(applyResult.structuredContent['issues_found']).toEqual(['issue']);
+    expect(applyResult.structuredContent['changes_applied']).toEqual(['tightened phrasing']);
     expect(nextActionResult.structuredContent['next_action']).toBe('Do the thing');
   });
 });

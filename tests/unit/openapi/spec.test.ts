@@ -28,10 +28,10 @@ describe('OpenAPI spec', () => {
   });
 
   it('models the health response and JSON-RPC schemas', () => {
-    expect(openApiSpec.components.schemas.HealthResponse.required).toEqual(
+    expect(openApiSpec.components.schemas.HealthBase.required).toEqual(
       expect.arrayContaining(['status', 'service', 'transport']),
     );
     expect(openApiSpec.components.schemas.JsonRpcMessage.oneOf).toHaveLength(4);
-    expect(openApiSpec.components.schemas.InternalServerError.properties.error.const).toBe('Internal server error');
+    expect(openApiSpec.components.schemas.InternalServerErrorResponse.properties.error.allOf).toBeDefined();
   });
 });

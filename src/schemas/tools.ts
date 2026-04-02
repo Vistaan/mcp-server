@@ -59,7 +59,10 @@ export const runWorkflowSequenceInputSchema = z.object({
 export const runWorkflowSequenceOutputSchema = z.object({
   mode: z.enum(['clarify', 'strategy', 'build', 'persuasion', 'execution', 'review']),
   domain: z.enum(['os', 'freelancing', 'products', 'content', 'execution', 'investing', 'utility']),
-  main_deliverable: z.string(),
+  stage: z.string(),
+  workflow_reference: z.string(),
+  execution_summary: z.string(),
+  recommendations: z.array(z.string()),
   applied_sequence: z.array(z.string()),
   optimization_applied: z.boolean(),
   next_action: z.string(),
@@ -88,8 +91,12 @@ export const applyUtilityPromptInputSchema = z.object({
 
 export const applyUtilityPromptOutputSchema = z.object({
   utility_name: z.string(),
+  operation: z.string(),
+  original_content: z.string(),
   revised_content: z.string(),
   issues_found: z.array(z.string()),
+  changes_applied: z.array(z.string()),
+  next_action: z.string(),
 });
 
 // ---------------------------------------------------------------------------

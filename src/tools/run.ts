@@ -1,10 +1,8 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { routeTask } from '../core/router.js';
-import { buildAppliedSequence, normalizeStage } from '../core/normalizer.js';
-import { makeNextAction } from '../core/output.js';
-import { DOMAIN_URI_MAP } from '../core/catalog.js';
 import { log } from '../logger.js';
 import { runWorkflowSequenceInputSchema, runWorkflowSequenceOutputSchema } from '../schemas/tools.js';
+import { executeWorkflow } from '../services/workflows.js';
 import { buildRunWorkflowSequenceResult } from './transformers.js';
 
 export function registerRunTool(server: McpServer): void {
@@ -18,7 +16,7 @@ export function registerRunTool(server: McpServer): void {
       inputSchema: runWorkflowSequenceInputSchema,
       outputSchema: runWorkflowSequenceOutputSchema,
     },
-    (args) => {
+    async (args) => {
       const route = routeTask({
         task: args.task,
         preferred_mode: args.mode,
@@ -26,34 +24,34 @@ export function registerRunTool(server: McpServer): void {
         constraints: [],
       });
 
-      const appliedSequence = buildAppliedSequence(args.domain, args.stage, route.sequence);
-      const stage = normalizeStage(args.domain, args.stage);
-
-      const mainDeliverable = [
-        `Mode: ${args.mode}`,
-        `Domain: ${args.domain}`,
-        `Stage: ${stage}`,
-        `Task: ${args.task}`,
-        args.context ? `Context: ${args.context}` : undefined,
-        `Sequence: ${appliedSequence.join(' -> ')}`,
-        `Use the resource ${DOMAIN_URI_MAP[args.domain]} as the source-of-truth workflow reference.`,
-      ]
-        .filter(Boolean)
-        .join('\n');
-
-      const nextAction = makeNextAction(args.domain, args.task, []);
-
-      const output = {
+      const output = await executeWorkflow({
         mode: args.mode,
         domain: args.domain,
-        main_deliverable: mainDeliverable,
-        applied_sequence: appliedSequence,
-        optimization_applied: args.optimize_once,
-        next_action: args.next_action_required ? nextAction : 'No next action requested.',
-      };
+        task: args.task,
+        stage: args.stage,
+        optimizeOnce: args.optimize_once,
+        nextActionRequired: args.next_action_required,
+        ...(args.context ? { context: args.context } : {}),
+      });
 
-      log.info('run_workflow_sequence', { mode: args.mode, domain: args.domain, stage });
-      return buildRunWorkflowSequenceResult(output);
+      log.info('run_workflow_sequence', {
+        mode: args.mode,
+        domain: args.domain,
+        stage: output.stage,
+        routed_sequence: route.sequence.join(' -> '),
+      });
+
+      return buildRunWorkflowSequenceResult({
+        mode: output.mode,
+        domain: output.domain,
+        stage: output.stage,
+        workflow_reference: output.workflowReference,
+        execution_summary: output.executionSummary,
+        recommendations: output.recommendations,
+        applied_sequence: output.appliedSequence,
+        optimization_applied: output.optimizationApplied,
+        next_action: output.nextAction,
+      });
     },
   );
 }

@@ -1,3 +1,5 @@
+import { errorMessageForCode } from '../transports/contracts.js';
+
 type OpenApiSpec = typeof openApiSpecTemplate & {
   servers: Array<{
     url: string;
@@ -53,7 +55,17 @@ const openApiSpecTemplate = {
             content: {
               'application/json': {
                 schema: {
-                  $ref: '#/components/schemas/HealthResponse',
+                  $ref: '#/components/schemas/HealthOkResponse',
+                },
+              },
+            },
+          },
+          '503': {
+            description: 'Service is running but required workflow files are unavailable.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/HealthDegradedResponse',
                 },
               },
             },
@@ -107,7 +119,37 @@ const openApiSpecTemplate = {
             content: {
               'application/json': {
                 schema: {
-                  $ref: '#/components/schemas/InternalServerError',
+                  $ref: '#/components/schemas/InternalServerErrorResponse',
+                },
+              },
+            },
+          },
+          '503': {
+            description: 'Workflow files are unavailable.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/WorkflowUnavailableErrorResponse',
+                },
+              },
+            },
+          },
+          '504': {
+            description: 'Request timed out.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/RequestTimeoutErrorResponse',
+                },
+              },
+            },
+          },
+          '408': {
+            description: 'Client aborted the request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/RequestAbortedErrorResponse',
                 },
               },
             },
@@ -137,7 +179,7 @@ const openApiSpecTemplate = {
             content: {
               'application/json': {
                 schema: {
-                  $ref: '#/components/schemas/InternalServerError',
+                  $ref: '#/components/schemas/InternalServerErrorResponse',
                 },
               },
             },
@@ -174,7 +216,7 @@ const openApiSpecTemplate = {
             content: {
               'application/json': {
                 schema: {
-                  $ref: '#/components/schemas/InternalServerError',
+                  $ref: '#/components/schemas/InternalServerErrorResponse',
                 },
               },
             },
@@ -226,14 +268,32 @@ const openApiSpecTemplate = {
   },
   components: {
     schemas: {
-      HealthResponse: {
+      HealthBase: {
         type: 'object',
         additionalProperties: false,
-        required: ['status', 'service', 'transport'],
+        required: ['status', 'service', 'transport', 'workflow_root', 'missing_workflows', 'checked_at'],
         properties: {
-          status: { type: 'string', const: 'ok' },
+          status: { type: 'string', enum: ['ok', 'degraded'] },
           service: { type: 'string', const: 'workflow-os-mcp' },
           transport: { type: 'string', const: 'http' },
+          workflow_root: { type: 'string' },
+          missing_workflows: {
+            type: 'array',
+            items: { type: 'string' },
+          },
+          checked_at: { type: 'string', format: 'date-time' },
+        },
+      },
+      HealthOkResponse: {
+        allOf: [{ $ref: '#/components/schemas/HealthBase' }],
+        properties: {
+          status: { type: 'string', const: 'ok' },
+        },
+      },
+      HealthDegradedResponse: {
+        allOf: [{ $ref: '#/components/schemas/HealthBase' }],
+        properties: {
+          status: { type: 'string', const: 'degraded' },
         },
       },
       JsonRpcId: {
@@ -312,14 +372,72 @@ const openApiSpecTemplate = {
           { $ref: '#/components/schemas/JsonRpcErrorResponse' },
         ],
       },
-      InternalServerError: {
+      ErrorBody: {
+        type: 'object',
+        additionalProperties: false,
+        required: ['code', 'message', 'request_id'],
+        properties: {
+          code: {
+            type: 'string',
+            enum: ['workflow_unavailable', 'request_aborted', 'request_timeout', 'internal'],
+          },
+          message: { type: 'string' },
+          request_id: { type: 'string' },
+        },
+      },
+      InternalServerErrorResponse: {
         type: 'object',
         additionalProperties: false,
         required: ['error'],
         properties: {
           error: {
-            type: 'string',
-            const: 'Internal server error',
+            allOf: [{ $ref: '#/components/schemas/ErrorBody' }],
+            properties: {
+              code: { type: 'string', const: 'internal' },
+              message: { type: 'string', const: errorMessageForCode('internal') },
+            },
+          },
+        },
+      },
+      WorkflowUnavailableErrorResponse: {
+        type: 'object',
+        additionalProperties: false,
+        required: ['error'],
+        properties: {
+          error: {
+            allOf: [{ $ref: '#/components/schemas/ErrorBody' }],
+            properties: {
+              code: { type: 'string', const: 'workflow_unavailable' },
+              message: { type: 'string', const: errorMessageForCode('workflow_unavailable') },
+            },
+          },
+        },
+      },
+      RequestTimeoutErrorResponse: {
+        type: 'object',
+        additionalProperties: false,
+        required: ['error'],
+        properties: {
+          error: {
+            allOf: [{ $ref: '#/components/schemas/ErrorBody' }],
+            properties: {
+              code: { type: 'string', const: 'request_timeout' },
+              message: { type: 'string', const: errorMessageForCode('request_timeout') },
+            },
+          },
+        },
+      },
+      RequestAbortedErrorResponse: {
+        type: 'object',
+        additionalProperties: false,
+        required: ['error'],
+        properties: {
+          error: {
+            allOf: [{ $ref: '#/components/schemas/ErrorBody' }],
+            properties: {
+              code: { type: 'string', const: 'request_aborted' },
+              message: { type: 'string', const: errorMessageForCode('request_aborted') },
+            },
           },
         },
       },

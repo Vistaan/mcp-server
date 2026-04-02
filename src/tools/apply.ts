@@ -1,6 +1,6 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { inferUtilityIssues } from '../core/output.js';
 import { applyUtilityPromptInputSchema, applyUtilityPromptOutputSchema } from '../schemas/tools.js';
+import { applyUtility } from '../services/workflows.js';
 import { buildApplyUtilityPromptResult } from './transformers.js';
 
 export function registerApplyTool(server: McpServer): void {
@@ -14,21 +14,20 @@ export function registerApplyTool(server: McpServer): void {
       inputSchema: applyUtilityPromptInputSchema,
       outputSchema: applyUtilityPromptOutputSchema,
     },
-    (args) => {
-      const issuesFound = inferUtilityIssues(args.utility_name, args.content);
-      const revisedContent = [
-        args.content,
-        '',
-        `[Utility applied: ${args.utility_name}]`,
-        args.context ? `Context: ${args.context}` : undefined,
-      ]
-        .filter((line) => line !== undefined)
-        .join('\n');
-
+    async (args) => {
+      const output = await applyUtility({
+        utilityName: args.utility_name,
+        content: args.content,
+        ...(args.context ? { context: args.context } : {}),
+      });
       return buildApplyUtilityPromptResult({
-        utility_name: args.utility_name,
-        revised_content: revisedContent,
-        issues_found: issuesFound,
+        utility_name: output.utilityName,
+        operation: output.operation,
+        original_content: output.originalContent,
+        revised_content: output.revisedContent,
+        issues_found: output.issuesFound,
+        changes_applied: output.changesApplied,
+        next_action: output.nextAction,
       });
     },
   );

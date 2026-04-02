@@ -110,6 +110,7 @@ function createResponse() {
     headersSent: false,
     req: { protocol: 'http' },
     setTimeout: vi.fn(),
+    destroy: vi.fn(),
     get: vi.fn((header: string) => {
       if (header === 'host') {
         return 'localhost:8080';
@@ -206,6 +207,7 @@ describe('HTTP transport', () => {
     const req = {
       body: { jsonrpc: '2.0' },
       method: 'POST',
+      path: '/mcp',
       aborted: false,
       on: vi.fn(),
       off: vi.fn(),
@@ -251,10 +253,23 @@ describe('HTTP transport', () => {
 
     expect(errorMock).toHaveBeenCalledWith(
       'HTTP MCP handler error',
-      expect.objectContaining({ error: 'Error: boom', kind: 'internal', statusCode: 500, aborted: false, timedOut: false }),
+      expect.objectContaining({
+        error: 'Error: boom',
+        kind: 'internal',
+        statusCode: 500,
+        aborted: false,
+        timedOut: false,
+        requestId: expect.any(String),
+      }),
     );
     expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.json).toHaveBeenCalledWith({ error: 'Internal server error' });
+    expect(res.json).toHaveBeenCalledWith({
+      error: {
+        code: 'internal',
+        message: 'Internal server error',
+        request_id: expect.any(String),
+      },
+    });
     expect(closeMock).toHaveBeenCalledTimes(1);
   });
 
@@ -268,12 +283,19 @@ describe('HTTP transport', () => {
     const res = createResponse();
     res.headersSent = true;
 
-    postMcpHandler?.({ body: undefined, method: 'POST', aborted: false, on: vi.fn(), off: vi.fn(), setTimeout: vi.fn() }, res);
+    postMcpHandler?.({ body: undefined, method: 'POST', path: '/mcp', aborted: false, on: vi.fn(), off: vi.fn(), setTimeout: vi.fn() }, res);
     await flushAsyncWork();
 
     expect(errorMock).toHaveBeenCalledWith(
       'HTTP MCP handler error',
-      expect.objectContaining({ error: 'Error: connect failed', kind: 'internal', statusCode: 500, aborted: false, timedOut: false }),
+      expect.objectContaining({
+        error: 'Error: connect failed',
+        kind: 'internal',
+        statusCode: 500,
+        aborted: false,
+        timedOut: false,
+        requestId: expect.any(String),
+      }),
     );
     expect(res.status).not.toHaveBeenCalled();
     expect(res.json).not.toHaveBeenCalled();
@@ -307,11 +329,17 @@ describe('HTTP transport', () => {
     expect(healthRes.status).toHaveBeenCalledWith(503);
 
     const res = createResponse();
-    postMcpHandler?.({ body: {}, method: 'POST', aborted: false, on: vi.fn(), off: vi.fn(), setTimeout: vi.fn() }, res);
+    postMcpHandler?.({ body: {}, method: 'POST', path: '/mcp', aborted: false, on: vi.fn(), off: vi.fn(), setTimeout: vi.fn() }, res);
     await flushAsyncWork();
 
     expect(res.status).toHaveBeenCalledWith(503);
-    expect(res.json).toHaveBeenCalledWith({ error: 'Workflow resources unavailable' });
+    expect(res.json).toHaveBeenCalledWith({
+      error: {
+        code: 'workflow_unavailable',
+        message: 'Workflow resources unavailable',
+        request_id: expect.any(String),
+      },
+    });
     expect(createServerMock).not.toHaveBeenCalled();
   });
 
@@ -326,14 +354,14 @@ describe('HTTP transport', () => {
 
     createHttpApp();
 
-    const req = { body: {}, method: 'POST', aborted: false, on: vi.fn(), off: vi.fn(), setTimeout: vi.fn() };
+    const req = { body: {}, method: 'POST', path: '/mcp', aborted: false, on: vi.fn(), off: vi.fn(), setTimeout: vi.fn() };
     const res = createResponse();
     postMcpHandler?.(req, res);
     await flushAsyncWork();
 
     expect(errorMock).toHaveBeenCalledWith(
       'HTTP MCP handler error',
-      expect.objectContaining({ kind: 'request_aborted', statusCode: 408, aborted: true, timedOut: false }),
+      expect.objectContaining({ kind: 'request_aborted', statusCode: 408, aborted: true, timedOut: false, requestId: expect.any(String) }),
     );
     expect(res.status).not.toHaveBeenCalled();
   });
@@ -349,14 +377,20 @@ describe('HTTP transport', () => {
     createHttpApp();
 
     const res = createResponse();
-    postMcpHandler?.({ body: {}, method: 'POST', aborted: false, on: vi.fn(), off: vi.fn(), setTimeout: vi.fn() }, res);
+    postMcpHandler?.({ body: {}, method: 'POST', path: '/mcp', aborted: false, on: vi.fn(), off: vi.fn(), setTimeout: vi.fn() }, res);
     await flushAsyncWork();
 
     expect(errorMock).toHaveBeenCalledWith(
       'HTTP MCP handler error',
-      expect.objectContaining({ kind: 'request_timeout', statusCode: 504, aborted: false, timedOut: true }),
+      expect.objectContaining({ kind: 'request_timeout', statusCode: 504, aborted: false, timedOut: true, requestId: expect.any(String) }),
     );
     expect(res.status).toHaveBeenCalledWith(504);
-    expect(res.json).toHaveBeenCalledWith({ error: 'Internal server error' });
+    expect(res.json).toHaveBeenCalledWith({
+      error: {
+        code: 'request_timeout',
+        message: 'Request timed out',
+        request_id: expect.any(String),
+      },
+    });
   });
 });

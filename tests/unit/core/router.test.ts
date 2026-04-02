@@ -81,14 +81,14 @@ describe('inferMode', () => {
 });
 
 describe('routeTask', () => {
-  it('returns 0.99 confidence for explicit preferred mode + domain', () => {
+  it('returns full confidence for explicit preferred mode + domain', () => {
     const result = routeTask({
       task: 'anything',
       preferred_mode: 'build',
       preferred_domain: 'products',
       constraints: [],
     });
-    expect(result.confidence).toBe(0.99);
+    expect(result.confidence).toBe(1);
     expect(result.mode).toBe('build');
     expect(result.domain).toBe('products');
     expect(result.reason).toBe('Explicit preferred mode and domain were provided.');
@@ -104,14 +104,15 @@ describe('routeTask', () => {
     expect(result.useUtility).toBe(false);
   });
 
-  it('returns 0.82 confidence for auto-inferred routing', () => {
+  it('derives confidence from the scored routing result', () => {
     const result = routeTask({
       task: 'i want to validate my product idea',
       preferred_mode: 'auto',
       preferred_domain: 'auto',
       constraints: [],
     });
-    expect(result.confidence).toBe(0.82);
+    expect(result.confidence).toBeGreaterThan(0.5);
+    expect(result.confidence).toBeLessThanOrEqual(1);
     expect(result.domain).toBe('products');
   });
 
