@@ -88,7 +88,7 @@ describe('resource registration', () => {
         sectionGroup: 'execution',
         sectionName: 'input',
       }),
-    ).rejects.toThrow('Unknown domain');
+    ).rejects.toThrow('Invalid workflow section resource params');
   });
 
   it('registers both static and section resources together', () => {

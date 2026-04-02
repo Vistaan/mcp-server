@@ -1,9 +1,17 @@
 import { ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { z } from 'zod';
 import type { Domain } from '../schemas/types.js';
 import { DOMAIN_FILES, DOMAIN_URI_MAP, SECTION_SEGMENTS } from '../core/catalog.js';
 import { toTitle } from '../core/normalizer.js';
 import { extractMarkdownSection, readWorkflowFile } from './loader.js';
+import { WorkflowResourceError } from './errors.js';
+
+const sectionResourceParamsSchema = z.object({
+  domain: z.enum(['os', 'freelancing', 'products', 'content', 'execution', 'investing', 'utility']),
+  sectionGroup: z.string().min(1),
+  sectionName: z.string().min(1),
+});
 
 export function registerSectionResources(server: McpServer): void {
   server.registerResource(
@@ -25,19 +33,25 @@ export function registerSectionResources(server: McpServer): void {
       mimeType: 'text/markdown',
     },
     async (uri, params) => {
-      const domain = params['domain'] as Domain;
-      const sectionGroup = String(params['sectionGroup']);
-      const sectionName = String(params['sectionName']);
+      const parsedParams = sectionResourceParamsSchema.safeParse(params);
+      if (!parsedParams.success) {
+        throw new WorkflowResourceError('WORKFLOW_PARAM_INVALID', 'Invalid workflow section resource params', {
+          issues: parsedParams.error.issues,
+          params,
+        });
+      }
+
+      const { domain, sectionGroup, sectionName } = parsedParams.data;
       const key = `${sectionGroup}/${sectionName}`;
       const segment = SECTION_SEGMENTS.find((item) => item.key === key);
 
       if (!segment) {
-        throw new Error(`Unsupported section: ${key}`);
+        throw new WorkflowResourceError('WORKFLOW_SECTION_NOT_FOUND', `Unsupported section: ${key}`, { key });
       }
 
-      const fileName = DOMAIN_FILES[domain];
+      const fileName = DOMAIN_FILES[domain as Domain];
       if (!fileName) {
-        throw new Error(`Unknown domain: ${domain}`);
+        throw new WorkflowResourceError('WORKFLOW_PARAM_INVALID', `Unknown domain: ${domain}`, { domain });
       }
 
       const source = await readWorkflowFile(fileName);

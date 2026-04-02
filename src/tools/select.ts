@@ -1,8 +1,8 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { DOMAIN_URI_MAP } from '../core/catalog.js';
 import { normalizeStage } from '../core/normalizer.js';
-import { toToolResult } from '../core/output.js';
 import { selectDomainWorkflowInputSchema, selectDomainWorkflowOutputSchema } from '../schemas/tools.js';
+import { buildSelectDomainWorkflowResult } from './transformers.js';
 
 export function registerSelectTool(server: McpServer): void {
   server.registerTool(
@@ -17,7 +17,7 @@ export function registerSelectTool(server: McpServer): void {
       const stage = normalizeStage(args.domain, args.stage);
       const resourceUri = DOMAIN_URI_MAP[args.domain];
 
-      return toToolResult({
+      return buildSelectDomainWorkflowResult({
         resource_uri: resourceUri,
         subsection_uri: stage !== 'auto' ? `${resourceUri}/execution/sequence` : undefined,
         stage,

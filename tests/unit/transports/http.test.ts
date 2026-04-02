@@ -8,6 +8,16 @@ let postMcpHandler: ((req: Record<string, unknown>, res: ReturnType<typeof creat
 let deleteMcpHandler: ((req: Record<string, unknown>, res: ReturnType<typeof createResponse>) => void) | undefined;
 let docsUseArgs: unknown[] | undefined;
 
+const { assertWorkflowReadinessMock, getWorkflowReadinessMock } = vi.hoisted(() => ({
+  assertWorkflowReadinessMock: vi.fn(),
+  getWorkflowReadinessMock: vi.fn(() => ({
+    status: 'ok',
+    workflowRoot: '/workflows',
+    missingFiles: [],
+    checkedAt: '2026-04-02T00:00:00.000Z',
+  })),
+}));
+
 const useMock = vi.fn();
 const listenMock = vi.fn((port: number, callback: () => void) => {
   callback();
@@ -69,6 +79,11 @@ vi.mock('../../../src/logger.js', () => ({
   log: { info: infoMock, error: errorMock },
 }));
 
+vi.mock('../../../src/resources/loader.js', () => ({
+  assertWorkflowReadiness: assertWorkflowReadinessMock,
+  getWorkflowReadiness: getWorkflowReadinessMock,
+}));
+
 vi.mock('swagger-ui-express', () => ({
   serve: swaggerServeHandlers,
   setup: swaggerSetupMock,
@@ -82,6 +97,9 @@ function createResponse() {
   return {
     headersSent: false,
     req: { protocol: 'http' },
+    on: vi.fn(),
+    off: vi.fn(),
+    setTimeout: vi.fn(),
     get: vi.fn((header: string) => {
       if (header === 'host') {
         return 'localhost:8080';
@@ -159,9 +177,23 @@ describe('HTTP transport', () => {
 
     const healthRes = createResponse();
     healthHandler?.({}, healthRes);
-    expect(healthRes.json).toHaveBeenCalledWith({ status: 'ok', service: 'workflow-os-mcp', transport: 'http' });
+    expect(healthRes.status).toHaveBeenCalledWith(200);
+    expect(healthRes.json).toHaveBeenCalledWith({
+      status: 'ok',
+      service: 'workflow-os-mcp',
+      transport: 'http',
+      workflow_root: '/workflows',
+      missing_workflows: [],
+      checked_at: '2026-04-02T00:00:00.000Z',
+    });
 
-    const req = { body: { jsonrpc: '2.0' } };
+    const req = {
+      body: { jsonrpc: '2.0' },
+      method: 'POST',
+      on: vi.fn(),
+      off: vi.fn(),
+      setTimeout: vi.fn(),
+    };
     const res = createResponse();
     postMcpHandler?.(req, res);
     await flushAsyncWork();
@@ -171,11 +203,12 @@ describe('HTTP transport', () => {
     expect(handleRequestMock).toHaveBeenCalledWith(req, res, req.body);
     expect(closeMock).toHaveBeenCalledTimes(1);
 
-    getMcpHandler?.(req, createResponse());
-    deleteMcpHandler?.(req, createResponse());
+    getMcpHandler?.({ ...req, method: 'GET' }, createResponse());
+    deleteMcpHandler?.({ ...req, method: 'DELETE' }, createResponse());
     await flushAsyncWork();
 
     expect(transportCtorMock).toHaveBeenCalledTimes(3);
+    expect(assertWorkflowReadinessMock).toHaveBeenCalled();
   });
 
   it('starts the shared app on the requested port for self-hosted HTTP mode', async () => {
@@ -194,14 +227,18 @@ describe('HTTP transport', () => {
 
     createHttpApp();
 
-    const req = { body: { bad: true } };
+    const req = { body: { bad: true }, method: 'POST', on: vi.fn(), off: vi.fn(), setTimeout: vi.fn() };
     const res = createResponse();
     postMcpHandler?.(req, res);
     await flushAsyncWork();
 
-    expect(errorMock).toHaveBeenCalledWith('HTTP MCP handler error', { error: 'Error: boom' });
+    expect(errorMock).toHaveBeenCalledWith(
+      'HTTP MCP handler error',
+      expect.objectContaining({ error: 'Error: boom', kind: 'internal', statusCode: 500 }),
+    );
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith({ error: 'Internal server error' });
+    expect(closeMock).toHaveBeenCalledTimes(1);
   });
 
   it('does not write a second error response after headers are sent', async () => {
@@ -214,11 +251,24 @@ describe('HTTP transport', () => {
     const res = createResponse();
     res.headersSent = true;
 
-    postMcpHandler?.({ body: undefined }, res);
+    postMcpHandler?.({ body: undefined, method: 'POST', on: vi.fn(), off: vi.fn(), setTimeout: vi.fn() }, res);
     await flushAsyncWork();
 
-    expect(errorMock).toHaveBeenCalledWith('HTTP MCP handler error', { error: 'Error: connect failed' });
+    expect(errorMock).toHaveBeenCalledWith(
+      'HTTP MCP handler error',
+      expect.objectContaining({ error: 'Error: connect failed', kind: 'internal', statusCode: 500 }),
+    );
     expect(res.status).not.toHaveBeenCalled();
     expect(res.json).not.toHaveBeenCalled();
+  });
+
+  it('classifies workflow readiness failures as service unavailable', async () => {
+    assertWorkflowReadinessMock.mockImplementationOnce(() => {
+      throw new Error('workflow missing');
+    });
+
+    const { createHttpApp } = await import('../../../src/transports/http.js');
+
+    expect(() => createHttpApp()).toThrow('workflow missing');
   });
 });

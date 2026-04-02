@@ -1,6 +1,7 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { makeNextAction, toToolResult } from '../core/output.js';
+import { makeNextAction } from '../core/output.js';
 import { generateNextActionInputSchema, generateNextActionOutputSchema } from '../schemas/tools.js';
+import { buildGenerateNextActionResult } from './transformers.js';
 
 export function registerGenerateTool(server: McpServer): void {
   server.registerTool(
@@ -14,7 +15,7 @@ export function registerGenerateTool(server: McpServer): void {
     (args) => {
       const nextAction = makeNextAction(args.domain ?? 'os', args.current_output, args.constraints);
 
-      return toToolResult({
+      return buildGenerateNextActionResult({
         next_action: nextAction,
         why_this_next:
           'It is the smallest concrete move that advances the current workflow without branching into multiple decisions.',

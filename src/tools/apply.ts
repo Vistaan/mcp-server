@@ -1,6 +1,7 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { inferUtilityIssues, toToolResult } from '../core/output.js';
+import { inferUtilityIssues } from '../core/output.js';
 import { applyUtilityPromptInputSchema, applyUtilityPromptOutputSchema } from '../schemas/tools.js';
+import { buildApplyUtilityPromptResult } from './transformers.js';
 
 export function registerApplyTool(server: McpServer): void {
   server.registerTool(
@@ -24,7 +25,7 @@ export function registerApplyTool(server: McpServer): void {
         .filter((line) => line !== undefined)
         .join('\n');
 
-      return toToolResult({
+      return buildApplyUtilityPromptResult({
         utility_name: args.utility_name,
         revised_content: revisedContent,
         issues_found: issuesFound,

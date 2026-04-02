@@ -7,8 +7,24 @@ import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/
 import * as swaggerUi from 'swagger-ui-express';
 import type { Transport } from '@modelcontextprotocol/sdk/shared/transport.js';
 import { createOpenApiSpec } from '../openapi/spec.js';
+import { WorkflowResourceError } from '../resources/errors.js';
+import { assertWorkflowReadiness, getWorkflowReadiness } from '../resources/loader.js';
 import { createServer } from '../server.js';
 import { log } from '../logger.js';
+
+const DEFAULT_MCP_REQUEST_TIMEOUT_MS = 30_000;
+
+type ClassifiedHttpError = {
+  kind: 'workflow_unavailable' | 'request_aborted' | 'request_timeout' | 'internal';
+  statusCode: number;
+};
+
+type RequestLifecycle = {
+  signal: AbortSignal;
+  wasAborted(): boolean;
+  reason(): string | undefined;
+  cleanup(): void;
+};
 
 function resolveLandingPagePath(): string {
   const currentDir = path.dirname(fileURLToPath(import.meta.url));
@@ -41,6 +57,8 @@ function resolveLandingPagePath(): string {
  *   GET  /health     — Liveness/readiness probe for K8s
  */
 export function createHttpApp(): express.Express {
+  assertWorkflowReadiness();
+
   const app = express();
   const landingPagePath = resolveLandingPagePath();
 
@@ -70,24 +88,54 @@ export function createHttpApp(): express.Express {
 
   // ── Health check ─────────────────────────────────────────────────────────────
   app.get('/health', (_req: Request, res: Response) => {
-    res.json({ status: 'ok', service: 'workflow-os-mcp', transport: 'http' });
+    const readiness = getWorkflowReadiness();
+    res.status(readiness.status === 'ok' ? 200 : 503).json({
+      status: readiness.status,
+      service: 'workflow-os-mcp',
+      transport: 'http',
+      workflow_root: readiness.workflowRoot,
+      missing_workflows: readiness.missingFiles,
+      checked_at: readiness.checkedAt,
+    });
   });
 
   // ── MCP handler (POST + GET + DELETE) ─────────────────────────────────────────
   async function handleMcp(req: Request, res: Response): Promise<void> {
+    const lifecycle = createRequestLifecycle(req, res);
+    let server: ReturnType<typeof createServer> | undefined;
+
     try {
       const transport = new StreamableHTTPServerTransport();
-      const server = createServer();
+      server = createServer();
 
       // The SDK transport is runtime-compatible with `Transport`, but its current
       // declarations do not satisfy `exactOptionalPropertyTypes` cleanly.
+      throwIfRequestAborted(lifecycle);
       await server.connect(transport as unknown as Transport);
+      throwIfRequestAborted(lifecycle);
       await transport.handleRequest(req, res, req.body as Record<string, unknown> | undefined);
-      void server.close();
     } catch (error) {
-      log.error('HTTP MCP handler error', { error: String(error) });
-      if (!res.headersSent) {
-        res.status(500).json({ error: 'Internal server error' });
+      const classified = classifyHttpError(error, lifecycle);
+      log.error('HTTP MCP handler error', {
+        error: String(error),
+        kind: classified.kind,
+        statusCode: classified.statusCode,
+        aborted: lifecycle.wasAborted(),
+        abortReason: lifecycle.reason(),
+      });
+      if (!res.headersSent && !lifecycle.wasAborted()) {
+        res.status(classified.statusCode).json({
+          error: classified.kind === 'workflow_unavailable' ? 'Workflow resources unavailable' : 'Internal server error',
+        });
+      }
+    } finally {
+      lifecycle.cleanup();
+      if (server) {
+        try {
+          await server.close();
+        } catch (error) {
+          log.error('HTTP MCP cleanup error', { error: String(error) });
+        }
       }
     }
   }
@@ -106,6 +154,7 @@ export function createHttpApp(): express.Express {
 }
 
 export async function startHttpTransport(port: number): Promise<void> {
+  assertWorkflowReadiness();
   const app = createHttpApp();
 
   await new Promise<void>((resolve) => {
@@ -114,4 +163,89 @@ export async function startHttpTransport(port: number): Promise<void> {
       resolve();
     });
   });
+}
+
+function createRequestLifecycle(req: Request, res: Response): RequestLifecycle {
+  const abortController = new AbortController();
+  let abortReason: string | undefined;
+
+  const abort = (reason: string): void => {
+    abortReason = reason;
+    if (!abortController.signal.aborted) {
+      abortController.abort(reason);
+    }
+  };
+
+  const onAborted = (): void => abort('client_aborted');
+  const onRequestClose = (): void => abort('request_closed');
+  const onResponseClose = (): void => abort('response_closed');
+  const onTimeout = (): void => abort('request_timeout');
+
+  req.on('aborted', onAborted);
+  req.on('close', onRequestClose);
+  if ('on' in res && typeof res.on === 'function') {
+    res.on('close', onResponseClose);
+  }
+
+  let timeout: NodeJS.Timeout | undefined;
+  const timeoutMs = resolveTimeoutMs(req.method);
+  if (timeoutMs !== undefined) {
+    timeout = setTimeout(onTimeout, timeoutMs);
+
+    if (typeof req.setTimeout === 'function') {
+      req.setTimeout(timeoutMs, onTimeout);
+    }
+
+    if (typeof res.setTimeout === 'function') {
+      res.setTimeout(timeoutMs, onTimeout);
+    }
+  }
+
+  return {
+    signal: abortController.signal,
+    wasAborted: () => abortController.signal.aborted,
+    reason: () => abortReason,
+    cleanup: () => {
+      if (timeout) {
+        clearTimeout(timeout);
+      }
+      req.off('aborted', onAborted);
+      req.off('close', onRequestClose);
+      if ('off' in res && typeof res.off === 'function') {
+        res.off('close', onResponseClose);
+      }
+    },
+  };
+}
+
+function throwIfRequestAborted(lifecycle: RequestLifecycle): void {
+  if (lifecycle.wasAborted()) {
+    throw new Error(lifecycle.reason() ?? 'request_aborted');
+  }
+}
+
+function resolveTimeoutMs(method?: string): number | undefined {
+  if (method === 'GET') {
+    return undefined;
+  }
+
+  const rawTimeout = process.env['MCP_REQUEST_TIMEOUT_MS'];
+  const parsedTimeout = rawTimeout ? Number.parseInt(rawTimeout, 10) : DEFAULT_MCP_REQUEST_TIMEOUT_MS;
+  return Number.isFinite(parsedTimeout) && parsedTimeout > 0 ? parsedTimeout : DEFAULT_MCP_REQUEST_TIMEOUT_MS;
+}
+
+function classifyHttpError(error: unknown, lifecycle: RequestLifecycle): ClassifiedHttpError {
+  if (error instanceof WorkflowResourceError) {
+    return { kind: 'workflow_unavailable', statusCode: 503 };
+  }
+
+  if (lifecycle.reason() === 'request_timeout') {
+    return { kind: 'request_timeout', statusCode: 504 };
+  }
+
+  if (lifecycle.wasAborted()) {
+    return { kind: 'request_aborted', statusCode: 408 };
+  }
+
+  return { kind: 'internal', statusCode: 500 };
 }

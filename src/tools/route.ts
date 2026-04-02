@@ -1,8 +1,8 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { routeTask } from '../core/router.js';
-import { toToolResult } from '../core/output.js';
 import { log } from '../logger.js';
 import { routeTaskInputSchema, routeTaskOutputSchema } from '../schemas/tools.js';
+import { buildRouteTaskResult } from './transformers.js';
 
 export function registerRouteTool(server: McpServer): void {
   server.registerTool(
@@ -17,15 +17,7 @@ export function registerRouteTool(server: McpServer): void {
       const routed = routeTask(args);
       log.info('route_task', { mode: routed.mode, domain: routed.domain, confidence: routed.confidence });
 
-      return toToolResult({
-        mode: routed.mode,
-        domain: routed.domain,
-        confidence: routed.confidence,
-        reason: routed.reason,
-        sequence: routed.sequence,
-        use_utility: routed.useUtility,
-        utility_candidates: routed.utilityCandidates,
-      });
+      return buildRouteTaskResult(routed);
     },
   );
 }

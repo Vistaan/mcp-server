@@ -1,10 +1,11 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { routeTask } from '../core/router.js';
 import { buildAppliedSequence, normalizeStage } from '../core/normalizer.js';
-import { makeNextAction, toToolResult } from '../core/output.js';
+import { makeNextAction } from '../core/output.js';
 import { DOMAIN_URI_MAP } from '../core/catalog.js';
 import { log } from '../logger.js';
 import { runWorkflowSequenceInputSchema, runWorkflowSequenceOutputSchema } from '../schemas/tools.js';
+import { buildRunWorkflowSequenceResult } from './transformers.js';
 
 export function registerRunTool(server: McpServer): void {
   server.registerTool(
@@ -52,7 +53,7 @@ export function registerRunTool(server: McpServer): void {
       };
 
       log.info('run_workflow_sequence', { mode: args.mode, domain: args.domain, stage });
-      return toToolResult(output);
+      return buildRunWorkflowSequenceResult(output);
     },
   );
 }
