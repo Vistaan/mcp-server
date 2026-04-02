@@ -27,4 +27,8 @@ describe('run_workflow_sequence logic', () => {
   it('normalizeStage handles auto correctly', () => {
     expect(normalizeStage('products', 'auto')).toBe('auto');
   });
+
+  it('normalizeStage resolves workflow-stage aliases', () => {
+    expect(normalizeStage('products', 'validation')).toBe('validate');
+  });
 });

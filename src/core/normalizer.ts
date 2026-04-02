@@ -1,16 +1,18 @@
 import type { Domain } from '../schemas/types.js';
-import { DOMAIN_SEQUENCES } from './catalog.js';
+import { DOMAIN_SEQUENCES, DOMAIN_STAGE_ALIASES } from './catalog.js';
 
 export function normalizeStage(domain: Domain, stage?: string): string {
   if (!stage || stage === 'auto') return 'auto';
+  const canonicalStage = DOMAIN_STAGE_ALIASES[domain][stage] ?? stage;
   const steps = DOMAIN_SEQUENCES[domain];
-  return steps.includes(stage) ? stage : 'auto';
+  return steps.includes(canonicalStage) ? canonicalStage : 'auto';
 }
 
 export function buildAppliedSequence(domain: Domain, stage: string, fallback: string[]): string[] {
   if (!stage || stage === 'auto') return fallback;
   const steps = DOMAIN_SEQUENCES[domain];
-  const start = steps.indexOf(stage);
+  const canonicalStage = DOMAIN_STAGE_ALIASES[domain][stage] ?? stage;
+  const start = steps.indexOf(canonicalStage);
   return start === -1 ? steps : steps.slice(start);
 }
 

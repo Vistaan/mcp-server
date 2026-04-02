@@ -4,6 +4,7 @@ import {
   routeTaskOutputSchema,
   selectDomainWorkflowInputSchema,
   runWorkflowSequenceInputSchema,
+  runWorkflowSequenceOutputSchema,
   applyUtilityPromptInputSchema,
   generateNextActionInputSchema,
 } from '../../../src/schemas/tools.js';
@@ -72,6 +73,26 @@ describe('runWorkflowSequenceInputSchema', () => {
   it('defaults next_action_required to true', () => {
     const result = runWorkflowSequenceInputSchema.parse({ mode: 'build', domain: 'products', task: 'test' });
     expect(result.next_action_required).toBe(true);
+  });
+});
+
+describe('runWorkflowSequenceOutputSchema', () => {
+  it('parses the enriched execution output', () => {
+    const result = runWorkflowSequenceOutputSchema.parse({
+      mode: 'build',
+      domain: 'products',
+      stage: 'validate',
+      workflow_reference: 'workflow://products/v4',
+      stage_outcome: 'Confirm demand',
+      execution_summary: 'summary',
+      recommendations: ['one'],
+      supporting_notes: ['note'],
+      applied_sequence: ['validate'],
+      optimization_applied: true,
+      next_action: 'next',
+    });
+
+    expect(result.supporting_notes).toEqual(['note']);
   });
 });
 

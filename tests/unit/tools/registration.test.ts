@@ -95,7 +95,9 @@ describe('tool registration', () => {
 
     expect(String(withNext.structuredContent['execution_summary'])).toContain('launch a productized service');
     expect(withNext.structuredContent['workflow_reference']).toBe('workflow://products/v4');
+    expect(String(withNext.structuredContent['stage_outcome']).toLowerCase()).toContain('price');
     expect(Array.isArray(withNext.structuredContent['recommendations'])).toBe(true);
+    expect(Array.isArray(withNext.structuredContent['supporting_notes'])).toBe(true);
     expect(withNext.structuredContent['optimization_applied']).toBe(true);
     expect(withNext.structuredContent['next_action']).not.toBe('No next action requested.');
     expect(withoutNext.structuredContent['next_action']).toBe('No next action requested.');

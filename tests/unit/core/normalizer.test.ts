@@ -32,6 +32,12 @@ describe('normalizeStage', () => {
     expect(normalizeStage('products', 'not_a_real_stage')).toBe('auto');
     expect(normalizeStage('freelancing', 'trade_setup')).toBe('auto');
   });
+
+  it('resolves configured aliases to canonical stages', () => {
+    expect(normalizeStage('products', 'validation')).toBe('validate');
+    expect(normalizeStage('products', 'product_shape')).toBe('build');
+    expect(normalizeStage('utility', 'blind_spots')).toBe('blind_spot_finder');
+  });
 });
 
 describe('buildAppliedSequence', () => {
@@ -54,6 +60,11 @@ describe('buildAppliedSequence', () => {
   it('handles first stage correctly', () => {
     const result = buildAppliedSequence('products', 'idea', DOMAIN_SEQUENCES.products);
     expect(result).toEqual(DOMAIN_SEQUENCES.products);
+  });
+
+  it('handles aliased stages when slicing the sequence', () => {
+    const result = buildAppliedSequence('products', 'validation', DOMAIN_SEQUENCES.products);
+    expect(result[0]).toBe('validate');
   });
 });
 

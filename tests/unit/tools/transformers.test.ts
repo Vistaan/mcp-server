@@ -37,8 +37,10 @@ describe('tool transformers', () => {
       domain: 'products',
       stage: 'idea',
       workflow_reference: 'workflow://products/v4',
+      stage_outcome: 'Define the buyer problem',
       execution_summary: 'deliverable',
       recommendations: ['validate demand'],
+      supporting_notes: ['Preserve the core audience context'],
       applied_sequence: ['idea'],
       optimization_applied: true,
       next_action: 'next',
@@ -47,6 +49,7 @@ describe('tool transformers', () => {
     expect(selectResult.structuredContent['resource_uri']).toBe('workflow://products/v4');
     expect(runResult.structuredContent['next_action']).toBe('next');
     expect(runResult.structuredContent['workflow_reference']).toBe('workflow://products/v4');
+    expect(runResult.structuredContent['supporting_notes']).toEqual(['Preserve the core audience context']);
   });
 
   it('validates utility and next-action DTOs before returning them', () => {

@@ -31,18 +31,21 @@ export async function executeWorkflow(command: WorkflowExecutionCommand): Promis
   const contextText = command.context?.trim();
   const focusSummary = contextText ? `${command.task} (${contextText})` : command.task;
   const recommendations = buildWorkflowRecommendations(command.domain, focusStage, focusSummary, blueprint, appliedSequence);
+  const supportingNotes = buildSupportingNotes(command.domain, focusStage, blueprint, contextText);
 
   return {
     mode: command.mode,
     domain: command.domain,
     stage,
     workflowReference: DOMAIN_URI_MAP[command.domain],
+    stageOutcome: describeStageOutcome(command.domain, focusStage, command.task),
     executionSummary: [
       sentence(`Purpose: ${blueprint.purpose}`),
       sentence(`Current focus: ${focusStage === 'auto' ? 'full workflow' : focusStage}`),
       sentence(`Task: ${focusSummary}`),
     ].join(' '),
     recommendations: command.optimizeOnce ? recommendations : recommendations.slice(0, 2),
+    supportingNotes,
     appliedSequence,
     optimizationApplied: command.optimizeOnce,
     nextAction: command.nextActionRequired ? makeNextAction(command.domain, focusSummary, []) : 'No next action requested.',
@@ -183,6 +186,48 @@ function buildWorkflowRecommendations(
   ];
 }
 
+function buildSupportingNotes(
+  domain: Domain,
+  focusStage: string,
+  blueprint: WorkflowBlueprint,
+  contextText?: string,
+): string[] {
+  return [
+    sentence(`Primary input boundary: ${blueprint.input}`),
+    sentence(`Stage objective for ${focusStage === 'auto' ? domain : focusStage}: ${describeStageOutcome(domain, focusStage, blueprint.purpose)}`),
+    contextText ? sentence(`Context carried into execution: ${contextText}`) : sentence('No extra context was provided beyond the task statement.'),
+  ];
+}
+
+function describeStageOutcome(domain: Domain, focusStage: string, subject: string): string {
+  const normalizedSubject = subject.trim() || 'the request';
+  switch (domain) {
+    case 'products':
+      if (focusStage === 'validate') return `Confirm buyer pain, demand signal, and why ${normalizedSubject} is worth building`;
+      if (focusStage === 'pricing') return `Set a price that is easy to justify for ${normalizedSubject}`;
+      if (focusStage === 'offer') return `Package ${normalizedSubject} into a clear and buyable offer`;
+      break;
+    case 'freelancing':
+      if (focusStage === 'outreach') return `Turn ${normalizedSubject} into a direct client-acquisition move`;
+      break;
+    case 'content':
+      if (focusStage === 'hooks') return `Create stronger opening hooks for ${normalizedSubject}`;
+      break;
+    case 'execution':
+      if (focusStage === 'do_now') return `Reduce ${normalizedSubject} to the smallest actionable next step`;
+      break;
+    case 'investing':
+      if (focusStage === 'trade_setup') return `Define exact entry, exit, and invalidation rules for ${normalizedSubject}`;
+      break;
+    case 'utility':
+      return `Improve one dimension of ${normalizedSubject} without reopening the full workflow`;
+    case 'os':
+      return `Route ${normalizedSubject} to one dominant execution path and produce one next move`;
+  }
+
+  return `Advance ${normalizedSubject} through the ${focusStage === 'auto' ? domain : focusStage} stage with minimal ambiguity`;
+}
+
 function utilityOperationLabel(utilityName: string): string {
   return utilityName.replace(/_/g, ' ');
 }
@@ -224,4 +269,3 @@ function sentence(value: string): string {
 function escapeForRegex(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
-

@@ -15,8 +15,10 @@ export type WorkflowExecutionResult = {
   domain: Domain;
   stage: string;
   workflowReference: string;
+  stageOutcome: string;
   executionSummary: string;
   recommendations: string[];
+  supportingNotes: string[];
   appliedSequence: string[];
   optimizationApplied: boolean;
   nextAction: string;
@@ -37,4 +39,3 @@ export type UtilityExecutionResult = {
   changesApplied: string[];
   nextAction: string;
 };
-

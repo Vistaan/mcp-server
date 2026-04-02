@@ -4,6 +4,7 @@ import * as path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { DOMAIN_FILES } from '../core/catalog.js';
 import { escapeRegex } from '../core/normalizer.js';
+import { metrics } from '../metrics.js';
 import { WorkflowResourceError } from './errors.js';
 
 /**
@@ -110,14 +111,17 @@ export async function readWorkflowFile(fileName: string): Promise<string> {
   const absolutePath = toWorkflowFilePath(fileName);
   const cached = workflowFileCache.get(absolutePath);
   if (cached !== undefined) {
+    metrics.increment('workflow_file_cache_hit', { file: fileName });
     return cached;
   }
 
   const existingRead = workflowReadInflight.get(absolutePath);
   if (existingRead) {
+    metrics.increment('workflow_file_singleflight_join', { file: fileName });
     return existingRead;
   }
 
+  metrics.increment('workflow_file_cache_miss', { file: fileName });
   const readPromise = readFile(absolutePath, 'utf8')
     .then((contents) => {
       workflowFileCache.set(absolutePath, contents);
@@ -128,6 +132,7 @@ export async function readWorkflowFile(fileName: string): Promise<string> {
       return contents;
     })
     .catch((error) => {
+      metrics.increment('workflow_file_read_error', { file: fileName });
       rememberUnreadableWorkflow(fileName);
       throw new WorkflowResourceError(
         'WORKFLOW_FILE_UNREADABLE',

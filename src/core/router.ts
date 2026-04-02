@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { metrics } from '../metrics.js';
 import type { Domain, Mode, RouteResult } from '../schemas/types.js';
 import { routeTaskInputSchema } from '../schemas/tools.js';
 import { DOMAIN_SEQUENCES } from './catalog.js';
@@ -91,11 +92,15 @@ export function routeTask(input: z.infer<typeof routeTaskInputSchema>): RouteRes
   const inferredDomain = domainResult.label;
   const modeResult = input.preferred_mode !== 'auto' ? explicitChoice(input.preferred_mode) : scoreMode(text, inferredDomain);
   const inferredMode = modeResult.label;
+  const confidence = deriveConfidence(domainResult.score, modeResult.score, domainResult.evidence.length, modeResult.evidence.length);
+  if (confidence < 0.7) {
+    metrics.increment('route_low_confidence', { domain: inferredDomain, mode: inferredMode });
+  }
 
   return {
     mode: inferredMode,
     domain: inferredDomain,
-    confidence: deriveConfidence(domainResult.score, modeResult.score, domainResult.evidence.length, modeResult.evidence.length),
+    confidence,
     reason: buildRouteReason(inferredMode, inferredDomain, text, {
       domainEvidence: domainResult.evidence,
       modeEvidence: modeResult.evidence,

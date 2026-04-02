@@ -20,6 +20,9 @@ export const metrics = {
   reset(): void {
     counters.clear();
   },
+  snapshot(): Record<string, number> {
+    return Object.fromEntries(counters.entries());
+  },
 };
 
 function metricKey(name: string, tags?: MetricTags): string {
