@@ -566,6 +566,7 @@ const files = [
     { src: 'docs/deployment.md', dest: 'docs/deployment.html', title: 'Deployment Guide' },
     { src: 'docs/api-reference.md', dest: 'docs/api-reference.html', title: 'API Reference' },
     { src: 'docs/setup.md', dest: 'docs/setup.html', title: 'Setup Guide' },
+    { src: 'docs/claude-desktop.md', dest: 'docs/claude-desktop.html', title: 'Claude Desktop Integration' },
 ];
 
 function convertFile(file) {
