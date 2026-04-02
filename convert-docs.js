@@ -22,7 +22,7 @@ const md = new MarkdownIt({
       } catch (__) {}
     }
     return `<pre class="hljs"><code class="hljs">${md.utils.escapeHtml(str)}</code></pre>`;
-  }
+  },
 });
 
 // Add additional plugins for better markdown support
@@ -560,33 +560,37 @@ const htmlTemplate = (title, content) => `<!DOCTYPE html>
 
 // Files to convert
 const files = [
-    { src: 'HOW_TO_USE.md', dest: 'how-to-use.html', title: 'How to Use' },
-    { src: 'README.md', dest: 'readme.html', title: 'README' },
-    { src: 'docs/mcp-client-configuration.md', dest: 'docs/mcp-client-configuration.html', title: 'MCP Client Configuration' },
-    { src: 'docs/deployment.md', dest: 'docs/deployment.html', title: 'Deployment Guide' },
-    { src: 'docs/api-reference.md', dest: 'docs/api-reference.html', title: 'API Reference' },
-    { src: 'docs/setup.md', dest: 'docs/setup.html', title: 'Setup Guide' },
-    { src: 'docs/claude-desktop.md', dest: 'docs/claude-desktop.html', title: 'Claude Desktop Integration' },
+  { src: 'HOW_TO_USE.md', dest: 'how-to-use.html', title: 'How to Use' },
+  { src: 'README.md', dest: 'readme.html', title: 'README' },
+  {
+    src: 'docs/mcp-client-configuration.md',
+    dest: 'docs/mcp-client-configuration.html',
+    title: 'MCP Client Configuration',
+  },
+  { src: 'docs/deployment.md', dest: 'docs/deployment.html', title: 'Deployment Guide' },
+  { src: 'docs/api-reference.md', dest: 'docs/api-reference.html', title: 'API Reference' },
+  { src: 'docs/setup.md', dest: 'docs/setup.html', title: 'Setup Guide' },
+  { src: 'docs/claude-desktop.md', dest: 'docs/claude-desktop.html', title: 'Claude Desktop Integration' },
 ];
 
 function convertFile(file) {
-    const srcPath = path.join(__dirname, file.src);
-    const destPath = path.join(__dirname, 'landing-page', file.dest);
+  const srcPath = path.join(__dirname, file.src);
+  const destPath = path.join(__dirname, 'landing-page', file.dest);
 
-    // Ensure destination directory exists
-    const destDir = path.dirname(destPath);
-    if (!fs.existsSync(destDir)) {
-        fs.mkdirSync(destDir, { recursive: true });
-    }
+  // Ensure destination directory exists
+  const destDir = path.dirname(destPath);
+  if (!fs.existsSync(destDir)) {
+    fs.mkdirSync(destDir, { recursive: true });
+  }
 
-    // Read and convert markdown using markdown-it
-    const markdown = fs.readFileSync(srcPath, 'utf8');
-    const htmlContent = md.render(markdown);
-    const fullHtml = htmlTemplate(file.title, htmlContent);
+  // Read and convert markdown using markdown-it
+  const markdown = fs.readFileSync(srcPath, 'utf8');
+  const htmlContent = md.render(markdown);
+  const fullHtml = htmlTemplate(file.title, htmlContent);
 
-    // Write HTML file
-    fs.writeFileSync(destPath, fullHtml);
-    console.log(`Converted ${file.src} to ${file.dest}`);
+  // Write HTML file
+  fs.writeFileSync(destPath, fullHtml);
+  console.log(`Converted ${file.src} to ${file.dest}`);
 }
 
 console.log('Converting markdown files to HTML...');

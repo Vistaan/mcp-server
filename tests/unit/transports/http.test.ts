@@ -13,6 +13,7 @@ const listenMock = vi.fn((port: number, callback: () => void) => {
   return { port };
 });
 const jsonMock = vi.fn(() => 'json-middleware');
+const staticMock = vi.fn(() => 'static-middleware');
 const swaggerServeHandlers = [vi.fn(), vi.fn()];
 const swaggerUiHandler = vi.fn();
 const swaggerSetupMock = vi.fn(() => swaggerUiHandler);
@@ -54,7 +55,7 @@ const handleRequestMock = vi.fn();
 const transportCtorMock = vi.fn(() => ({ handleRequest: handleRequestMock }));
 
 vi.mock('express', () => ({
-  default: Object.assign(expressMock, { json: jsonMock }),
+  default: Object.assign(expressMock, { json: jsonMock, static: staticMock }),
 }));
 
 vi.mock('../../../src/server.js', () => ({
@@ -120,6 +121,8 @@ describe('startHttpTransport', () => {
     await startHttpTransport(8080);
 
     expect(jsonMock).toHaveBeenCalledWith({ limit: '10mb' });
+    expect(staticMock).toHaveBeenCalledWith(expect.stringContaining('landing-page'));
+    expect(useMock).toHaveBeenCalledWith('static-middleware');
     expect(useMock).toHaveBeenCalledWith('json-middleware');
     expect(swaggerSetupMock).toHaveBeenCalledWith(undefined, {
       explorer: true,

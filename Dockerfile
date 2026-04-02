@@ -27,6 +27,7 @@ RUN pnpm install --frozen-lockfile --prod
 
 # Copy compiled output and bundled workflow files
 COPY --from=builder /app/dist ./dist
+COPY landing-page ./landing-page
 COPY workflows ./workflows
 
 # Non-root user for security

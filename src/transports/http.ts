@@ -1,4 +1,7 @@
 import express from 'express';
+import { existsSync } from 'fs';
+import * as path from 'path';
+import { fileURLToPath } from 'url';
 import type { Request, Response } from 'express';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import * as swaggerUi from 'swagger-ui-express';
@@ -6,6 +9,24 @@ import type { Transport } from '@modelcontextprotocol/sdk/shared/transport.js';
 import { createOpenApiSpec } from '../openapi/spec.js';
 import { createServer } from '../server.js';
 import { log } from '../logger.js';
+
+function resolveLandingPagePath(): string {
+  const currentDir = path.dirname(fileURLToPath(import.meta.url));
+  const primaryCandidate = path.resolve(currentDir, '..', '..', 'landing-page');
+  const candidates = [
+    primaryCandidate,
+    path.resolve(currentDir, '..', '..', '..', 'landing-page'),
+    path.resolve(process.cwd(), 'landing-page'),
+  ];
+
+  for (const candidate of candidates) {
+    if (existsSync(path.join(candidate, 'index.html'))) {
+      return candidate;
+    }
+  }
+
+  return primaryCandidate;
+}
 
 /**
  * Starts the MCP server on a Streamable HTTP transport.
@@ -21,6 +42,15 @@ import { log } from '../logger.js';
  */
 export async function startHttpTransport(port: number): Promise<void> {
   const app = express();
+  const landingPagePath = resolveLandingPagePath();
+
+  app.use(express.static(landingPagePath));
+
+  // Root index route for enterprise landing page
+  app.get('/', (_req: Request, res: Response) => {
+    res.sendFile(path.join(landingPagePath, 'index.html'));
+  });
+
   app.use(express.json({ limit: '10mb' }));
   app.get('/docs-api.json', (req: Request, res: Response) => {
     const host = req.get('host');
