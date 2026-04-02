@@ -24,6 +24,11 @@ MCP_TRANSPORT=http MCP_PORT=<port> node dist/index.js
 # Example: MCP_TRANSPORT=http MCP_PORT=3000 node dist/index.js
 ```
 
+HTTP docs in HTTP mode:
+
+- Swagger UI: `/docs`
+- OpenAPI JSON: `/docs-api.json`
+
 ## Docs
 
 - [How To Use](./HOW_TO_USE.md)

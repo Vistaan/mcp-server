@@ -1,9 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+let docsJsonHandler: ((req: unknown, res: ReturnType<typeof createResponse>) => void) | undefined;
 let healthHandler: ((req: unknown, res: ReturnType<typeof createResponse>) => void) | undefined;
 let getMcpHandler: ((req: Record<string, unknown>, res: ReturnType<typeof createResponse>) => void) | undefined;
 let postMcpHandler: ((req: Record<string, unknown>, res: ReturnType<typeof createResponse>) => void) | undefined;
 let deleteMcpHandler: ((req: Record<string, unknown>, res: ReturnType<typeof createResponse>) => void) | undefined;
+let docsUseArgs: unknown[] | undefined;
 
 const useMock = vi.fn();
 const listenMock = vi.fn((port: number, callback: () => void) => {
@@ -11,10 +13,20 @@ const listenMock = vi.fn((port: number, callback: () => void) => {
   return { port };
 });
 const jsonMock = vi.fn(() => 'json-middleware');
+const swaggerServeHandlers = [vi.fn(), vi.fn()];
+const swaggerUiHandler = vi.fn();
+const swaggerSetupMock = vi.fn(() => swaggerUiHandler);
 const expressMock = vi.fn(() => ({
-  use: useMock,
+  use: vi.fn((...args: unknown[]) => {
+    useMock(...args);
+    if (args[0] === '/docs') {
+      docsUseArgs = args;
+    }
+  }),
   get: vi.fn((path: string, handler: typeof healthHandler) => {
-    if (path === '/health') {
+    if (path === '/docs-api.json') {
+      docsJsonHandler = handler;
+    } else if (path === '/health') {
       healthHandler = handler;
     } else if (path === '/mcp') {
       getMcpHandler = handler as typeof getMcpHandler;
@@ -53,6 +65,11 @@ vi.mock('../../../src/logger.js', () => ({
   log: { info: infoMock, error: errorMock },
 }));
 
+vi.mock('swagger-ui-express', () => ({
+  serve: swaggerServeHandlers,
+  setup: swaggerSetupMock,
+}));
+
 vi.mock('@modelcontextprotocol/sdk/server/streamableHttp.js', () => ({
   StreamableHTTPServerTransport: transportCtorMock,
 }));
@@ -60,6 +77,13 @@ vi.mock('@modelcontextprotocol/sdk/server/streamableHttp.js', () => ({
 function createResponse() {
   return {
     headersSent: false,
+    req: { protocol: 'http' },
+    get: vi.fn((header: string) => {
+      if (header === 'host') {
+        return 'localhost:8080';
+      }
+      return undefined;
+    }),
     json: vi.fn(),
     status: vi.fn(function status(this: { json: unknown }, _code: number) {
       return this;
@@ -76,10 +100,12 @@ async function flushAsyncWork(): Promise<void> {
 describe('startHttpTransport', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    docsJsonHandler = undefined;
     healthHandler = undefined;
     getMcpHandler = undefined;
     postMcpHandler = undefined;
     deleteMcpHandler = undefined;
+    docsUseArgs = undefined;
     connectMock.mockResolvedValue(undefined);
     handleRequestMock.mockResolvedValue(undefined);
   });
@@ -95,8 +121,31 @@ describe('startHttpTransport', () => {
 
     expect(jsonMock).toHaveBeenCalledWith({ limit: '10mb' });
     expect(useMock).toHaveBeenCalledWith('json-middleware');
+    expect(swaggerSetupMock).toHaveBeenCalledWith(undefined, {
+      explorer: true,
+      swaggerOptions: {
+        url: '/docs-api.json',
+      },
+    });
+    expect(docsUseArgs).toEqual(['/docs', ...swaggerServeHandlers, swaggerUiHandler]);
     expect(listenMock).toHaveBeenCalledWith(8080, expect.any(Function));
     expect(infoMock).toHaveBeenCalledWith('workflow-os MCP server running on HTTP port 8080');
+
+    const docsRes = createResponse();
+    docsJsonHandler?.(
+      {
+        protocol: 'http',
+        get: (header: string) => (header === 'host' ? 'localhost:8080' : undefined),
+      },
+      docsRes,
+    );
+    const [docsJsonCall] = docsRes.json.mock.calls as unknown[][];
+    const [docsSpecArg] = docsJsonCall ?? [];
+    const docsSpec = docsSpecArg as { openapi: string; paths: Record<string, unknown>; servers: Array<{ url: string }> };
+    expect(docsSpec.openapi).toBe('3.1.0');
+    expect(docsSpec.servers[0]?.url).toBe('http://localhost:8080');
+    expect(docsSpec.paths).toHaveProperty('/health');
+    expect(docsSpec.paths).toHaveProperty('/mcp');
 
     const healthRes = createResponse();
     healthHandler?.({}, healthRes);

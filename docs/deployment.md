@@ -15,6 +15,8 @@ make docker-build
 make docker-run
 # Uses PORT (or exported MCP_PORT) and defaults to 3000 if neither is set
 # Example: PORT=6677 make docker-run
+# Swagger UI: http://localhost:<port>/docs
+# OpenAPI JSON: http://localhost:<port>/docs-api.json
 # MCP endpoint: http://localhost:<port>/mcp
 # Health: http://localhost:<port>/health
 ```

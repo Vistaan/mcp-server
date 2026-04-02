@@ -45,9 +45,13 @@ MCP_TRANSPORT=http MCP_PORT=<port> node dist/index.js
 HTTP endpoints:
 
 - `GET /health`
+- `GET /docs`
+- `GET /docs-api.json`
 - `POST /mcp`
 - `GET /mcp`
 - `DELETE /mcp`
+
+In HTTP mode, interactive API docs are available at `/docs`, and the raw OpenAPI document is available at `/docs-api.json`.
 
 ## Environment Variables
 

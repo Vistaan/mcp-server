@@ -1,7 +1,9 @@
 import express from 'express';
 import type { Request, Response } from 'express';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
+import * as swaggerUi from 'swagger-ui-express';
 import type { Transport } from '@modelcontextprotocol/sdk/shared/transport.js';
+import { createOpenApiSpec } from '../openapi/spec.js';
 import { createServer } from '../server.js';
 import { log } from '../logger.js';
 
@@ -20,6 +22,21 @@ import { log } from '../logger.js';
 export async function startHttpTransport(port: number): Promise<void> {
   const app = express();
   app.use(express.json({ limit: '10mb' }));
+  app.get('/docs-api.json', (req: Request, res: Response) => {
+    const host = req.get('host');
+    const serverUrl = host ? `${req.protocol}://${host}` : '/';
+    res.json(createOpenApiSpec(serverUrl));
+  });
+  app.use(
+    '/docs',
+    ...swaggerUi.serve,
+    swaggerUi.setup(undefined, {
+      explorer: true,
+      swaggerOptions: {
+        url: '/docs-api.json',
+      },
+    }),
+  );
 
   // ── Health check ─────────────────────────────────────────────────────────────
   app.get('/health', (_req: Request, res: Response) => {
