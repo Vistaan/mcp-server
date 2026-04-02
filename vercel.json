@@ -13,7 +13,7 @@
   ],
   "routes": [
     { "src": "/docs-api\\.json/?$", "dest": "/api/index.ts" },
-    { "src": "/docs/?$", "dest": "/api/index.ts" },
+    { "src": "/docs(?:/(.*))?$", "dest": "/api/index.ts" },
     { "src": "/mcp/?$", "dest": "/api/index.ts" },
     { "src": "/health/?$", "dest": "/api/index.ts" },
     { "src": "/$", "dest": "/landing-page/index.html" },

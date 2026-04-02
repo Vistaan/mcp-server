@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'url';
 import { startStdioTransport } from './transports/stdio.js';
 import { startHttpTransport } from './transports/http.js';
 
@@ -12,7 +13,11 @@ async function main(): Promise<void> {
   }
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+export function isDirectExecution(moduleUrl: string, entryPath = process.argv[1]): boolean {
+  return Boolean(entryPath) && fileURLToPath(moduleUrl) === entryPath;
+}
+
+if (isDirectExecution(import.meta.url)) {
   main().catch((error: unknown) => {
     process.stderr.write(
       JSON.stringify({ level: 'error', msg: 'Failed to start MCP server', error: String(error) }) + '\n',
