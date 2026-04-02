@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Use - workflow-os-mcp</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../styles.css">
+    <style>
+        .markdown-content {
+            max-width: none;
+        }
+        .markdown-content h1 { @apply text-3xl font-bold mb-6; }
+        .markdown-content h2 { @apply text-2xl font-bold mb-4 mt-8; }
+        .markdown-content h3 { @apply text-xl font-semibold mb-3 mt-6; }
+        .markdown-content p { @apply mb-4; }
+        .markdown-content ul { @apply mb-4 pl-6; }
+        .markdown-content ol { @apply mb-4 pl-6; }
+        .markdown-content li { @apply mb-2; }
+        .markdown-content code { @apply bg-gray-100 px-2 py-1 rounded text-sm font-mono; }
+        .markdown-content pre { @apply bg-gray-900 text-green-400 p-4 rounded-lg mb-4 overflow-x-auto; }
+        .markdown-content pre code { @apply bg-transparent text-green-400 p-0; }
+        .markdown-content blockquote { @apply border-l-4 border-gray-300 pl-4 italic text-gray-600 mb-4; }
+        .markdown-content table { @apply w-full border-collapse border border-gray-300 mb-4; }
+        .markdown-content th, .markdown-content td { @apply border border-gray-300 px-4 py-2; }
+        .markdown-content th { @apply bg-gray-100 font-semibold; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center">
+                    <a href="../index.html" class="text-2xl font-bold text-gray-900">workflow-os-mcp</a>
+                </div>
+                <div class="flex space-x-4">
+                    <a href="../index.html" class="text-gray-600 hover:text-gray-900">← Back to Landing Page</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Content -->
+    <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <article class="bg-white rounded-lg shadow-sm p-8">
+            <div class="markdown-content prose prose-lg max-w-none">
+                <h1>How To Use</h1>
+<p>This app is an MCP server named <code>workflow-os</code>.</p>
+<p>It helps an MCP client route a request into one of the bundled workflow domains, run a single main workflow, optionally apply one utility pass, and end with one concrete next action.</p>
+<h2>What It Does</h2>
+<p>The server exposes:</p>
+<ul>
+<li>tools for routing and execution</li>
+<li>prompts for common workflow entry points</li>
+<li>resources that expose the bundled workflow markdown files</li>
+</ul>
+<p>The intended pattern is:</p>
+<ol>
+<li>Route the task first</li>
+<li>Select or inspect the right workflow/resource if needed</li>
+<li>Run one main workflow</li>
+<li>Optionally apply one utility prompt</li>
+<li>Return one immediate next action</li>
+</ol>
+<h2>Start The Server</h2>
+<p>Build first:</p>
+<pre><code class="language-bash">pnpm install
+pnpm run build
+</code></pre>
+<p>Run in stdio mode:</p>
+<pre><code class="language-bash">node dist/index.js
+</code></pre>
+<p>Run in HTTP mode:</p>
+<pre><code class="language-bash">MCP_TRANSPORT=http MCP_PORT=&lt;port&gt; node dist/index.js
+# Example: MCP_TRANSPORT=http MCP_PORT=3000 node dist/index.js
+</code></pre>
+<p>HTTP endpoints:</p>
+<ul>
+<li><code>GET /health</code></li>
+<li><code>GET /docs</code></li>
+<li><code>GET /docs-api.json</code></li>
+<li><code>POST /mcp</code></li>
+<li><code>GET /mcp</code></li>
+<li><code>DELETE /mcp</code></li>
+</ul>
+<p>In HTTP mode, interactive API docs are available at <code>/docs</code>, and the raw OpenAPI document is available at <code>/docs-api.json</code>.</p>
+<h2>Environment Variables</h2>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Default</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>MCP_TRANSPORT</code></td>
+<td><code>stdio</code></td>
+<td>Transport mode: <code>stdio</code> or <code>http</code></td>
+</tr>
+<tr>
+<td><code>MCP_PORT</code></td>
+<td>defaults to <code>3000</code></td>
+<td>HTTP port when using HTTP transport</td>
+</tr>
+<tr>
+<td><code>WORKFLOW_ROOT</code></td>
+<td><code>./workflows</code> bundle</td>
+<td>Override workflow markdown source directory</td>
+</tr>
+</tbody></table>
+<h2>Main Tools</h2>
+<h3><code>route_task</code></h3>
+<p>Use this first.</p>
+<p>Input:</p>
+<ul>
+<li><code>task</code></li>
+<li>optional <code>goal</code></li>
+<li>optional <code>audience</code></li>
+<li>optional <code>constraints</code></li>
+<li>optional <code>preferred_mode</code></li>
+<li>optional <code>preferred_domain</code></li>
+</ul>
+<p>Output:</p>
+<ul>
+<li><code>mode</code></li>
+<li><code>domain</code></li>
+<li><code>confidence</code></li>
+<li><code>reason</code></li>
+<li><code>sequence</code></li>
+<li><code>use_utility</code></li>
+<li><code>utility_candidates</code></li>
+</ul>
+<p>Example intent:</p>
+<pre><code class="language-text">Route: &quot;Help me validate a digital product idea for busy founders&quot;
+</code></pre>
+<h3><code>select_domain_workflow</code></h3>
+<p>Use this when you want the workflow resource URI and normalized stage before running.</p>
+<p>Input:</p>
+<ul>
+<li><code>domain</code></li>
+<li>optional <code>stage</code></li>
+</ul>
+<p>Output includes:</p>
+<ul>
+<li><code>resource_uri</code></li>
+<li><code>subsection_uri</code></li>
+<li><code>stage</code></li>
+<li><code>command_format</code></li>
+<li><code>response_shape</code></li>
+</ul>
+<h3><code>run_workflow_sequence</code></h3>
+<p>This is the primary execution tool.</p>
+<p>Input:</p>
+<ul>
+<li><code>mode</code></li>
+<li><code>domain</code></li>
+<li><code>task</code></li>
+<li>optional <code>context</code></li>
+<li>optional <code>stage</code></li>
+<li>optional <code>optimize_once</code></li>
+<li>optional <code>next_action_required</code></li>
+</ul>
+<p>Output includes:</p>
+<ul>
+<li><code>main_deliverable</code></li>
+<li><code>applied_sequence</code></li>
+<li><code>optimization_applied</code></li>
+<li><code>next_action</code></li>
+</ul>
+<h3><code>apply_utility_prompt</code></h3>
+<p>Use only after a main workflow has already run.</p>
+<p>Available utilities:</p>
+<ul>
+<li><code>clarity_rewrite</code></li>
+<li><code>conversion_rewrite</code></li>
+<li><code>tone_calibration</code></li>
+<li><code>structure_rebuild</code></li>
+<li><code>audience_rewrite</code></li>
+<li><code>impact_compressor</code></li>
+<li><code>blind_spot_finder</code></li>
+<li><code>shortcut_strategy</code></li>
+<li><code>ultra_leverage</code></li>
+<li><code>momentum_amplifier</code></li>
+</ul>
+<h3><code>generate_next_action</code></h3>
+<p>Use this when you already have output and need exactly one immediate next step.</p>
+<h2>Prompts</h2>
+<p>The server also exposes prompts for higher-level MCP clients.</p>
+<p>Mode prompts:</p>
+<ul>
+<li><code>clarify_task</code></li>
+<li><code>strategize_task</code></li>
+<li><code>build_output</code></li>
+<li><code>improve_persuasion</code></li>
+<li><code>force_execution</code></li>
+<li><code>review_optimize</code></li>
+</ul>
+<p>Domain prompts:</p>
+<ul>
+<li><code>run_freelancing_workflow</code></li>
+<li><code>run_products_workflow</code></li>
+<li><code>run_content_workflow</code></li>
+<li><code>run_execution_workflow</code></li>
+<li><code>run_investing_workflow</code></li>
+<li><code>run_utility_workflow</code></li>
+</ul>
+<p>Front-door prompt:</p>
+<ul>
+<li><code>route_and_run</code></li>
+</ul>
+<h2>Resources</h2>
+<p>Full workflow resources:</p>
+<ul>
+<li><code>workflow://os/v4</code></li>
+<li><code>workflow://freelancing/v4</code></li>
+<li><code>workflow://products/v4</code></li>
+<li><code>workflow://content/v4</code></li>
+<li><code>workflow://execution/v4</code></li>
+<li><code>workflow://investing/v4</code></li>
+<li><code>workflow://utility/v4</code></li>
+<li><code>workflow://execute-referencing/v4</code></li>
+</ul>
+<p>Section resources follow this template:</p>
+<pre><code class="language-text">workflow://{domain}/v4/{sectionGroup}/{sectionName}
+</code></pre>
+<p>Examples:</p>
+<ul>
+<li><code>workflow://products/v4/execution/sequence</code></li>
+<li><code>workflow://content/v4/output/response-shape</code></li>
+</ul>
+<h2>Recommended Client Flow</h2>
+<p>For most client integrations, use this sequence:</p>
+<ol>
+<li>Call <code>route_task</code></li>
+<li>Optionally read <code>resource_uri</code> or a section resource</li>
+<li>Call <code>run_workflow_sequence</code></li>
+<li>If needed, call <code>apply_utility_prompt</code> once</li>
+<li>Return the final output with the supplied <code>next_action</code></li>
+</ol>
+<h2>Client Configuration</h2>
+<p>For client setup across Codex, Claude, ChatGPT, Kimi, Claw-style clients, and VS Code extensions, use the generic MCP configuration guide:</p>
+<ul>
+<li><a href="./docs/mcp-client-configuration.md">Generic MCP Client Configuration</a></li>
+</ul>
+<h2>Notes</h2>
+<ul>
+<li>The bundled workflow markdown files are the source of truth.</li>
+<li>The server is designed to run one main workflow per request.</li>
+<li>Utility prompts are supporting tools, not the primary entry point.</li>
+<li>Output should end with one immediate next action.</li>
+</ul>
+
+            </div>
+        </article>
+    </main>
+
+    <script src="../script.js"></script>
+</body>
+</html>

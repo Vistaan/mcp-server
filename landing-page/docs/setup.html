@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Setup Guide - workflow-os-mcp</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../styles.css">
+    <style>
+        .markdown-content {
+            max-width: none;
+        }
+        .markdown-content h1 { @apply text-3xl font-bold mb-6; }
+        .markdown-content h2 { @apply text-2xl font-bold mb-4 mt-8; }
+        .markdown-content h3 { @apply text-xl font-semibold mb-3 mt-6; }
+        .markdown-content p { @apply mb-4; }
+        .markdown-content ul { @apply mb-4 pl-6; }
+        .markdown-content ol { @apply mb-4 pl-6; }
+        .markdown-content li { @apply mb-2; }
+        .markdown-content code { @apply bg-gray-100 px-2 py-1 rounded text-sm font-mono; }
+        .markdown-content pre { @apply bg-gray-900 text-green-400 p-4 rounded-lg mb-4 overflow-x-auto; }
+        .markdown-content pre code { @apply bg-transparent text-green-400 p-0; }
+        .markdown-content blockquote { @apply border-l-4 border-gray-300 pl-4 italic text-gray-600 mb-4; }
+        .markdown-content table { @apply w-full border-collapse border border-gray-300 mb-4; }
+        .markdown-content th, .markdown-content td { @apply border border-gray-300 px-4 py-2; }
+        .markdown-content th { @apply bg-gray-100 font-semibold; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center">
+                    <a href="../index.html" class="text-2xl font-bold text-gray-900">workflow-os-mcp</a>
+                </div>
+                <div class="flex space-x-4">
+                    <a href="../index.html" class="text-gray-600 hover:text-gray-900">← Back to Landing Page</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Content -->
+    <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <article class="bg-white rounded-lg shadow-sm p-8">
+            <div class="markdown-content prose prose-lg max-w-none">
+                <h1>Local Setup</h1>
+<h2>Prerequisites</h2>
+<ul>
+<li>Node.js 20.6+</li>
+<li>pnpm 10+</li>
+</ul>
+<h2>Install</h2>
+<pre><code class="language-bash">git clone &lt;repo-url&gt;
+cd mcp-server
+pnpm install
+</code></pre>
+<h2>Build</h2>
+<pre><code class="language-bash">make build
+# or: pnpm run build
+</code></pre>
+<h2>Run (stdio mode — for Claude Desktop)</h2>
+<pre><code class="language-bash">node dist/index.js
+# MCP_TRANSPORT defaults to &quot;stdio&quot;
+</code></pre>
+<h2>Run (HTTP mode — for local testing of Docker/K8s behavior)</h2>
+<pre><code class="language-bash">MCP_TRANSPORT=http MCP_PORT=&lt;port&gt; node dist/index.js
+# Example: MCP_TRANSPORT=http MCP_PORT=3000 node dist/index.js
+# Server starts on http://localhost:&lt;port&gt;
+# Swagger UI: http://localhost:&lt;port&gt;/docs
+# OpenAPI JSON: http://localhost:&lt;port&gt;/docs-api.json
+# Health check: http://localhost:&lt;port&gt;/health
+# MCP endpoint: http://localhost:&lt;port&gt;/mcp
+</code></pre>
+<h2>Test</h2>
+<pre><code class="language-bash">make test             # run all tests
+make test-coverage    # with coverage report
+</code></pre>
+<h2>Workflow Files</h2>
+<p>The 8 v4 Markdown workflow files are <strong>bundled</strong> in <code>workflows/</code>. They are automatically found by the server. No environment variables needed for local development.</p>
+<p>To use custom/external workflow files:</p>
+<pre><code class="language-bash">WORKFLOW_ROOT=/your/custom/path node dist/index.js
+</code></pre>
+<h2>Environment Variables</h2>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>MCP_TRANSPORT</code></td>
+<td><code>stdio</code></td>
+<td><code>stdio</code> or <code>http</code></td>
+</tr>
+<tr>
+<td><code>MCP_PORT</code></td>
+<td>defaults to <code>3000</code></td>
+<td>HTTP server port (ignored in stdio mode)</td>
+</tr>
+<tr>
+<td><code>WORKFLOW_ROOT</code></td>
+<td><code>&lt;project&gt;/workflows</code></td>
+<td>Path to workflow markdown files</td>
+</tr>
+</tbody></table>
+
+            </div>
+        </article>
+    </main>
+
+    <script src="../script.js"></script>
+</body>
+</html>

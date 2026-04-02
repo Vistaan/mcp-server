@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCP Client Configuration - workflow-os-mcp</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../styles.css">
+    <style>
+        .markdown-content {
+            max-width: none;
+        }
+        .markdown-content h1 { @apply text-3xl font-bold mb-6; }
+        .markdown-content h2 { @apply text-2xl font-bold mb-4 mt-8; }
+        .markdown-content h3 { @apply text-xl font-semibold mb-3 mt-6; }
+        .markdown-content p { @apply mb-4; }
+        .markdown-content ul { @apply mb-4 pl-6; }
+        .markdown-content ol { @apply mb-4 pl-6; }
+        .markdown-content li { @apply mb-2; }
+        .markdown-content code { @apply bg-gray-100 px-2 py-1 rounded text-sm font-mono; }
+        .markdown-content pre { @apply bg-gray-900 text-green-400 p-4 rounded-lg mb-4 overflow-x-auto; }
+        .markdown-content pre code { @apply bg-transparent text-green-400 p-0; }
+        .markdown-content blockquote { @apply border-l-4 border-gray-300 pl-4 italic text-gray-600 mb-4; }
+        .markdown-content table { @apply w-full border-collapse border border-gray-300 mb-4; }
+        .markdown-content th, .markdown-content td { @apply border border-gray-300 px-4 py-2; }
+        .markdown-content th { @apply bg-gray-100 font-semibold; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center">
+                    <a href="../index.html" class="text-2xl font-bold text-gray-900">workflow-os-mcp</a>
+                </div>
+                <div class="flex space-x-4">
+                    <a href="../index.html" class="text-gray-600 hover:text-gray-900">← Back to Landing Page</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Content -->
+    <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <article class="bg-white rounded-lg shadow-sm p-8">
+            <div class="markdown-content prose prose-lg max-w-none">
+                <h1>Generic MCP Client Configuration</h1>
+<p>Use this guide for any client that can launch an MCP server over <code>stdio</code> by providing:</p>
+<ul>
+<li>a command</li>
+<li>command arguments</li>
+<li>optional environment variables</li>
+</ul>
+<p>That generic pattern is the same for:</p>
+<ul>
+<li>Codex app</li>
+<li>Codex VS Code extension</li>
+<li>Claude Code VS Code extension</li>
+<li>Claude web</li>
+<li>ChatGPT web</li>
+<li>Kimi web</li>
+<li>Kimi Code VS Code extension</li>
+<li>Kimi Claw</li>
+<li>Open Claw</li>
+</ul>
+<p>The exact UI, JSON field names, and file location may differ by client, but the server contract is the same.</p>
+<h2>Build First</h2>
+<pre><code class="language-bash">pnpm install
+pnpm run build
+</code></pre>
+<h2>Generic Stdio Configuration</h2>
+<p>Most MCP-capable clients need the equivalent of:</p>
+<pre><code class="language-json">{
+  &quot;mcpServers&quot;: {
+    &quot;workflow-os&quot;: {
+      &quot;command&quot;: &quot;node&quot;,
+      &quot;args&quot;: [&quot;/absolute/path/to/mcp-server/dist/index.js&quot;]
+    }
+  }
+}
+</code></pre>
+<p>If the client exposes form fields instead of raw JSON, map them like this:</p>
+<ul>
+<li>server name: <code>workflow-os</code></li>
+<li>transport: <code>stdio</code></li>
+<li>command: <code>node</code></li>
+<li>args: <code>/absolute/path/to/mcp-server/dist/index.js</code></li>
+<li>env: optional</li>
+</ul>
+<h2>Optional Environment Variables</h2>
+<p>You usually do not need any environment variables because the bundled workflow files are included in the repo.</p>
+<p>If your client allows custom environment variables, these are supported:</p>
+<ul>
+<li><code>WORKFLOW_ROOT</code></li>
+<li><code>MCP_TRANSPORT</code></li>
+<li><code>MCP_PORT</code></li>
+</ul>
+<p><code>MCP_PORT</code> is configurable. The app currently defaults to <code>3000</code> only if you do not provide a value.</p>
+<p>Typical override example:</p>
+<pre><code class="language-json">{
+  &quot;mcpServers&quot;: {
+    &quot;workflow-os&quot;: {
+      &quot;command&quot;: &quot;node&quot;,
+      &quot;args&quot;: [&quot;/absolute/path/to/mcp-server/dist/index.js&quot;],
+      &quot;env&quot;: {
+        &quot;WORKFLOW_ROOT&quot;: &quot;/absolute/path/to/custom/workflows&quot;
+      }
+    }
+  }
+}
+</code></pre>
+<h2>When To Use HTTP Instead</h2>
+<p>Use HTTP only if a client explicitly asks for an MCP endpoint URL instead of launching a local command.</p>
+<p>Start the server:</p>
+<pre><code class="language-bash">MCP_TRANSPORT=http MCP_PORT=&lt;port&gt; node dist/index.js
+# Example: MCP_TRANSPORT=http MCP_PORT=3000 node dist/index.js
+</code></pre>
+<p>Then provide the client with:</p>
+<ul>
+<li>base URL: <code>http://localhost:&lt;port&gt;</code></li>
+<li>MCP endpoint: <code>http://localhost:&lt;port&gt;/mcp</code></li>
+<li>health check: <code>http://localhost:&lt;port&gt;/health</code></li>
+</ul>
+<h2>Verify The Integration</h2>
+<p>After adding the server to a client:</p>
+<ol>
+<li>Restart or refresh the client</li>
+<li>Open a new session or workspace</li>
+<li>Confirm the tools appear:<ul>
+<li><code>route_task</code></li>
+<li><code>select_domain_workflow</code></li>
+<li><code>run_workflow_sequence</code></li>
+<li><code>apply_utility_prompt</code></li>
+<li><code>generate_next_action</code></li>
+</ul>
+</li>
+<li>Confirm the resources appear:<ul>
+<li><code>workflow://os/v4</code></li>
+<li><code>workflow://freelancing/v4</code></li>
+<li><code>workflow://products/v4</code></li>
+<li><code>workflow://content/v4</code></li>
+<li><code>workflow://execution/v4</code></li>
+<li><code>workflow://investing/v4</code></li>
+<li><code>workflow://utility/v4</code></li>
+</ul>
+</li>
+</ol>
+<h2>Recommended Usage Pattern</h2>
+<p>For most clients, the best flow is:</p>
+<ol>
+<li>Call <code>route_task</code></li>
+<li>Optionally inspect a workflow resource</li>
+<li>Call <code>run_workflow_sequence</code></li>
+<li>Optionally call <code>apply_utility_prompt</code> once</li>
+<li>End with the returned <code>next_action</code></li>
+</ol>
+<h2>Troubleshooting</h2>
+<p>If the server does not start:</p>
+<ul>
+<li>confirm <code>dist/index.js</code> exists</li>
+<li>run <code>pnpm run build</code></li>
+<li>confirm the configured path is absolute</li>
+<li>confirm the client is allowed to launch local commands</li>
+</ul>
+<p>If the client expects HTTP instead of <code>stdio</code>:</p>
+<ul>
+<li>run the server with <code>MCP_TRANSPORT=http</code></li>
+<li>provide <code>http://localhost:&lt;your-configured-port&gt;/mcp</code></li>
+</ul>
+<p>If the wrong workflow files are being used:</p>
+<ul>
+<li>set <code>WORKFLOW_ROOT</code> explicitly</li>
+</ul>
+<p>If you need logs:</p>
+<ul>
+<li>this server writes structured JSON logs to <code>stderr</code></li>
+<li>many MCP clients expose these logs in a developer console, logs panel, or extension output pane</li>
+</ul>
+
+            </div>
+        </article>
+    </main>
+
+    <script src="../script.js"></script>
+</body>
+</html>

@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deployment Guide - workflow-os-mcp</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../styles.css">
+    <style>
+        .markdown-content {
+            max-width: none;
+        }
+        .markdown-content h1 { @apply text-3xl font-bold mb-6; }
+        .markdown-content h2 { @apply text-2xl font-bold mb-4 mt-8; }
+        .markdown-content h3 { @apply text-xl font-semibold mb-3 mt-6; }
+        .markdown-content p { @apply mb-4; }
+        .markdown-content ul { @apply mb-4 pl-6; }
+        .markdown-content ol { @apply mb-4 pl-6; }
+        .markdown-content li { @apply mb-2; }
+        .markdown-content code { @apply bg-gray-100 px-2 py-1 rounded text-sm font-mono; }
+        .markdown-content pre { @apply bg-gray-900 text-green-400 p-4 rounded-lg mb-4 overflow-x-auto; }
+        .markdown-content pre code { @apply bg-transparent text-green-400 p-0; }
+        .markdown-content blockquote { @apply border-l-4 border-gray-300 pl-4 italic text-gray-600 mb-4; }
+        .markdown-content table { @apply w-full border-collapse border border-gray-300 mb-4; }
+        .markdown-content th, .markdown-content td { @apply border border-gray-300 px-4 py-2; }
+        .markdown-content th { @apply bg-gray-100 font-semibold; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center">
+                    <a href="../index.html" class="text-2xl font-bold text-gray-900">workflow-os-mcp</a>
+                </div>
+                <div class="flex space-x-4">
+                    <a href="../index.html" class="text-gray-600 hover:text-gray-900">← Back to Landing Page</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Content -->
+    <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <article class="bg-white rounded-lg shadow-sm p-8">
+            <div class="markdown-content prose prose-lg max-w-none">
+                <h1>Deployment</h1>
+<h2>Docker</h2>
+<h3>Build image</h3>
+<pre><code class="language-bash">make docker-build
+# or: IMAGE_TAG=1.2.0 make docker-build
+</code></pre>
+<h3>Run locally</h3>
+<pre><code class="language-bash">make docker-run
+# Uses PORT (or exported MCP_PORT) and defaults to 3000 if neither is set
+# Example: PORT=6677 make docker-run
+# Swagger UI: http://localhost:&lt;port&gt;/docs
+# OpenAPI JSON: http://localhost:&lt;port&gt;/docs-api.json
+# MCP endpoint: http://localhost:&lt;port&gt;/mcp
+# Health: http://localhost:&lt;port&gt;/health
+</code></pre>
+<h3>docker-compose (recommended for local/staging)</h3>
+<pre><code class="language-bash">make compose-up     # build + start in background
+make compose-down   # stop
+
+# docker-compose.yml uses MCP_PORT from your shell or .env
+</code></pre>
+<h3>Push to registry</h3>
+<pre><code class="language-bash">make docker-push REGISTRY=your.registry.io
+# Pushes: your.registry.io/workflow-os-mcp:1.0.0
+</code></pre>
+<hr>
+<h2>Kubernetes</h2>
+<h3>Prerequisites</h3>
+<ul>
+<li><code>kubectl</code> configured for your cluster</li>
+<li>Docker image pushed to a registry accessible from the cluster</li>
+<li>Update <code>k8s/deployment.yaml</code> → <code>image:</code> to point to your registry image</li>
+</ul>
+<h3>Apply all manifests</h3>
+<pre><code class="language-bash">make k8s-apply
+# Example: PORT=6677 K8S_SERVICE_PORT=8080 make k8s-apply
+</code></pre>
+<p>This creates (in order):</p>
+<ol>
+<li><code>workflow-os</code> namespace</li>
+<li><code>workflow-os-mcp-config</code> ConfigMap</li>
+<li><code>workflow-os-mcp</code> Deployment (2 replicas)</li>
+<li><code>workflow-os-mcp</code> ClusterIP Service (default port 80 → current container port)</li>
+</ol>
+<h3>Useful commands</h3>
+<pre><code class="language-bash">make k8s-status      # kubectl get all -n workflow-os
+make k8s-logs        # tail pod logs
+make k8s-restart     # rolling restart (zero-downtime)
+make k8s-delete      # tear down all resources
+</code></pre>
+<h3>Update image after a new build</h3>
+<pre><code class="language-bash"># Push new image
+make docker-push REGISTRY=your.registry.io IMAGE_TAG=1.1.0
+
+# Update deployment.yaml image tag, then apply
+make k8s-apply
+
+# Or trigger a rolling restart if image tag hasn&#39;t changed (uses :latest)
+make k8s-restart
+</code></pre>
+<h3>Resource sizing</h3>
+<p>Defaults in <code>k8s/deployment.yaml</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Resource</th>
+<th>Request</th>
+<th>Limit</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>CPU</td>
+<td>100m</td>
+<td>500m</td>
+</tr>
+<tr>
+<td>Memory</td>
+<td>128Mi</td>
+<td>256Mi</td>
+</tr>
+</tbody></table>
+<p>Adjust per your cluster capacity. The server is stateless — scale replicas freely.</p>
+<hr>
+<h2>Environment Variables</h2>
+<p>All env vars are set in <code>k8s/configmap.yaml</code> for Kubernetes or in <code>docker-compose.yml</code> for Compose.</p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>MCP_TRANSPORT</code></td>
+<td><code>http</code></td>
+<td>Always <code>http</code> in Docker/K8s</td>
+</tr>
+<tr>
+<td><code>MCP_PORT</code></td>
+<td>defaults to <code>3000</code></td>
+<td>Current container HTTP port</td>
+</tr>
+<tr>
+<td><code>WORKFLOW_ROOT</code></td>
+<td>bundled <code>workflows/</code></td>
+<td>Override to mount external files</td>
+</tr>
+<tr>
+<td><code>NODE_ENV</code></td>
+<td><code>production</code></td>
+<td>Node environment</td>
+</tr>
+</tbody></table>
+<p>Additional deployment-time variables:</p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>PORT</code></td>
+<td><code>3000</code></td>
+<td>Docker/K8s container HTTP port used by Make and Kubernetes templating</td>
+</tr>
+<tr>
+<td><code>K8S_SERVICE_PORT</code></td>
+<td><code>80</code></td>
+<td>Kubernetes Service port exposed inside the cluster</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Health Check Endpoints</h2>
+<table>
+<thead>
+<tr>
+<th>Path</th>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>/health</code></td>
+<td>GET</td>
+<td>Returns <code>{&quot;status&quot;:&quot;ok&quot;}</code> — used by K8s liveness + readiness probes</td>
+</tr>
+<tr>
+<td><code>/mcp</code></td>
+<td>POST</td>
+<td>MCP JSON-RPC messages</td>
+</tr>
+<tr>
+<td><code>/mcp</code></td>
+<td>GET</td>
+<td>MCP SSE stream</td>
+</tr>
+<tr>
+<td><code>/mcp</code></td>
+<td>DELETE</td>
+<td>Session teardown (no-op in stateless mode)</td>
+</tr>
+</tbody></table>
+<h3>Manual health check</h3>
+<pre><code class="language-bash"># If you keep your current local Docker/K8s port mapping, use:
+curl http://localhost:&lt;port&gt;/health
+# {&quot;status&quot;:&quot;ok&quot;,&quot;service&quot;:&quot;workflow-os-mcp&quot;,&quot;transport&quot;:&quot;http&quot;}
+</code></pre>
+
+            </div>
+        </article>
+    </main>
+
+    <script src="../script.js"></script>
+</body>
+</html>

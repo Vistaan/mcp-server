@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Reference - workflow-os-mcp</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../styles.css">
+    <style>
+        .markdown-content {
+            max-width: none;
+        }
+        .markdown-content h1 { @apply text-3xl font-bold mb-6; }
+        .markdown-content h2 { @apply text-2xl font-bold mb-4 mt-8; }
+        .markdown-content h3 { @apply text-xl font-semibold mb-3 mt-6; }
+        .markdown-content p { @apply mb-4; }
+        .markdown-content ul { @apply mb-4 pl-6; }
+        .markdown-content ol { @apply mb-4 pl-6; }
+        .markdown-content li { @apply mb-2; }
+        .markdown-content code { @apply bg-gray-100 px-2 py-1 rounded text-sm font-mono; }
+        .markdown-content pre { @apply bg-gray-900 text-green-400 p-4 rounded-lg mb-4 overflow-x-auto; }
+        .markdown-content pre code { @apply bg-transparent text-green-400 p-0; }
+        .markdown-content blockquote { @apply border-l-4 border-gray-300 pl-4 italic text-gray-600 mb-4; }
+        .markdown-content table { @apply w-full border-collapse border border-gray-300 mb-4; }
+        .markdown-content th, .markdown-content td { @apply border border-gray-300 px-4 py-2; }
+        .markdown-content th { @apply bg-gray-100 font-semibold; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center">
+                    <a href="../index.html" class="text-2xl font-bold text-gray-900">workflow-os-mcp</a>
+                </div>
+                <div class="flex space-x-4">
+                    <a href="../index.html" class="text-gray-600 hover:text-gray-900">← Back to Landing Page</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Content -->
+    <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <article class="bg-white rounded-lg shadow-sm p-8">
+            <div class="markdown-content prose prose-lg max-w-none">
+                <h1>API Reference</h1>
+<h2>Resources</h2>
+<p>All resources use the <code>workflow://</code> URI scheme and return <code>text/markdown</code>.</p>
+<table>
+<thead>
+<tr>
+<th>URI</th>
+<th>File</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>workflow://os/v4</code></td>
+<td><code>WORKFLOW_OS_v4.md</code></td>
+</tr>
+<tr>
+<td><code>workflow://freelancing/v4</code></td>
+<td><code>WORKFLOW_FREELANCING_v4.md</code></td>
+</tr>
+<tr>
+<td><code>workflow://products/v4</code></td>
+<td><code>WORKFLOW_PRODUCTS_v4.md</code></td>
+</tr>
+<tr>
+<td><code>workflow://content/v4</code></td>
+<td><code>WORKFLOW_CONTENT_v4.md</code></td>
+</tr>
+<tr>
+<td><code>workflow://execution/v4</code></td>
+<td><code>WORKFLOW_EXECUTION_v4.md</code></td>
+</tr>
+<tr>
+<td><code>workflow://investing/v4</code></td>
+<td><code>WORKFLOW_INVESTING_v4.md</code></td>
+</tr>
+<tr>
+<td><code>workflow://utility/v4</code></td>
+<td><code>UTILITY_PROMPTS_v4.md</code></td>
+</tr>
+<tr>
+<td><code>workflow://execute-referencing/v4</code></td>
+<td><code>WORKFLOW_EXECUTE_REFERENCING_v4.md</code></td>
+</tr>
+</tbody></table>
+<h3>Subsection resources</h3>
+<p>Fetch only a specific section of a workflow file:</p>
+<pre><code>workflow://{domain}/v4/execution/input
+workflow://{domain}/v4/execution/decision-rule
+workflow://{domain}/v4/execution/sequence
+workflow://{domain}/v4/execution/command-format
+workflow://{domain}/v4/execution/operating-rules
+workflow://{domain}/v4/output/response-shape
+workflow://{domain}/v4/output/output-rules
+workflow://{domain}/v4/output/completion-rule
+</code></pre>
+<hr>
+<h2>Prompts</h2>
+<h3>Mode prompts</h3>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Purpose</th>
+<th>Key arguments</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>clarify_task</code></td>
+<td>Clarify a vague/fuzzy task</td>
+<td><code>task</code>, <code>goal?</code>, <code>audience?</code>, <code>constraints?</code></td>
+</tr>
+<tr>
+<td><code>strategize_task</code></td>
+<td>Select direction or priorities</td>
+<td><code>task</code>, <code>domain?</code>, <code>context?</code></td>
+</tr>
+<tr>
+<td><code>build_output</code></td>
+<td>Convert idea to asset</td>
+<td><code>task</code>, <code>domain?</code>, <code>context?</code></td>
+</tr>
+<tr>
+<td><code>improve_persuasion</code></td>
+<td>Strengthen copy/messaging</td>
+<td><code>task</code>, <code>audience?</code>, <code>platform?</code></td>
+</tr>
+<tr>
+<td><code>force_execution</code></td>
+<td>Break through overwhelm</td>
+<td><code>task</code>, <code>energy_level?</code></td>
+</tr>
+<tr>
+<td><code>review_optimize</code></td>
+<td>Tighten an existing output</td>
+<td><code>task</code>, <code>domain?</code>, <code>content?</code></td>
+</tr>
+</tbody></table>
+<h3>Domain prompts</h3>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Domain</th>
+<th>Stage argument values</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>run_freelancing_workflow</code></td>
+<td>freelancing</td>
+<td><code>skill | niche | offer | pricing | portfolio | outreach | first_client | premium | growth</code></td>
+</tr>
+<tr>
+<td><code>run_products_workflow</code></td>
+<td>products</td>
+<td><code>idea | validate | build | value | pricing | offer | first_sale</code></td>
+</tr>
+<tr>
+<td><code>run_content_workflow</code></td>
+<td>content</td>
+<td><code>audience_pain | direction | ideas | hooks | write | improve | optimize | consistency</code></td>
+</tr>
+<tr>
+<td><code>run_execution_workflow</code></td>
+<td>execution</td>
+<td><code>do_now | organize | simplify | unblock | sprint | priorities | momentum</code></td>
+</tr>
+<tr>
+<td><code>run_investing_workflow</code></td>
+<td>investing</td>
+<td><code>analyze | watchlist | news | trade_setup | red_flags | trade_review | system</code></td>
+</tr>
+<tr>
+<td><code>run_utility_workflow</code></td>
+<td>utility</td>
+<td><code>clarity_rewrite | conversion_rewrite | tone_calibration | structure_rebuild | audience_rewrite | impact_compressor | blind_spot_finder | shortcut_strategy | ultra_leverage | momentum_amplifier</code></td>
+</tr>
+</tbody></table>
+<h3>Front-door prompt</h3>
+<p><strong><code>route_and_run</code></strong> — classifies and runs in one call.</p>
+<pre><code class="language-json">{
+  &quot;task&quot;: &quot;string (required)&quot;,
+  &quot;goal&quot;: &quot;string (optional)&quot;,
+  &quot;audience&quot;: &quot;string (optional)&quot;,
+  &quot;constraints&quot;: [&quot;string&quot;] ,
+  &quot;preferred_mode&quot;: &quot;auto | clarify | strategy | build | persuasion | execution | review&quot;,
+  &quot;preferred_domain&quot;: &quot;auto | os | freelancing | products | content | execution | investing | utility&quot;
+}
+</code></pre>
+<hr>
+<h2>Tools</h2>
+<h3><code>route_task</code></h3>
+<p>Classify a task into mode + domain + sequence. <strong>Call this first.</strong></p>
+<p><strong>Input:</strong></p>
+<pre><code class="language-json">{
+  &quot;task&quot;: &quot;string&quot;,
+  &quot;goal&quot;: &quot;string (optional)&quot;,
+  &quot;audience&quot;: &quot;string (optional)&quot;,
+  &quot;constraints&quot;: [&quot;string&quot;],
+  &quot;preferred_mode&quot;: &quot;auto | clarify | strategy | build | persuasion | execution | review&quot;,
+  &quot;preferred_domain&quot;: &quot;auto | os | freelancing | products | content | execution | investing | utility&quot;
+}
+</code></pre>
+<p><strong>Output:</strong></p>
+<pre><code class="language-json">{
+  &quot;mode&quot;: &quot;build&quot;,
+  &quot;domain&quot;: &quot;products&quot;,
+  &quot;confidence&quot;: 0.82,
+  &quot;reason&quot;: &quot;Detected build mode for the products domain from task language: ...&quot;,
+  &quot;sequence&quot;: [&quot;idea&quot;, &quot;validate&quot;, &quot;build&quot;, &quot;value&quot;, &quot;pricing&quot;, &quot;offer&quot;, &quot;first_sale&quot;],
+  &quot;use_utility&quot;: true,
+  &quot;utility_candidates&quot;: [&quot;structure_rebuild&quot;, &quot;audience_rewrite&quot;]
+}
+</code></pre>
+<hr>
+<h3><code>select_domain_workflow</code></h3>
+<p>Resolve which resource URI and stage to use.</p>
+<p><strong>Input:</strong></p>
+<pre><code class="language-json">{
+  &quot;domain&quot;: &quot;products&quot;,
+  &quot;stage&quot;: &quot;pricing&quot;
+}
+</code></pre>
+<p><strong>Output:</strong></p>
+<pre><code class="language-json">{
+  &quot;resource_uri&quot;: &quot;workflow://products/v4&quot;,
+  &quot;subsection_uri&quot;: &quot;workflow://products/v4/execution/sequence&quot;,
+  &quot;stage&quot;: &quot;pricing&quot;,
+  &quot;command_format&quot;: &quot;RUN: &lt;mode&gt; | &lt;domain&gt; | &lt;task&gt; | &lt;stage?&gt; | &lt;constraints?&gt;&quot;,
+  &quot;response_shape&quot;: &quot;{ mode, domain, main_deliverable, supporting_notes?, optimization_applied, next_action }&quot;
+}
+</code></pre>
+<hr>
+<h3><code>run_workflow_sequence</code></h3>
+<p><strong>Main workhorse.</strong> Runs the workflow and returns one deliverable + one next action.</p>
+<p><strong>Input:</strong></p>
+<pre><code class="language-json">{
+  &quot;mode&quot;: &quot;strategy&quot;,
+  &quot;domain&quot;: &quot;products&quot;,
+  &quot;task&quot;: &quot;I want a simple product to sell this weekend&quot;,
+  &quot;context&quot;: &quot;Beginner, no audience yet&quot;,
+  &quot;stage&quot;: &quot;auto&quot;,
+  &quot;optimize_once&quot;: true,
+  &quot;next_action_required&quot;: true
+}
+</code></pre>
+<p><strong>Output:</strong></p>
+<pre><code class="language-json">{
+  &quot;mode&quot;: &quot;strategy&quot;,
+  &quot;domain&quot;: &quot;products&quot;,
+  &quot;main_deliverable&quot;: &quot;Mode: strategy\nDomain: products\nStage: auto\nTask: ...\nSequence: idea -&gt; validate -&gt; ...\nUse the resource workflow://products/v4 as the source-of-truth workflow reference.&quot;,
+  &quot;applied_sequence&quot;: [&quot;idea&quot;, &quot;validate&quot;, &quot;build&quot;, &quot;value&quot;, &quot;pricing&quot;, &quot;offer&quot;, &quot;first_sale&quot;],
+  &quot;optimization_applied&quot;: true,
+  &quot;next_action&quot;: &quot;Write the one-sentence product promise and list the first five components.&quot;
+}
+</code></pre>
+<hr>
+<h3><code>apply_utility_prompt</code></h3>
+<p>Apply one supporting utility <strong>after</strong> a primary workflow has run.</p>
+<p><strong>Input:</strong></p>
+<pre><code class="language-json">{
+  &quot;utility_name&quot;: &quot;blind_spot_finder&quot;,
+  &quot;content&quot;: &quot;Premium AI ad management service for $3k/month&quot;,
+  &quot;context&quot;: &quot;Need to check risks before finalizing&quot;
+}
+</code></pre>
+<p><strong>Output:</strong></p>
+<pre><code class="language-json">{
+  &quot;utility_name&quot;: &quot;blind_spot_finder&quot;,
+  &quot;revised_content&quot;: &quot;...&quot;,
+  &quot;issues_found&quot;: [
+    &quot;Potential hidden assumption: target audience and proof level may be underspecified.&quot;
+  ]
+}
+</code></pre>
+<p>Available <code>utility_name</code> values:<br><code>clarity_rewrite</code> · <code>conversion_rewrite</code> · <code>tone_calibration</code> · <code>structure_rebuild</code> · <code>audience_rewrite</code> · <code>impact_compressor</code> · <code>blind_spot_finder</code> · <code>shortcut_strategy</code> · <code>ultra_leverage</code> · <code>momentum_amplifier</code></p>
+<hr>
+<h3><code>generate_next_action</code></h3>
+<p>Return exactly one immediate next step.</p>
+<p><strong>Input:</strong></p>
+<pre><code class="language-json">{
+  &quot;domain&quot;: &quot;freelancing&quot;,
+  &quot;current_output&quot;: &quot;Service offer drafted for backend consulting&quot;,
+  &quot;constraints&quot;: [&quot;no portfolio yet&quot;, &quot;need first client fast&quot;]
+}
+</code></pre>
+<p><strong>Output:</strong></p>
+<pre><code class="language-json">{
+  &quot;next_action&quot;: &quot;Turn the current freelancing output into a one-page offer brief while respecting: no portfolio yet, need first client fast.&quot;,
+  &quot;why_this_next&quot;: &quot;It is the smallest concrete move that advances the current workflow without branching into multiple decisions.&quot;
+}
+</code></pre>
+<hr>
+<h2>Recommended Call Sequence</h2>
+<pre><code>1. route_task          → get mode + domain + sequence
+2. run_workflow_sequence → get main_deliverable + next_action
+3. apply_utility_prompt  → (optional) one polish pass
+4. generate_next_action  → (optional) standalone next step
+</code></pre>
+
+            </div>
+        </article>
+    </main>
+
+    <script src="../script.js"></script>
+</body>
+</html>
