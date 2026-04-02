@@ -6,6 +6,7 @@ const realSetTimeout = globalThis.setTimeout;
 let rootHandler: ((req: unknown, res: ReturnType<typeof createResponse>) => void) | undefined;
 let docsJsonHandler: ((req: unknown, res: ReturnType<typeof createResponse>) => void) | undefined;
 let healthHandler: ((req: unknown, res: ReturnType<typeof createResponse>) => void) | undefined;
+let metricsHandler: ((req: unknown, res: ReturnType<typeof createResponse>) => void) | undefined;
 let getMcpHandler: ((req: Record<string, unknown>, res: ReturnType<typeof createResponse>) => void) | undefined;
 let postMcpHandler: ((req: Record<string, unknown>, res: ReturnType<typeof createResponse>) => void) | undefined;
 let deleteMcpHandler: ((req: Record<string, unknown>, res: ReturnType<typeof createResponse>) => void) | undefined;
@@ -47,16 +48,18 @@ const expressMock = vi.fn(() => ({
       docsUseArgs = args;
     }
   }),
-  get: vi.fn((path: string, handler: typeof healthHandler) => {
-    if (path === '/') {
-      rootHandler = handler as typeof rootHandler;
-    } else if (path === '/docs-api.json') {
-      docsJsonHandler = handler;
-    } else if (path === '/health') {
-      healthHandler = handler;
-    } else if (path === '/mcp') {
-      getMcpHandler = handler as typeof getMcpHandler;
-    }
+    get: vi.fn((path: string, handler: typeof healthHandler) => {
+      if (path === '/') {
+        rootHandler = handler as typeof rootHandler;
+      } else if (path === '/docs-api.json') {
+        docsJsonHandler = handler;
+      } else if (path === '/health') {
+        healthHandler = handler;
+      } else if (path === '/metrics') {
+        metricsHandler = handler;
+      } else if (path === '/mcp') {
+        getMcpHandler = handler as typeof getMcpHandler;
+      }
   }),
   post: vi.fn((path: string, handler: typeof postMcpHandler) => {
     if (path === '/mcp') {
@@ -111,6 +114,7 @@ function createResponse() {
     req: { protocol: 'http' },
     setTimeout: vi.fn(),
     destroy: vi.fn(),
+    setHeader: vi.fn(),
     get: vi.fn((header: string) => {
       if (header === 'host') {
         return 'localhost:8080';
@@ -137,6 +141,7 @@ describe('HTTP transport', () => {
     rootHandler = undefined;
     docsJsonHandler = undefined;
     healthHandler = undefined;
+    metricsHandler = undefined;
     getMcpHandler = undefined;
     postMcpHandler = undefined;
     deleteMcpHandler = undefined;
@@ -155,7 +160,7 @@ describe('HTTP transport', () => {
     vi.restoreAllMocks();
   });
 
-  it('creates the shared app with docs, root, health, and MCP handlers', async () => {
+  it('creates the shared app with docs, root, health, metrics, and MCP handlers', async () => {
     const { createHttpApp } = await import('../../../src/transports/http.js');
 
     createHttpApp();
@@ -190,7 +195,9 @@ describe('HTTP transport', () => {
     expect(docsSpec.openapi).toBe('3.1.0');
     expect(docsSpec.servers[0]?.url).toBe('http://localhost:8080');
     expect(docsSpec.paths).toHaveProperty('/health');
+    expect(docsSpec.paths).toHaveProperty('/metrics');
     expect(docsSpec.paths).toHaveProperty('/mcp');
+    expect(docsRes.setHeader).toHaveBeenCalledWith('cache-control', 'no-store');
 
     const healthRes = createResponse();
     healthHandler?.({}, healthRes);
@@ -203,6 +210,20 @@ describe('HTTP transport', () => {
       missing_workflows: [],
       checked_at: '2026-04-02T00:00:00.000Z',
     });
+    expect(healthRes.setHeader).toHaveBeenCalledWith('cache-control', 'no-store');
+
+    const metricsRes = createResponse();
+    metricsHandler?.({}, metricsRes);
+    expect(metricsRes.status).toHaveBeenCalledWith(200);
+    expect(metricsRes.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        service: 'workflow-os-mcp',
+        transport: 'http',
+        counters: expect.any(Object),
+        durations: expect.any(Object),
+      }),
+    );
+    expect(metricsRes.setHeader).toHaveBeenCalledWith('cache-control', 'no-store');
 
     const req = {
       body: { jsonrpc: '2.0' },
@@ -217,6 +238,8 @@ describe('HTTP transport', () => {
     postMcpHandler?.(req, res);
     await flushAsyncWork();
 
+    expect(res.setHeader).toHaveBeenCalledWith('x-request-id', expect.any(String));
+    expect(res.setHeader).toHaveBeenCalledWith('cache-control', 'no-store');
     expect(transportCtorMock).toHaveBeenCalledTimes(1);
     expect(connectMock).toHaveBeenCalledTimes(1);
     expect(handleRequestMock).toHaveBeenCalledWith(req, res, req.body);
@@ -237,6 +260,29 @@ describe('HTTP transport', () => {
 
     expect(listenMock).toHaveBeenCalledWith(8080, expect.any(Function));
     expect(infoMock).toHaveBeenCalledWith('workflow-os MCP server running on HTTP port 8080');
+  });
+
+  it('prefers PUBLIC_BASE_URL for generated docs when configured', async () => {
+    process.env['PUBLIC_BASE_URL'] = 'https://api.example.com';
+
+    const { createHttpApp } = await import('../../../src/transports/http.js');
+    createHttpApp();
+
+    const docsRes = createResponse();
+    docsJsonHandler?.(
+      {
+        protocol: 'http',
+        get: (header: string) => (header === 'host' ? 'localhost:8080' : undefined),
+      },
+      docsRes,
+    );
+
+    const [docsJsonCall] = docsRes.json.mock.calls as unknown[][];
+    const [docsSpecArg] = docsJsonCall ?? [];
+    const docsSpec = docsSpecArg as { servers: Array<{ url: string }> };
+    expect(docsSpec.servers[0]?.url).toBe('https://api.example.com');
+
+    delete process.env['PUBLIC_BASE_URL'];
   });
 
   it('logs errors and returns a 500 response when request handling fails', async () => {

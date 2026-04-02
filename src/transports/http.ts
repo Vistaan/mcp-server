@@ -13,7 +13,7 @@ import { WorkflowResourceError } from '../resources/errors.js';
 import { assertWorkflowReadiness, getWorkflowReadiness } from '../resources/loader.js';
 import { createServer } from '../server.js';
 import { log } from '../logger.js';
-import { buildHealthResponse, buildHttpErrorResponse, type HttpErrorCode } from './contracts.js';
+import { buildHealthResponse, buildHttpErrorResponse, buildMetricsResponse, type HttpErrorCode } from './contracts.js';
 
 const DEFAULT_MCP_REQUEST_TIMEOUT_MS = 30_000;
 
@@ -75,6 +75,8 @@ export function createHttpApp(): express.Express {
 
   app.use(express.json({ limit: '10mb' }));
   app.get('/docs-api.json', (req: Request, res: Response) => {
+    applyNoStore(res);
+    metrics.increment('http_docs_requested');
     const serverUrl = resolveServerUrl(req);
     res.json(createOpenApiSpec(serverUrl));
   });
@@ -91,14 +93,24 @@ export function createHttpApp(): express.Express {
 
   // ── Health check ─────────────────────────────────────────────────────────────
   app.get('/health', (_req: Request, res: Response) => {
+    applyNoStore(res);
+    metrics.increment('http_health_requested');
     const readiness = getWorkflowReadiness();
     res.status(readiness.status === 'ok' ? 200 : 503).json(buildHealthResponse(readiness));
+  });
+
+  app.get('/metrics', (_req: Request, res: Response) => {
+    applyNoStore(res);
+    metrics.increment('http_metrics_requested');
+    res.status(200).json(buildMetricsResponse(metrics.snapshot()));
   });
 
   // ── MCP handler (POST + GET + DELETE) ─────────────────────────────────────────
   async function handleMcp(req: Request, res: Response): Promise<void> {
     const lifecycle = createRequestLifecycle(req, res);
     let server: ReturnType<typeof createServer> | undefined;
+    setResponseHeader(res, 'x-request-id', lifecycle.requestId);
+    applyNoStore(res);
     metrics.increment('http_request_started', { method: req.method ?? 'UNKNOWN' });
     log.info('HTTP MCP request started', { requestId: lifecycle.requestId, method: req.method, path: req.path });
 
@@ -278,6 +290,16 @@ function waitForAbort(signal: AbortSignal): Promise<never> {
       { once: true },
     );
   });
+}
+
+function applyNoStore(res: Response): void {
+  setResponseHeader(res, 'cache-control', 'no-store');
+}
+
+function setResponseHeader(res: Response, name: string, value: string): void {
+  if (typeof res.setHeader === 'function') {
+    res.setHeader(name, value);
+  }
 }
 
 function resolveServerUrl(req: Request): string {

@@ -191,6 +191,22 @@ Available `utility_name` values:
 
 ---
 
+## Operational HTTP Endpoints
+
+### `GET /health`
+
+Returns readiness state plus workflow file metadata.
+
+### `GET /metrics`
+
+Returns lightweight in-memory counters and duration aggregates for the HTTP transport. This is intended for operational inspection and basic monitoring.
+
+### `GET /docs-api.json`
+
+Returns the generated OpenAPI document. In production, set `PUBLIC_BASE_URL` so the documented server URL does not depend on request headers.
+
+---
+
 ### `generate_next_action`
 
 Return exactly one immediate next step.

@@ -245,6 +245,26 @@ const openApiSpecTemplate = {
         },
       },
     },
+    '/metrics': {
+      get: {
+        tags: ['Operational'],
+        summary: 'Get in-process metrics snapshot',
+        description: 'Returns lightweight in-memory counters and duration aggregates for the HTTP transport.',
+        operationId: 'getMetrics',
+        responses: {
+          '200': {
+            description: 'Metrics snapshot.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/MetricsResponse',
+                },
+              },
+            },
+          },
+        },
+      },
+    },
     '/docs': {
       get: {
         tags: ['Documentation'],
@@ -294,6 +314,37 @@ const openApiSpecTemplate = {
         allOf: [{ $ref: '#/components/schemas/HealthBase' }],
         properties: {
           status: { type: 'string', const: 'degraded' },
+        },
+      },
+      MetricsDurationSummary: {
+        type: 'object',
+        additionalProperties: false,
+        required: ['count', 'total_ms', 'avg_ms', 'min_ms', 'max_ms'],
+        properties: {
+          count: { type: 'integer' },
+          total_ms: { type: 'number' },
+          avg_ms: { type: 'number' },
+          min_ms: { type: 'number' },
+          max_ms: { type: 'number' },
+        },
+      },
+      MetricsResponse: {
+        type: 'object',
+        additionalProperties: false,
+        required: ['service', 'transport', 'counters', 'durations'],
+        properties: {
+          service: { type: 'string', const: 'workflow-os-mcp' },
+          transport: { type: 'string', const: 'http' },
+          counters: {
+            type: 'object',
+            additionalProperties: { type: 'integer' },
+          },
+          durations: {
+            type: 'object',
+            additionalProperties: {
+              $ref: '#/components/schemas/MetricsDurationSummary',
+            },
+          },
         },
       },
       JsonRpcId: {

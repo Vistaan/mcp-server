@@ -74,7 +74,7 @@ describe('workflow services', () => {
     expect(second.workflowReference).toBe(third.workflowReference);
 
     const snapshot = metrics.snapshot();
-    expect(snapshot).toEqual(
+    expect(snapshot.counters).toEqual(
       expect.objectContaining({
         'workflow_file_cache_miss|file:WORKFLOW_PRODUCTS_v4.md': 1,
         'workflow_file_singleflight_join|file:WORKFLOW_PRODUCTS_v4.md': 1,

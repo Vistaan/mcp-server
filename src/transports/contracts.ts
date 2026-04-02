@@ -1,3 +1,5 @@
+import type { MetricsSnapshot } from '../metrics.js';
+
 export type ServiceStatus = 'ok' | 'degraded';
 
 export type HttpErrorCode = 'workflow_unavailable' | 'request_aborted' | 'request_timeout' | 'internal';
@@ -17,6 +19,11 @@ export type HttpErrorResponse = {
     message: string;
     request_id: string;
   };
+};
+
+export type MetricsResponse = MetricsSnapshot & {
+  service: 'workflow-os-mcp';
+  transport: 'http';
 };
 
 export function buildHealthResponse(input: {
@@ -59,3 +66,10 @@ export function errorMessageForCode(code: HttpErrorCode): string {
   }
 }
 
+export function buildMetricsResponse(snapshot: MetricsSnapshot): MetricsResponse {
+  return {
+    service: 'workflow-os-mcp',
+    transport: 'http',
+    ...snapshot,
+  };
+}
