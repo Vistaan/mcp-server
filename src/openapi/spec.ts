@@ -47,7 +47,7 @@ const openApiSpecTemplate = {
       get: {
         tags: ['Operational'],
         summary: 'Health check',
-        description: 'Returns a liveness/readiness response for the HTTP transport.',
+        description: 'Legacy combined readiness endpoint for the HTTP transport.',
         operationId: 'getHealth',
         responses: {
           '200': {
@@ -62,6 +62,56 @@ const openApiSpecTemplate = {
           },
           '503': {
             description: 'Service is running but required workflow files are unavailable.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/HealthDegradedResponse',
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    '/livez': {
+      get: {
+        tags: ['Operational'],
+        summary: 'Liveness check',
+        description: 'Returns process liveness for container and orchestrator probes.',
+        operationId: 'getLivez',
+        responses: {
+          '200': {
+            description: 'Service process is alive.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/LivezResponse',
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    '/readyz': {
+      get: {
+        tags: ['Operational'],
+        summary: 'Readiness check',
+        description: 'Returns readiness state including workflow availability for orchestrator probes.',
+        operationId: 'getReadyz',
+        responses: {
+          '200': {
+            description: 'Service is ready.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/HealthOkResponse',
+                },
+              },
+            },
+          },
+          '503': {
+            description: 'Service is not ready because workflow files are unavailable.',
             content: {
               'application/json': {
                 schema: {
@@ -334,6 +384,16 @@ const openApiSpecTemplate = {
         allOf: [{ $ref: '#/components/schemas/HealthBase' }],
         properties: {
           status: { type: 'string', const: 'degraded' },
+        },
+      },
+      LivezResponse: {
+        type: 'object',
+        additionalProperties: false,
+        required: ['status', 'service', 'transport'],
+        properties: {
+          status: { type: 'string', const: 'ok' },
+          service: { type: 'string', const: 'workflow-os-mcp' },
+          transport: { type: 'string', const: 'http' },
         },
       },
       MetricsDurationSummary: {

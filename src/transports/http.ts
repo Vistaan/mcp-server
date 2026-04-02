@@ -32,6 +32,11 @@ type RequestLifecycle = {
   cleanup(): void;
 };
 
+type IncomingRequestWithHeader = {
+  get?(name: string): string | undefined;
+  headers?: Record<string, unknown>;
+};
+
 function resolveLandingPagePath(): string {
   const currentDir = path.dirname(fileURLToPath(import.meta.url));
   const primaryCandidate = path.resolve(currentDir, '..', '..', 'landing-page');
@@ -93,6 +98,23 @@ export function createHttpApp(): express.Express {
   );
 
   // ── Health check ─────────────────────────────────────────────────────────────
+  app.get('/livez', (_req: Request, res: Response) => {
+    applyNoStore(res);
+    metrics.increment('http_livez_requested');
+    res.status(200).json({
+      status: 'ok',
+      service: 'workflow-os-mcp',
+      transport: 'http',
+    });
+  });
+
+  app.get('/readyz', (_req: Request, res: Response) => {
+    applyNoStore(res);
+    metrics.increment('http_readyz_requested');
+    const readiness = getWorkflowReadiness();
+    res.status(readiness.status === 'ok' ? 200 : 503).json(buildHealthResponse(readiness));
+  });
+
   app.get('/health', (_req: Request, res: Response) => {
     applyNoStore(res);
     metrics.increment('http_health_requested');
@@ -200,7 +222,7 @@ export async function startHttpTransport(port: number): Promise<void> {
 }
 
 function createRequestLifecycle(req: Request, res: Response): RequestLifecycle {
-  const requestId = randomUUID();
+  const requestId = resolveRequestId(req);
   const controller = new AbortController();
   let aborted = Boolean(req.aborted);
   let timedOut = false;
@@ -326,4 +348,14 @@ function resolveServerUrl(req: Request): string {
   }
 
   return '/';
+}
+
+function resolveRequestId(req: IncomingRequestWithHeader): string {
+  const headerValue =
+    req.get?.('x-request-id') ??
+    req.get?.('X-Request-Id') ??
+    (typeof req.headers?.['x-request-id'] === 'string' ? req.headers['x-request-id'] : undefined);
+
+  const trimmed = headerValue?.trim();
+  return trimmed && trimmed.length > 0 ? trimmed : randomUUID();
 }

@@ -165,7 +165,9 @@ Additional deployment-time variables:
 
 | Path | Method | Description |
 |---|---|---|
-| `/health` | GET | Returns readiness status plus workflow metadata |
+| `/livez` | GET | Returns process liveness for container/orchestrator probes |
+| `/readyz` | GET | Returns readiness status plus workflow metadata |
+| `/health` | GET | Legacy combined readiness endpoint |
 | `/metrics` | GET | Returns in-process counters and duration aggregates |
 | `/metrics/prometheus` | GET | Returns Prometheus text exposition output |
 | `/mcp` | POST | MCP JSON-RPC messages |
@@ -176,6 +178,12 @@ Additional deployment-time variables:
 
 ```bash
 # If you keep your current local Docker/K8s port mapping, use:
+curl http://localhost:<port>/livez
+# {"status":"ok","service":"workflow-os-mcp","transport":"http"}
+
+curl http://localhost:<port>/readyz
+# {"status":"ok","service":"workflow-os-mcp","transport":"http",...}
+
 curl http://localhost:<port>/health
 # {"status":"ok","service":"workflow-os-mcp","transport":"http",...}
 

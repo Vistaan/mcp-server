@@ -20,7 +20,7 @@ describe('OpenAPI spec', () => {
 
   it('documents the expected HTTP paths', () => {
     expect(Object.keys(openApiSpec.paths)).toEqual(
-      expect.arrayContaining(['/health', '/metrics', '/metrics/prometheus', '/mcp', '/docs', '/docs-api.json']),
+      expect.arrayContaining(['/health', '/livez', '/readyz', '/metrics', '/metrics/prometheus', '/mcp', '/docs', '/docs-api.json']),
     );
     expect(openApiSpec.paths['/mcp']).toHaveProperty('post');
     expect(openApiSpec.paths['/mcp']).toHaveProperty('get');
@@ -29,6 +29,9 @@ describe('OpenAPI spec', () => {
 
   it('models the health response and JSON-RPC schemas', () => {
     expect(openApiSpec.components.schemas.HealthBase.required).toEqual(
+      expect.arrayContaining(['status', 'service', 'transport']),
+    );
+    expect(openApiSpec.components.schemas.LivezResponse.required).toEqual(
       expect.arrayContaining(['status', 'service', 'transport']),
     );
     expect(openApiSpec.components.schemas.MetricsResponse.required).toEqual(

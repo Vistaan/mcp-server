@@ -5,6 +5,8 @@ const realSetTimeout = globalThis.setTimeout;
 
 let rootHandler: ((req: unknown, res: ReturnType<typeof createResponse>) => void) | undefined;
 let docsJsonHandler: ((req: unknown, res: ReturnType<typeof createResponse>) => void) | undefined;
+let livezHandler: ((req: unknown, res: ReturnType<typeof createResponse>) => void) | undefined;
+let readyzHandler: ((req: unknown, res: ReturnType<typeof createResponse>) => void) | undefined;
 let healthHandler: ((req: unknown, res: ReturnType<typeof createResponse>) => void) | undefined;
 let metricsHandler: ((req: unknown, res: ReturnType<typeof createResponse>) => void) | undefined;
 let metricsPrometheusHandler: ((req: unknown, res: ReturnType<typeof createResponse>) => void) | undefined;
@@ -54,6 +56,10 @@ const expressMock = vi.fn(() => ({
         rootHandler = handler as typeof rootHandler;
       } else if (path === '/docs-api.json') {
         docsJsonHandler = handler;
+      } else if (path === '/livez') {
+        livezHandler = handler;
+      } else if (path === '/readyz') {
+        readyzHandler = handler;
       } else if (path === '/health') {
         healthHandler = handler;
       } else if (path === '/metrics') {
@@ -144,6 +150,8 @@ describe('HTTP transport', () => {
     vi.clearAllMocks();
     rootHandler = undefined;
     docsJsonHandler = undefined;
+    livezHandler = undefined;
+    readyzHandler = undefined;
     healthHandler = undefined;
     metricsHandler = undefined;
     metricsPrometheusHandler = undefined;
@@ -165,7 +173,7 @@ describe('HTTP transport', () => {
     vi.restoreAllMocks();
   });
 
-  it('creates the shared app with docs, root, health, metrics, and MCP handlers', async () => {
+  it('creates the shared app with docs, liveness/readiness, metrics, and MCP handlers', async () => {
     const { createHttpApp } = await import('../../../src/transports/http.js');
 
     createHttpApp();
@@ -200,10 +208,33 @@ describe('HTTP transport', () => {
     expect(docsSpec.openapi).toBe('3.1.0');
     expect(docsSpec.servers[0]?.url).toBe('http://localhost:8080');
     expect(docsSpec.paths).toHaveProperty('/health');
+    expect(docsSpec.paths).toHaveProperty('/livez');
+    expect(docsSpec.paths).toHaveProperty('/readyz');
     expect(docsSpec.paths).toHaveProperty('/metrics');
     expect(docsSpec.paths).toHaveProperty('/mcp');
     expect(docsSpec.paths).toHaveProperty('/metrics/prometheus');
     expect(docsRes.setHeader).toHaveBeenCalledWith('cache-control', 'no-store');
+
+    const livezRes = createResponse();
+    livezHandler?.({}, livezRes);
+    expect(livezRes.status).toHaveBeenCalledWith(200);
+    expect(livezRes.json).toHaveBeenCalledWith({
+      status: 'ok',
+      service: 'workflow-os-mcp',
+      transport: 'http',
+    });
+
+    const readyzRes = createResponse();
+    readyzHandler?.({}, readyzRes);
+    expect(readyzRes.status).toHaveBeenCalledWith(200);
+    expect(readyzRes.json).toHaveBeenCalledWith({
+      status: 'ok',
+      service: 'workflow-os-mcp',
+      transport: 'http',
+      workflow_root: '/workflows',
+      missing_workflows: [],
+      checked_at: '2026-04-02T00:00:00.000Z',
+    });
 
     const healthRes = createResponse();
     healthHandler?.({}, healthRes);
@@ -307,6 +338,29 @@ describe('HTTP transport', () => {
     expect(metricsPrometheusHandler).toBeUndefined();
 
     delete process.env['METRICS_ENABLED'];
+  });
+
+  it('reuses an incoming x-request-id header for MCP responses', async () => {
+    const { createHttpApp } = await import('../../../src/transports/http.js');
+    createHttpApp();
+
+    const req = {
+      body: { jsonrpc: '2.0' },
+      method: 'POST',
+      path: '/mcp',
+      aborted: false,
+      headers: { 'x-request-id': 'edge-request-123' },
+      get: vi.fn((name: string) => (name.toLowerCase() === 'x-request-id' ? 'edge-request-123' : undefined)),
+      on: vi.fn(),
+      off: vi.fn(),
+      setTimeout: vi.fn(),
+    };
+    const res = createResponse();
+
+    postMcpHandler?.(req, res);
+    await flushAsyncWork();
+
+    expect(res.setHeader).toHaveBeenCalledWith('x-request-id', 'edge-request-123');
   });
 
   it('logs errors and returns a 500 response when request handling fails', async () => {
