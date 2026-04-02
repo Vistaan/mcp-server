@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>workflow-os-mcp - MCP Server for Workflow Routing and Execution</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+</head>
+<body class="bg-gray-50 text-gray-900 font-sans">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center">
+                    <h1 class="text-2xl font-bold text-gray-900">workflow-os-mcp</h1>
+                </div>
+                <div class="hidden md:flex space-x-8">
+                    <a href="#how-it-works" class="text-gray-600 hover:text-gray-900">How It Works</a>
+                    <a href="#tools" class="text-gray-600 hover:text-gray-900">Tools</a>
+                    <a href="#prompts-resources" class="text-gray-600 hover:text-gray-900">Prompts & Resources</a>
+                    <a href="#clients" class="text-gray-600 hover:text-gray-900">Clients</a>
+                    <a href="#api" class="text-gray-600 hover:text-gray-900">API</a>
+                    <a href="#deployment" class="text-gray-600 hover:text-gray-900">Deployment</a>
+                    <a href="#quick-start" class="text-gray-600 hover:text-gray-900">Quick Start</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="bg-gradient-to-br from-blue-50 to-indigo-100 py-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h1 class="text-5xl font-bold text-gray-900 mb-6">
+                workflow-os-mcp
+            </h1>
+            <p class="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
+                An MCP server for intelligent workflow routing and execution across MCP-compatible clients.
+                Route tasks, run workflows, and generate next actions seamlessly in stdio or HTTP mode.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="#quick-start" class="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
+                    Get Started
+                </a>
+                <a href="#clients" class="border border-gray-300 text-gray-700 px-8 py-3 rounded-lg font-semibold hover:bg-gray-50 transition-colors">
+                    View Client Config
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section id="how-it-works" class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl font-bold text-center text-gray-900 mb-12">How It Works</h2>
+            <div class="flex flex-col md:flex-row items-center justify-center space-y-8 md:space-y-0 md:space-x-8">
+                <div class="workflow-step" data-step="1">
+                    <div class="bg-blue-100 p-6 rounded-lg text-center">
+                        <div class="text-2xl mb-4">🔀</div>
+                        <h3 class="font-semibold">Route Task</h3>
+                        <p class="text-sm text-gray-600">Determine the appropriate workflow domain</p>
+                    </div>
+                </div>
+                <div class="workflow-arrow">→</div>
+                <div class="workflow-step" data-step="2">
+                    <div class="bg-green-100 p-6 rounded-lg text-center">
+                        <div class="text-2xl mb-4">📋</div>
+                        <h3 class="font-semibold">Select Workflow</h3>
+                        <p class="text-sm text-gray-600">Choose or inspect workflow resources</p>
+                    </div>
+                </div>
+                <div class="workflow-arrow">→</div>
+                <div class="workflow-step" data-step="3">
+                    <div class="bg-purple-100 p-6 rounded-lg text-center">
+                        <div class="text-2xl mb-4">⚡</div>
+                        <h3 class="font-semibold">Run Workflow</h3>
+                        <p class="text-sm text-gray-600">Execute one main workflow sequence</p>
+                    </div>
+                </div>
+                <div class="workflow-arrow">→</div>
+                <div class="workflow-step" data-step="4">
+                    <div class="bg-yellow-100 p-6 rounded-lg text-center">
+                        <div class="text-2xl mb-4">🔧</div>
+                        <h3 class="font-semibold">Apply Utility (Optional)</h3>
+                        <p class="text-sm text-gray-600">Apply one utility prompt if needed</p>
+                    </div>
+                </div>
+                <div class="workflow-arrow">→</div>
+                <div class="workflow-step" data-step="5">
+                    <div class="bg-red-100 p-6 rounded-lg text-center">
+                        <div class="text-2xl mb-4">🎯</div>
+                        <h3 class="font-semibold">Generate Next Action</h3>
+                        <p class="text-sm text-gray-600">Produce one immediate next action</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tools Section -->
+    <section id="tools" class="py-20 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl font-bold text-center text-gray-900 mb-12">Core Tools</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="tool-card bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                    <h3 class="font-semibold text-lg mb-2">route_task</h3>
+                    <p class="text-gray-600">Routes incoming tasks to appropriate workflow domains</p>
+                    <span class="text-xs text-blue-600 mt-2 inline-block">Step 1</span>
+                </div>
+                <div class="tool-card bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                    <h3 class="font-semibold text-lg mb-2">select_domain_workflow</h3>
+                    <p class="text-gray-600">Selects or inspects workflow resources for a domain</p>
+                    <span class="text-xs text-green-600 mt-2 inline-block">Step 2</span>
+                </div>
+                <div class="tool-card bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                    <h3 class="font-semibold text-lg mb-2">run_workflow_sequence</h3>
+                    <p class="text-gray-600">Executes the main workflow sequence</p>
+                    <span class="text-xs text-purple-600 mt-2 inline-block">Step 3</span>
+                </div>
+                <div class="tool-card bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                    <h3 class="font-semibold text-lg mb-2">apply_utility_prompt</h3>
+                    <p class="text-gray-600">Applies a utility prompt for additional processing</p>
+                    <span class="text-xs text-yellow-600 mt-2 inline-block">Step 4 (Optional)</span>
+                </div>
+                <div class="tool-card bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                    <h3 class="font-semibold text-lg mb-2">generate_next_action</h3>
+                    <p class="text-gray-600">Generates the immediate next action to take</p>
+                    <span class="text-xs text-red-600 mt-2 inline-block">Step 5</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Prompts and Resources Section -->
+    <section id="prompts-resources" class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl font-bold text-center text-gray-900 mb-12">Prompts & Resources</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                <div>
+                    <h3 class="text-xl font-semibold mb-4">Prompts</h3>
+                    <ul class="space-y-2">
+                        <li><strong>Mode Prompts:</strong> Configure execution modes</li>
+                        <li><strong>Domain Prompts:</strong> Domain-specific guidance</li>
+                        <li><strong>Front-door Prompt:</strong> <code class="bg-gray-100 px-2 py-1 rounded">route_and_run</code> for complete workflow execution</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold mb-4">Resources</h3>
+                    <p class="mb-4">Bundled workflow resources include:</p>
+                    <div class="grid grid-cols-2 gap-2 text-sm">
+                        <div>workflow://os/v4</div>
+                        <div>workflow://freelancing/v4</div>
+                        <div>workflow://products/v4</div>
+                        <div>workflow://content/v4</div>
+                        <div>workflow://execution/v4</div>
+                        <div>workflow://investing/v4</div>
+                        <div>workflow://utility/v4</div>
+                        <div>workflow://execute-referencing/v4</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Client Compatibility Section -->
+    <section id="clients" class="py-20 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl font-bold text-center text-gray-900 mb-12">Client Compatibility</h2>
+            <p class="text-center text-gray-600 mb-8">Integrate with any MCP-compatible client using the standard MCP configuration contract.</p>
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                <div class="client-card bg-white p-4 rounded-lg shadow-sm text-center">
+                    <div class="text-2xl mb-2">📱</div>
+                    <div class="font-semibold">Codex App</div>
+                </div>
+                <div class="client-card bg-white p-4 rounded-lg shadow-sm text-center">
+                    <div class="text-2xl mb-2">💻</div>
+                    <div class="font-semibold">Codex VS Code</div>
+                </div>
+                <div class="client-card bg-white p-4 rounded-lg shadow-sm text-center">
+                    <div class="text-2xl mb-2">🤖</div>
+                    <div class="font-semibold">Claude Code</div>
+                </div>
+                <div class="client-card bg-white p-4 rounded-lg shadow-sm text-center">
+                    <div class="text-2xl mb-2">🌐</div>
+                    <div class="font-semibold">Claude Web</div>
+                </div>
+                <div class="client-card bg-white p-4 rounded-lg shadow-sm text-center">
+                    <div class="text-2xl mb-2">💬</div>
+                    <div class="font-semibold">ChatGPT Web</div>
+                </div>
+                <div class="client-card bg-white p-4 rounded-lg shadow-sm text-center">
+                    <div class="text-2xl mb-2">🔍</div>
+                    <div class="font-semibold">Kimi Web</div>
+                </div>
+                <div class="client-card bg-white p-4 rounded-lg shadow-sm text-center">
+                    <div class="text-2xl mb-2">⚙️</div>
+                    <div class="font-semibold">Kimi Code</div>
+                </div>
+                <div class="client-card bg-white p-4 rounded-lg shadow-sm text-center">
+                    <div class="text-2xl mb-2">🦾</div>
+                    <div class="font-semibold">Kimi Claw</div>
+                </div>
+                <div class="client-card bg-white p-4 rounded-lg shadow-sm text-center">
+                    <div class="text-2xl mb-2">🔓</div>
+                    <div class="font-semibold">Open Claw</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- HTTP API / Swagger Section -->
+    <section id="api" class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl font-bold text-center text-gray-900 mb-12">HTTP API & Documentation</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                <div>
+                    <h3 class="text-xl font-semibold mb-4">Endpoints</h3>
+                    <ul class="space-y-2 font-mono text-sm">
+                        <li><span class="text-green-600">GET</span> /health</li>
+                        <li><span class="text-blue-600">GET</span> /docs - Swagger UI</li>
+                        <li><span class="text-blue-600">GET</span> /docs-api.json - OpenAPI JSON</li>
+                        <li><span class="text-purple-600">POST</span> /mcp</li>
+                        <li><span class="text-blue-600">GET</span> /mcp</li>
+                        <li><span class="text-red-600">DELETE</span> /mcp</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold mb-4">Interactive Documentation</h3>
+                    <p class="text-gray-600 mb-4">
+                        When running in HTTP mode, explore the full API interactively at <code class="bg-gray-100 px-2 py-1 rounded">/docs</code>.
+                        The OpenAPI specification is available at <code class="bg-gray-100 px-2 py-1 rounded">/docs-api.json</code>.
+                    </p>
+                    <p class="text-sm text-gray-500">
+                        Port is configurable via <code class="bg-gray-100 px-2 py-1 rounded">MCP_PORT</code> environment variable.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Deployment Section -->
+    <section id="deployment" class="py-20 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl font-bold text-center text-gray-900 mb-12">Deployment Options</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="deployment-option bg-white p-6 rounded-lg shadow-sm text-center">
+                    <div class="text-3xl mb-4">💻</div>
+                    <h3 class="font-semibold mb-2">Local Development</h3>
+                    <p class="text-gray-600">Run directly on your machine for development and testing.</p>
+                </div>
+                <div class="deployment-option bg-white p-6 rounded-lg shadow-sm text-center">
+                    <div class="text-3xl mb-4">🐳</div>
+                    <h3 class="font-semibold mb-2">Docker</h3>
+                    <p class="text-gray-600">Containerized deployment for consistent environments.</p>
+                </div>
+                <div class="deployment-option bg-white p-6 rounded-lg shadow-sm text-center">
+                    <div class="text-3xl mb-4">☸️</div>
+                    <h3 class="font-semibold mb-2">Kubernetes</h3>
+                    <p class="text-gray-600">Scalable deployment in container orchestration platforms.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quick Start Section -->
+    <section id="quick-start" class="py-20 bg-white">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl font-bold text-center text-gray-900 mb-12">Quick Start</h2>
+            <div class="bg-gray-900 text-green-400 p-6 rounded-lg font-mono text-sm">
+                <div class="mb-2"># Install dependencies</div>
+                <div class="mb-2">pnpm install</div>
+                <div class="mb-4"></div>
+                <div class="mb-2"># Build the project</div>
+                <div class="mb-2">pnpm run build</div>
+                <div class="mb-4"></div>
+                <div class="mb-2"># Run in stdio mode</div>
+                <div class="mb-2">node dist/index.js</div>
+                <div class="mb-4"></div>
+                <div class="mb-2"># Run in HTTP mode</div>
+                <div>MCP_TRANSPORT=http MCP_PORT=3000 node dist/index.js</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="font-semibold mb-4">Documentation</h3>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="HOW_TO_USE.md" class="hover:text-gray-300">How to Use</a></li>
+                        <li><a href="docs/mcp-client-configuration.md" class="hover:text-gray-300">Client Configuration</a></li>
+                        <li><a href="docs/deployment.md" class="hover:text-gray-300">Deployment Guide</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="font-semibold mb-4">Resources</h3>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="README.md" class="hover:text-gray-300">README</a></li>
+                        <li><a href="docs/api-reference.md" class="hover:text-gray-300">API Reference</a></li>
+                        <li><a href="docs/setup.md" class="hover:text-gray-300">Setup Guide</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="font-semibold mb-4">Community</h3>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="#" class="hover:text-gray-300">GitHub</a></li>
+                        <li><a href="#" class="hover:text-gray-300">Issues</a></li>
+                        <li><a href="#" class="hover:text-gray-300">Discussions</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="font-semibold mb-4">workflow-os-mcp</h3>
+                    <p class="text-sm text-gray-400">
+                        MCP server for workflow routing and execution across compatible clients.
+                    </p>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-sm text-gray-400">
+                <p>&copy; 2024 workflow-os-mcp. Built for MCP-compatible clients.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
