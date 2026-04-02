@@ -29,6 +29,12 @@ HTTP docs in HTTP mode:
 - Swagger UI: `/docs`
 - OpenAPI JSON: `/docs-api.json`
 
+Vercel build:
+
+```bash
+pnpm run build:vercel
+```
+
 ## Docs
 
 - [How To Use](./HOW_TO_USE.md)

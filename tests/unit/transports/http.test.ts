@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+let rootHandler: ((req: unknown, res: ReturnType<typeof createResponse>) => void) | undefined;
 let docsJsonHandler: ((req: unknown, res: ReturnType<typeof createResponse>) => void) | undefined;
 let healthHandler: ((req: unknown, res: ReturnType<typeof createResponse>) => void) | undefined;
 let getMcpHandler: ((req: Record<string, unknown>, res: ReturnType<typeof createResponse>) => void) | undefined;
@@ -25,7 +26,9 @@ const expressMock = vi.fn(() => ({
     }
   }),
   get: vi.fn((path: string, handler: typeof healthHandler) => {
-    if (path === '/docs-api.json') {
+    if (path === '/') {
+      rootHandler = handler as typeof rootHandler;
+    } else if (path === '/docs-api.json') {
       docsJsonHandler = handler;
     } else if (path === '/health') {
       healthHandler = handler;
@@ -86,6 +89,7 @@ function createResponse() {
       return undefined;
     }),
     json: vi.fn(),
+    sendFile: vi.fn(),
     status: vi.fn(function status(this: { json: unknown }, _code: number) {
       return this;
     }),
@@ -98,9 +102,10 @@ async function flushAsyncWork(): Promise<void> {
   await new Promise((resolve) => setTimeout(resolve, 0));
 }
 
-describe('startHttpTransport', () => {
+describe('HTTP transport', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    rootHandler = undefined;
     docsJsonHandler = undefined;
     healthHandler = undefined;
     getMcpHandler = undefined;
@@ -115,10 +120,10 @@ describe('startHttpTransport', () => {
     vi.restoreAllMocks();
   });
 
-  it('registers middleware and handlers, and serves health and MCP requests', async () => {
-    const { startHttpTransport } = await import('../../../src/transports/http.js');
+  it('creates the shared app with docs, root, health, and MCP handlers', async () => {
+    const { createHttpApp } = await import('../../../src/transports/http.js');
 
-    await startHttpTransport(8080);
+    createHttpApp();
 
     expect(jsonMock).toHaveBeenCalledWith({ limit: '10mb' });
     expect(staticMock).toHaveBeenCalledWith(expect.stringContaining('landing-page'));
@@ -131,8 +136,10 @@ describe('startHttpTransport', () => {
       },
     });
     expect(docsUseArgs).toEqual(['/docs', ...swaggerServeHandlers, swaggerUiHandler]);
-    expect(listenMock).toHaveBeenCalledWith(8080, expect.any(Function));
-    expect(infoMock).toHaveBeenCalledWith('workflow-os MCP server running on HTTP port 8080');
+
+    const rootRes = createResponse();
+    rootHandler?.({}, rootRes);
+    expect(rootRes.sendFile).toHaveBeenCalledWith(expect.stringContaining('landing-page/index.html'));
 
     const docsRes = createResponse();
     docsJsonHandler?.(
@@ -171,12 +178,21 @@ describe('startHttpTransport', () => {
     expect(transportCtorMock).toHaveBeenCalledTimes(3);
   });
 
+  it('starts the shared app on the requested port for self-hosted HTTP mode', async () => {
+    const { startHttpTransport } = await import('../../../src/transports/http.js');
+
+    await startHttpTransport(8080);
+
+    expect(listenMock).toHaveBeenCalledWith(8080, expect.any(Function));
+    expect(infoMock).toHaveBeenCalledWith('workflow-os MCP server running on HTTP port 8080');
+  });
+
   it('logs errors and returns a 500 response when request handling fails', async () => {
     handleRequestMock.mockRejectedValueOnce(new Error('boom'));
 
-    const { startHttpTransport } = await import('../../../src/transports/http.js');
+    const { createHttpApp } = await import('../../../src/transports/http.js');
 
-    await startHttpTransport(9090);
+    createHttpApp();
 
     const req = { body: { bad: true } };
     const res = createResponse();
@@ -191,9 +207,9 @@ describe('startHttpTransport', () => {
   it('does not write a second error response after headers are sent', async () => {
     connectMock.mockRejectedValueOnce(new Error('connect failed'));
 
-    const { startHttpTransport } = await import('../../../src/transports/http.js');
+    const { createHttpApp } = await import('../../../src/transports/http.js');
 
-    await startHttpTransport(7070);
+    createHttpApp();
 
     const res = createResponse();
     res.headersSent = true;

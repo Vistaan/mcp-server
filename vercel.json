@@ -1,0 +1,22 @@
+{
+  "version": 2,
+  "buildCommand": "pnpm run build:vercel",
+  "builds": [
+    {
+      "src": "api/index.ts",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "landing-page/**",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    { "src": "/docs-api\\.json/?$", "dest": "/api/index.ts" },
+    { "src": "/docs/?$", "dest": "/api/index.ts" },
+    { "src": "/mcp/?$", "dest": "/api/index.ts" },
+    { "src": "/health/?$", "dest": "/api/index.ts" },
+    { "src": "/$", "dest": "/landing-page/index.html" },
+    { "src": "/(.*)", "dest": "/landing-page/$1" }
+  ]
+}

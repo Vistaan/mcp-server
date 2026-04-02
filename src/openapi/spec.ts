@@ -203,6 +203,26 @@ const openApiSpecTemplate = {
         },
       },
     },
+    '/docs': {
+      get: {
+        tags: ['Documentation'],
+        summary: 'Open interactive Swagger UI',
+        description: 'Serves the interactive Swagger UI for exploring the workflow-os MCP HTTP API.',
+        operationId: 'getSwaggerUi',
+        responses: {
+          '200': {
+            description: 'Swagger UI HTML page.',
+            content: {
+              'text/html': {
+                schema: {
+                  type: 'string',
+                },
+              },
+            },
+          },
+        },
+      },
+    },
   },
   components: {
     schemas: {

@@ -39,6 +39,49 @@ make docker-push REGISTRY=your.registry.io
 
 ---
 
+## Vercel
+
+Vercel can serve:
+
+- the static landing bundle from `landing-page/`
+- the HTTP API through the Node serverless entry at `api/index.ts`
+
+### Build configuration
+
+Use the repo-owned Vercel build script:
+
+```bash
+pnpm run build:vercel
+```
+
+This ensures both the TypeScript server build and generated HTML docs are current for deployment.
+
+### Routes exposed on Vercel
+
+| Path | Method | Behavior |
+|---|---|---|
+| `/` | GET | Serves `landing-page/index.html` |
+| `/docs` | GET | Swagger UI from the shared Express HTTP app |
+| `/docs-api.json` | GET | Raw OpenAPI JSON |
+| `/health` | GET | Health response |
+| `/mcp` | POST | Reliable MCP JSON-RPC path on Vercel |
+| `/mcp` | GET | Best-effort SSE stream |
+| `/mcp` | DELETE | Stateless teardown/no-op |
+| `/docs/*.html` | GET | Generated static documentation pages from `landing-page/docs/` |
+
+### Vercel caveat for SSE
+
+`GET /mcp` is still exposed on Vercel through the shared HTTP app, but long-lived SSE is inherently less reliable on serverless than on Docker or Kubernetes because function lifetime and streaming behavior are platform-constrained.
+
+Treat:
+
+- `POST /mcp` as the primary and reliable Vercel integration path
+- `GET /mcp` as best-effort only
+
+If you need robust long-running SSE behavior, prefer Docker, Compose, or Kubernetes deployment.
+
+---
+
 ## Kubernetes
 
 ### Prerequisites

@@ -539,6 +539,78 @@ make compose-down   <span class="hljs-comment"># stop</span>
 <span class="hljs-comment"># Pushes: your.registry.io/workflow-os-mcp:1.0.0</span>
 </code></pre>
 <hr>
+<h2>Vercel</h2>
+<p>Vercel can serve:</p>
+<ul>
+<li>the static landing bundle from <code>landing-page/</code></li>
+<li>the HTTP API through the Node serverless entry at <code>api/index.ts</code></li>
+</ul>
+<h3>Build configuration</h3>
+<p>Use the repo-owned Vercel build script:</p>
+<pre class="hljs"><code class="hljs language-bash">pnpm run build:vercel
+</code></pre>
+<p>This ensures both the TypeScript server build and generated HTML docs are current for deployment.</p>
+<h3>Routes exposed on Vercel</h3>
+<table>
+<thead>
+<tr>
+<th>Path</th>
+<th>Method</th>
+<th>Behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/</code></td>
+<td>GET</td>
+<td>Serves <code>landing-page/index.html</code></td>
+</tr>
+<tr>
+<td><code>/docs</code></td>
+<td>GET</td>
+<td>Swagger UI from the shared Express HTTP app</td>
+</tr>
+<tr>
+<td><code>/docs-api.json</code></td>
+<td>GET</td>
+<td>Raw OpenAPI JSON</td>
+</tr>
+<tr>
+<td><code>/health</code></td>
+<td>GET</td>
+<td>Health response</td>
+</tr>
+<tr>
+<td><code>/mcp</code></td>
+<td>POST</td>
+<td>Reliable MCP JSON-RPC path on Vercel</td>
+</tr>
+<tr>
+<td><code>/mcp</code></td>
+<td>GET</td>
+<td>Best-effort SSE stream</td>
+</tr>
+<tr>
+<td><code>/mcp</code></td>
+<td>DELETE</td>
+<td>Stateless teardown/no-op</td>
+</tr>
+<tr>
+<td><code>/docs/*.html</code></td>
+<td>GET</td>
+<td>Generated static documentation pages from <code>landing-page/docs/</code></td>
+</tr>
+</tbody>
+</table>
+<h3>Vercel caveat for SSE</h3>
+<p><code>GET /mcp</code> is still exposed on Vercel through the shared HTTP app, but long-lived SSE is inherently less reliable on serverless than on Docker or Kubernetes because function lifetime and streaming behavior are platform-constrained.</p>
+<p>Treat:</p>
+<ul>
+<li><code>POST /mcp</code> as the primary and reliable Vercel integration path</li>
+<li><code>GET /mcp</code> as best-effort only</li>
+</ul>
+<p>If you need robust long-running SSE behavior, prefer Docker, Compose, or Kubernetes deployment.</p>
+<hr>
 <h2>Kubernetes</h2>
 <h3>Prerequisites</h3>
 <ul>

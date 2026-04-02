@@ -40,7 +40,7 @@ function resolveLandingPagePath(): string {
  *   DELETE /mcp      — Session teardown (no-op in stateless mode)
  *   GET  /health     — Liveness/readiness probe for K8s
  */
-export async function startHttpTransport(port: number): Promise<void> {
+export function createHttpApp(): express.Express {
   const app = express();
   const landingPagePath = resolveLandingPagePath();
 
@@ -101,6 +101,12 @@ export async function startHttpTransport(port: number): Promise<void> {
   app.delete('/mcp', (req, res) => {
     void handleMcp(req, res);
   });
+
+  return app;
+}
+
+export async function startHttpTransport(port: number): Promise<void> {
+  const app = createHttpApp();
 
   await new Promise<void>((resolve) => {
     app.listen(port, () => {

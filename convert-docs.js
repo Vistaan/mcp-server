@@ -573,6 +573,35 @@ const files = [
   { src: 'docs/claude-desktop.md', dest: 'docs/claude-desktop.html', title: 'Claude Desktop Integration' },
 ];
 
+const htmlTargetBySource = new Map(files.map((file) => [file.src, file.dest]));
+
+function rewriteMarkdownLinks(html, currentFile) {
+  return html.replace(/href="([^"]+\.md(?:#[^"]*)?)"/g, (_match, href) => {
+    const [rawPath, hash = ''] = href.split('#');
+
+    if (!rawPath) {
+      return `href="${href}"`;
+    }
+
+    const normalizedSourcePath = path
+      .normalize(path.join(path.dirname(currentFile.src), rawPath))
+      .replace(/\\/g, '/');
+    const targetHtmlPath = htmlTargetBySource.get(normalizedSourcePath);
+
+    if (!targetHtmlPath) {
+      return `href="${href}"`;
+    }
+
+    const rewrittenPath = path
+      .relative(path.dirname(currentFile.dest), targetHtmlPath)
+      .replace(/\\/g, '/');
+    const normalizedPath =
+      rewrittenPath.startsWith('.') || rewrittenPath.startsWith('/') ? rewrittenPath : `./${rewrittenPath}`;
+    const finalPath = hash ? `${normalizedPath}#${hash}` : normalizedPath;
+    return `href="${finalPath}"`;
+  });
+}
+
 function convertFile(file) {
   const srcPath = path.join(__dirname, file.src);
   const destPath = path.join(__dirname, 'landing-page', file.dest);
@@ -585,7 +614,7 @@ function convertFile(file) {
 
   // Read and convert markdown using markdown-it
   const markdown = fs.readFileSync(srcPath, 'utf8');
-  const htmlContent = md.render(markdown);
+  const htmlContent = rewriteMarkdownLinks(md.render(markdown), file);
   const fullHtml = htmlTemplate(file.title, htmlContent);
 
   // Write HTML file

@@ -12,9 +12,11 @@ async function main(): Promise<void> {
   }
 }
 
-main().catch((error: unknown) => {
-  process.stderr.write(
-    JSON.stringify({ level: 'error', msg: 'Failed to start MCP server', error: String(error) }) + '\n',
-  );
-  process.exit(1);
-});
+if (import.meta.url === `file://${process.argv[1]}`) {
+  main().catch((error: unknown) => {
+    process.stderr.write(
+      JSON.stringify({ level: 'error', msg: 'Failed to start MCP server', error: String(error) }) + '\n',
+    );
+    process.exit(1);
+  });
+}
