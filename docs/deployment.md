@@ -13,9 +13,10 @@ make docker-build
 
 ```bash
 make docker-run
-# By default, this maps host port 3000 to the container's current HTTP port 3000
-# MCP endpoint: http://localhost:3000/mcp
-# Health: http://localhost:3000/health
+# Uses PORT (or exported MCP_PORT) and defaults to 3000 if neither is set
+# Example: PORT=6677 make docker-run
+# MCP endpoint: http://localhost:<port>/mcp
+# Health: http://localhost:<port>/health
 ```
 
 ### docker-compose (recommended for local/staging)
@@ -23,6 +24,8 @@ make docker-run
 ```bash
 make compose-up     # build + start in background
 make compose-down   # stop
+
+# docker-compose.yml uses MCP_PORT from your shell or .env
 ```
 
 ### Push to registry
@@ -46,13 +49,14 @@ make docker-push REGISTRY=your.registry.io
 
 ```bash
 make k8s-apply
+# Example: PORT=6677 K8S_SERVICE_PORT=8080 make k8s-apply
 ```
 
 This creates (in order):
 1. `workflow-os` namespace
 2. `workflow-os-mcp-config` ConfigMap
 3. `workflow-os-mcp` Deployment (2 replicas)
-4. `workflow-os-mcp` ClusterIP Service (port 80 → 3000)
+4. `workflow-os-mcp` ClusterIP Service (default port 80 → current container port)
 
 ### Useful commands
 
@@ -100,6 +104,13 @@ All env vars are set in `k8s/configmap.yaml` for Kubernetes or in `docker-compos
 | `WORKFLOW_ROOT` | bundled `workflows/` | Override to mount external files |
 | `NODE_ENV` | `production` | Node environment |
 
+Additional deployment-time variables:
+
+| Variable | Default | Description |
+|---|---|---|
+| `PORT` | `3000` | Docker/K8s container HTTP port used by Make and Kubernetes templating |
+| `K8S_SERVICE_PORT` | `80` | Kubernetes Service port exposed inside the cluster |
+
 ---
 
 ## Health Check Endpoints
@@ -114,7 +125,7 @@ All env vars are set in `k8s/configmap.yaml` for Kubernetes or in `docker-compos
 ### Manual health check
 
 ```bash
-# If you keep the current local Docker/K8s port mapping, use:
-curl http://localhost:3000/health
+# If you keep your current local Docker/K8s port mapping, use:
+curl http://localhost:<port>/health
 # {"status":"ok","service":"workflow-os-mcp","transport":"http"}
 ```

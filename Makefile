@@ -7,7 +7,8 @@ IMAGE_TAG   ?= 1.0.0
 REGISTRY    ?=
 FULL_IMAGE  := $(if $(REGISTRY),$(REGISTRY)/$(IMAGE_NAME):$(IMAGE_TAG),$(IMAGE_NAME):$(IMAGE_TAG))
 K8S_NS      := workflow-os
-PORT        ?= 3000
+PORT        ?= $(or $(MCP_PORT),3000)
+K8S_SERVICE_PORT ?= 80
 
 # ─── Help ─────────────────────────────────────────────────────────────────────
 help: ## Show this help
@@ -54,9 +55,9 @@ docker-build: build ## Build Docker image (runs TS build first)
 	docker build -t $(FULL_IMAGE) .
 
 docker-run: ## Run Docker container locally (HTTP mode, port $(PORT))
-	docker run --rm -p $(PORT):3000 \
+	docker run --rm -p $(PORT):$(PORT) \
 	  -e MCP_TRANSPORT=http \
-	  -e MCP_PORT=3000 \
+	  -e MCP_PORT=$(PORT) \
 	  --name workflow-os-mcp \
 	  $(FULL_IMAGE)
 
@@ -76,12 +77,15 @@ compose-down: ## Stop docker-compose
 # ─── Kubernetes ───────────────────────────────────────────────────────────────
 k8s-apply: ## Apply all K8s manifests
 	kubectl apply -f k8s/namespace.yaml
-	kubectl apply -f k8s/configmap.yaml
-	kubectl apply -f k8s/deployment.yaml
-	kubectl apply -f k8s/service.yaml
+	PORT="$(PORT)" K8S_SERVICE_PORT="$(K8S_SERVICE_PORT)" envsubst < k8s/configmap.yaml | kubectl apply -f -
+	PORT="$(PORT)" K8S_SERVICE_PORT="$(K8S_SERVICE_PORT)" envsubst < k8s/deployment.yaml | kubectl apply -f -
+	PORT="$(PORT)" K8S_SERVICE_PORT="$(K8S_SERVICE_PORT)" envsubst < k8s/service.yaml | kubectl apply -f -
 
 k8s-delete: ## Delete all K8s resources
-	kubectl delete -f k8s/ --ignore-not-found
+	PORT="$(PORT)" K8S_SERVICE_PORT="$(K8S_SERVICE_PORT)" envsubst < k8s/service.yaml | kubectl delete --ignore-not-found -f -
+	PORT="$(PORT)" K8S_SERVICE_PORT="$(K8S_SERVICE_PORT)" envsubst < k8s/deployment.yaml | kubectl delete --ignore-not-found -f -
+	PORT="$(PORT)" K8S_SERVICE_PORT="$(K8S_SERVICE_PORT)" envsubst < k8s/configmap.yaml | kubectl delete --ignore-not-found -f -
+	kubectl delete -f k8s/namespace.yaml --ignore-not-found
 
 k8s-status: ## Show status of K8s deployment
 	kubectl get all -n $(K8S_NS)
