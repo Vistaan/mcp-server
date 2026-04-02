@@ -38,7 +38,8 @@ node dist/index.js
 Run in HTTP mode:
 
 ```bash
-MCP_TRANSPORT=http MCP_PORT=3000 node dist/index.js
+MCP_TRANSPORT=http MCP_PORT=<port> node dist/index.js
+# Example: MCP_TRANSPORT=http MCP_PORT=3000 node dist/index.js
 ```
 
 HTTP endpoints:
@@ -53,7 +54,7 @@ HTTP endpoints:
 | Variable | Default | Meaning |
 |---|---|---|
 | `MCP_TRANSPORT` | `stdio` | Transport mode: `stdio` or `http` |
-| `MCP_PORT` | `3000` | HTTP port when using HTTP transport |
+| `MCP_PORT` | defaults to `3000` | HTTP port when using HTTP transport |
 | `WORKFLOW_ROOT` | `./workflows` bundle | Override workflow markdown source directory |
 
 ## Main Tools
@@ -206,20 +207,11 @@ For most client integrations, use this sequence:
 4. If needed, call `apply_utility_prompt` once
 5. Return the final output with the supplied `next_action`
 
-## Claude Desktop Example
+## Client Configuration
 
-Use stdio transport in your Claude Desktop config:
+For client setup across Codex, Claude, ChatGPT, Kimi, Claw-style clients, and VS Code extensions, use the generic MCP configuration guide:
 
-```json
-{
-  "mcpServers": {
-    "workflow-os": {
-      "command": "node",
-      "args": ["/absolute/path/to/mcp-server/dist/index.js"]
-    }
-  }
-}
-```
+- [Generic MCP Client Configuration](./docs/mcp-client-configuration.md)
 
 ## Notes
 

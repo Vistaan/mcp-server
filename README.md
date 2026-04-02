@@ -20,12 +20,14 @@ node dist/index.js
 Run in HTTP mode:
 
 ```bash
-MCP_TRANSPORT=http MCP_PORT=3000 node dist/index.js
+MCP_TRANSPORT=http MCP_PORT=<port> node dist/index.js
+# Example: MCP_TRANSPORT=http MCP_PORT=3000 node dist/index.js
 ```
 
 ## Docs
 
 - [How To Use](./HOW_TO_USE.md)
+- [Generic MCP Client Configuration](./docs/mcp-client-configuration.md)
 - [Local Setup](./docs/setup.md)
 - [Claude Desktop Integration](./docs/claude-desktop.md)
 

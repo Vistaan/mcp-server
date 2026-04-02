@@ -30,10 +30,11 @@ node dist/index.js
 ## Run (HTTP mode — for local testing of Docker/K8s behavior)
 
 ```bash
-MCP_TRANSPORT=http MCP_PORT=3000 node dist/index.js
-# Server starts on http://localhost:3000
-# Health check: http://localhost:3000/health
-# MCP endpoint: http://localhost:3000/mcp
+MCP_TRANSPORT=http MCP_PORT=<port> node dist/index.js
+# Example: MCP_TRANSPORT=http MCP_PORT=3000 node dist/index.js
+# Server starts on http://localhost:<port>
+# Health check: http://localhost:<port>/health
+# MCP endpoint: http://localhost:<port>/mcp
 ```
 
 ## Test
@@ -57,5 +58,5 @@ WORKFLOW_ROOT=/your/custom/path node dist/index.js
 | Variable | Default | Description |
 |---|---|---|
 | `MCP_TRANSPORT` | `stdio` | `stdio` or `http` |
-| `MCP_PORT` | `3000` | HTTP server port (ignored in stdio mode) |
+| `MCP_PORT` | defaults to `3000` | HTTP server port (ignored in stdio mode) |
 | `WORKFLOW_ROOT` | `<project>/workflows` | Path to workflow markdown files |

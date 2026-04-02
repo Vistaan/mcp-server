@@ -13,7 +13,8 @@ make docker-build
 
 ```bash
 make docker-run
-# Server: http://localhost:3000/mcp
+# By default, this maps host port 3000 to the container's current HTTP port 3000
+# MCP endpoint: http://localhost:3000/mcp
 # Health: http://localhost:3000/health
 ```
 
@@ -95,7 +96,7 @@ All env vars are set in `k8s/configmap.yaml` for Kubernetes or in `docker-compos
 | Variable | Default | Description |
 |---|---|---|
 | `MCP_TRANSPORT` | `http` | Always `http` in Docker/K8s |
-| `MCP_PORT` | `3000` | Container port |
+| `MCP_PORT` | defaults to `3000` | Current container HTTP port |
 | `WORKFLOW_ROOT` | bundled `workflows/` | Override to mount external files |
 | `NODE_ENV` | `production` | Node environment |
 
@@ -113,6 +114,7 @@ All env vars are set in `k8s/configmap.yaml` for Kubernetes or in `docker-compos
 ### Manual health check
 
 ```bash
+# If you keep the current local Docker/K8s port mapping, use:
 curl http://localhost:3000/health
 # {"status":"ok","service":"workflow-os-mcp","transport":"http"}
 ```

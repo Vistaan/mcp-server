@@ -1,5 +1,9 @@
 # Claude Desktop Integration
 
+For the generic MCP setup pattern used across multiple clients, see:
+
+- [Generic MCP Client Configuration](./mcp-client-configuration.md)
+
 ## Build First
 
 ```bash
