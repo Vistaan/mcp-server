@@ -1,4 +1,5 @@
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import { assertWorkflowReadiness } from '../resources/loader.js';
 import { createServer } from '../server.js';
 import { log } from '../logger.js';
 
@@ -7,6 +8,7 @@ import { log } from '../logger.js';
  * Used for local Claude Desktop integration.
  */
 export async function startStdioTransport(): Promise<void> {
+  assertWorkflowReadiness();
   const server = createServer();
   const transport = new StdioServerTransport();
   await server.connect(transport);

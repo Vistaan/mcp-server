@@ -1,4 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { WorkflowResourceError } from '../../../src/resources/errors.js';
+
+const realSetTimeout = globalThis.setTimeout;
 
 let rootHandler: ((req: unknown, res: ReturnType<typeof createResponse>) => void) | undefined;
 let docsJsonHandler: ((req: unknown, res: ReturnType<typeof createResponse>) => void) | undefined;
@@ -7,15 +10,24 @@ let getMcpHandler: ((req: Record<string, unknown>, res: ReturnType<typeof create
 let postMcpHandler: ((req: Record<string, unknown>, res: ReturnType<typeof createResponse>) => void) | undefined;
 let deleteMcpHandler: ((req: Record<string, unknown>, res: ReturnType<typeof createResponse>) => void) | undefined;
 let docsUseArgs: unknown[] | undefined;
+let timerCallbacks: Array<() => void> = [];
 
 const { assertWorkflowReadinessMock, getWorkflowReadinessMock } = vi.hoisted(() => ({
   assertWorkflowReadinessMock: vi.fn(),
-  getWorkflowReadinessMock: vi.fn(() => ({
-    status: 'ok',
-    workflowRoot: '/workflows',
-    missingFiles: [],
-    checkedAt: '2026-04-02T00:00:00.000Z',
-  })),
+  getWorkflowReadinessMock: vi.fn(
+    () =>
+      ({
+        status: 'ok',
+        workflowRoot: '/workflows',
+        missingFiles: [] as string[],
+        checkedAt: '2026-04-02T00:00:00.000Z',
+      }) as {
+        status: 'ok' | 'degraded';
+        workflowRoot: string;
+        missingFiles: string[];
+        checkedAt: string;
+      },
+  ),
 }));
 
 const useMock = vi.fn();
@@ -97,8 +109,6 @@ function createResponse() {
   return {
     headersSent: false,
     req: { protocol: 'http' },
-    on: vi.fn(),
-    off: vi.fn(),
     setTimeout: vi.fn(),
     get: vi.fn((header: string) => {
       if (header === 'host') {
@@ -117,7 +127,7 @@ function createResponse() {
 async function flushAsyncWork(): Promise<void> {
   await Promise.resolve();
   await Promise.resolve();
-  await new Promise((resolve) => setTimeout(resolve, 0));
+  await new Promise((resolve) => realSetTimeout(resolve, 0));
 }
 
 describe('HTTP transport', () => {
@@ -132,6 +142,12 @@ describe('HTTP transport', () => {
     docsUseArgs = undefined;
     connectMock.mockResolvedValue(undefined);
     handleRequestMock.mockResolvedValue(undefined);
+    timerCallbacks = [];
+    vi.spyOn(globalThis, 'setTimeout').mockImplementation(((callback: () => void) => {
+      timerCallbacks.push(callback);
+      return 1 as never;
+    }) as never);
+    vi.spyOn(globalThis, 'clearTimeout').mockImplementation((() => undefined) as never);
   });
 
   afterEach(() => {
@@ -190,6 +206,7 @@ describe('HTTP transport', () => {
     const req = {
       body: { jsonrpc: '2.0' },
       method: 'POST',
+      aborted: false,
       on: vi.fn(),
       off: vi.fn(),
       setTimeout: vi.fn(),
@@ -208,7 +225,7 @@ describe('HTTP transport', () => {
     await flushAsyncWork();
 
     expect(transportCtorMock).toHaveBeenCalledTimes(3);
-    expect(assertWorkflowReadinessMock).toHaveBeenCalled();
+    expect(assertWorkflowReadinessMock).toHaveBeenCalledTimes(3);
   });
 
   it('starts the shared app on the requested port for self-hosted HTTP mode', async () => {
@@ -227,14 +244,14 @@ describe('HTTP transport', () => {
 
     createHttpApp();
 
-    const req = { body: { bad: true }, method: 'POST', on: vi.fn(), off: vi.fn(), setTimeout: vi.fn() };
+    const req = { body: { bad: true }, method: 'POST', aborted: false, on: vi.fn(), off: vi.fn(), setTimeout: vi.fn() };
     const res = createResponse();
     postMcpHandler?.(req, res);
     await flushAsyncWork();
 
     expect(errorMock).toHaveBeenCalledWith(
       'HTTP MCP handler error',
-      expect.objectContaining({ error: 'Error: boom', kind: 'internal', statusCode: 500 }),
+      expect.objectContaining({ error: 'Error: boom', kind: 'internal', statusCode: 500, aborted: false, timedOut: false }),
     );
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith({ error: 'Internal server error' });
@@ -251,24 +268,95 @@ describe('HTTP transport', () => {
     const res = createResponse();
     res.headersSent = true;
 
-    postMcpHandler?.({ body: undefined, method: 'POST', on: vi.fn(), off: vi.fn(), setTimeout: vi.fn() }, res);
+    postMcpHandler?.({ body: undefined, method: 'POST', aborted: false, on: vi.fn(), off: vi.fn(), setTimeout: vi.fn() }, res);
     await flushAsyncWork();
 
     expect(errorMock).toHaveBeenCalledWith(
       'HTTP MCP handler error',
-      expect.objectContaining({ error: 'Error: connect failed', kind: 'internal', statusCode: 500 }),
+      expect.objectContaining({ error: 'Error: connect failed', kind: 'internal', statusCode: 500, aborted: false, timedOut: false }),
     );
     expect(res.status).not.toHaveBeenCalled();
     expect(res.json).not.toHaveBeenCalled();
   });
 
-  it('classifies workflow readiness failures as service unavailable', async () => {
+  it('boots degraded and returns 503 for MCP requests when workflows are unavailable', async () => {
     assertWorkflowReadinessMock.mockImplementationOnce(() => {
-      throw new Error('workflow missing');
+      throw new WorkflowResourceError('WORKFLOW_FILE_UNREADABLE', 'workflow missing');
+    });
+    getWorkflowReadinessMock.mockImplementationOnce(
+      () =>
+        ({
+          status: 'degraded',
+          workflowRoot: '/broken',
+          missingFiles: ['WORKFLOW_OS_v4.md'],
+          checkedAt: '2026-04-02T00:00:00.000Z',
+        }) as {
+          status: 'ok' | 'degraded';
+          workflowRoot: string;
+          missingFiles: string[];
+          checkedAt: string;
+        },
+    );
+
+    const { createHttpApp } = await import('../../../src/transports/http.js');
+
+    createHttpApp();
+
+    const healthRes = createResponse();
+    healthHandler?.({}, healthRes);
+    expect(healthRes.status).toHaveBeenCalledWith(503);
+
+    const res = createResponse();
+    postMcpHandler?.({ body: {}, method: 'POST', aborted: false, on: vi.fn(), off: vi.fn(), setTimeout: vi.fn() }, res);
+    await flushAsyncWork();
+
+    expect(res.status).toHaveBeenCalledWith(503);
+    expect(res.json).toHaveBeenCalledWith({ error: 'Workflow resources unavailable' });
+    expect(createServerMock).not.toHaveBeenCalled();
+  });
+
+  it('classifies true aborted requests without treating normal close as an abort', async () => {
+    handleRequestMock.mockImplementationOnce(async (req: { on: ReturnType<typeof vi.fn> }) => {
+      const abortedHandler = req.on.mock.calls.find(([event]) => event === 'aborted')?.[1] as (() => void) | undefined;
+      abortedHandler?.();
+      throw new Error('socket closed');
     });
 
     const { createHttpApp } = await import('../../../src/transports/http.js');
 
-    expect(() => createHttpApp()).toThrow('workflow missing');
+    createHttpApp();
+
+    const req = { body: {}, method: 'POST', aborted: false, on: vi.fn(), off: vi.fn(), setTimeout: vi.fn() };
+    const res = createResponse();
+    postMcpHandler?.(req, res);
+    await flushAsyncWork();
+
+    expect(errorMock).toHaveBeenCalledWith(
+      'HTTP MCP handler error',
+      expect.objectContaining({ kind: 'request_aborted', statusCode: 408, aborted: true, timedOut: false }),
+    );
+    expect(res.status).not.toHaveBeenCalled();
+  });
+
+  it('classifies timeout-triggered failures separately', async () => {
+    handleRequestMock.mockImplementationOnce(async () => {
+      timerCallbacks[0]?.();
+      throw new Error('timed out');
+    });
+
+    const { createHttpApp } = await import('../../../src/transports/http.js');
+
+    createHttpApp();
+
+    const res = createResponse();
+    postMcpHandler?.({ body: {}, method: 'POST', aborted: false, on: vi.fn(), off: vi.fn(), setTimeout: vi.fn() }, res);
+    await flushAsyncWork();
+
+    expect(errorMock).toHaveBeenCalledWith(
+      'HTTP MCP handler error',
+      expect.objectContaining({ kind: 'request_timeout', statusCode: 504, aborted: false, timedOut: true }),
+    );
+    expect(res.status).toHaveBeenCalledWith(504);
+    expect(res.json).toHaveBeenCalledWith({ error: 'Internal server error' });
   });
 });

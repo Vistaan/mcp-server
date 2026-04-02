@@ -20,9 +20,8 @@ type ClassifiedHttpError = {
 };
 
 type RequestLifecycle = {
-  signal: AbortSignal;
   wasAborted(): boolean;
-  reason(): string | undefined;
+  isTimedOut(): boolean;
   cleanup(): void;
 };
 
@@ -57,8 +56,6 @@ function resolveLandingPagePath(): string {
  *   GET  /health     — Liveness/readiness probe for K8s
  */
 export function createHttpApp(): express.Express {
-  assertWorkflowReadiness();
-
   const app = express();
   const landingPagePath = resolveLandingPagePath();
 
@@ -105,14 +102,13 @@ export function createHttpApp(): express.Express {
     let server: ReturnType<typeof createServer> | undefined;
 
     try {
+      assertWorkflowReadiness();
       const transport = new StreamableHTTPServerTransport();
       server = createServer();
 
       // The SDK transport is runtime-compatible with `Transport`, but its current
       // declarations do not satisfy `exactOptionalPropertyTypes` cleanly.
-      throwIfRequestAborted(lifecycle);
       await server.connect(transport as unknown as Transport);
-      throwIfRequestAborted(lifecycle);
       await transport.handleRequest(req, res, req.body as Record<string, unknown> | undefined);
     } catch (error) {
       const classified = classifyHttpError(error, lifecycle);
@@ -121,7 +117,7 @@ export function createHttpApp(): express.Express {
         kind: classified.kind,
         statusCode: classified.statusCode,
         aborted: lifecycle.wasAborted(),
-        abortReason: lifecycle.reason(),
+        timedOut: lifecycle.isTimedOut(),
       });
       if (!res.headersSent && !lifecycle.wasAborted()) {
         res.status(classified.statusCode).json({
@@ -154,7 +150,6 @@ export function createHttpApp(): express.Express {
 }
 
 export async function startHttpTransport(port: number): Promise<void> {
-  assertWorkflowReadiness();
   const app = createHttpApp();
 
   await new Promise<void>((resolve) => {
@@ -166,26 +161,16 @@ export async function startHttpTransport(port: number): Promise<void> {
 }
 
 function createRequestLifecycle(req: Request, res: Response): RequestLifecycle {
-  const abortController = new AbortController();
-  let abortReason: string | undefined;
-
-  const abort = (reason: string): void => {
-    abortReason = reason;
-    if (!abortController.signal.aborted) {
-      abortController.abort(reason);
-    }
+  let aborted = Boolean(req.aborted);
+  let timedOut = false;
+  const onAborted = (): void => {
+    aborted = true;
+  };
+  const onTimeout = (): void => {
+    timedOut = true;
   };
 
-  const onAborted = (): void => abort('client_aborted');
-  const onRequestClose = (): void => abort('request_closed');
-  const onResponseClose = (): void => abort('response_closed');
-  const onTimeout = (): void => abort('request_timeout');
-
   req.on('aborted', onAborted);
-  req.on('close', onRequestClose);
-  if ('on' in res && typeof res.on === 'function') {
-    res.on('close', onResponseClose);
-  }
 
   let timeout: NodeJS.Timeout | undefined;
   const timeoutMs = resolveTimeoutMs(req.method);
@@ -202,26 +187,15 @@ function createRequestLifecycle(req: Request, res: Response): RequestLifecycle {
   }
 
   return {
-    signal: abortController.signal,
-    wasAborted: () => abortController.signal.aborted,
-    reason: () => abortReason,
+    wasAborted: () => aborted,
+    isTimedOut: () => timedOut,
     cleanup: () => {
       if (timeout) {
         clearTimeout(timeout);
       }
       req.off('aborted', onAborted);
-      req.off('close', onRequestClose);
-      if ('off' in res && typeof res.off === 'function') {
-        res.off('close', onResponseClose);
-      }
     },
   };
-}
-
-function throwIfRequestAborted(lifecycle: RequestLifecycle): void {
-  if (lifecycle.wasAborted()) {
-    throw new Error(lifecycle.reason() ?? 'request_aborted');
-  }
 }
 
 function resolveTimeoutMs(method?: string): number | undefined {
@@ -239,7 +213,7 @@ function classifyHttpError(error: unknown, lifecycle: RequestLifecycle): Classif
     return { kind: 'workflow_unavailable', statusCode: 503 };
   }
 
-  if (lifecycle.reason() === 'request_timeout') {
+  if (lifecycle.isTimedOut()) {
     return { kind: 'request_timeout', statusCode: 504 };
   }
 

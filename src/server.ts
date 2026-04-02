@@ -1,6 +1,5 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { registerResources } from './resources/index.js';
-import { assertWorkflowReadiness } from './resources/loader.js';
 import { registerPrompts } from './prompts/index.js';
 import { registerTools } from './tools/index.js';
 
@@ -14,8 +13,6 @@ const SERVER_INSTRUCTIONS = [
 ].join(' ');
 
 export function createServer(): McpServer {
-  assertWorkflowReadiness();
-
   const server = new McpServer(
     { name: SERVER_NAME, version: SERVER_VERSION },
     {
