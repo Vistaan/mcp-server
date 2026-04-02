@@ -140,6 +140,12 @@ Defaults in `k8s/deployment.yaml`:
 
 Adjust per your cluster capacity. The server is stateless — scale replicas freely.
 
+The default manifest also includes:
+
+- a `startupProbe` on `/livez` so cold starts do not immediately fail liveness
+- a `livenessProbe` on `/livez`
+- a `readinessProbe` on `/readyz`
+
 ---
 
 ## Environment Variables
