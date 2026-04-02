@@ -54,6 +54,29 @@ export const metrics = {
       ),
     };
   },
+  toPrometheus(): string {
+    const snapshot = this.snapshot();
+    const lines: string[] = [];
+
+    for (const [key, value] of Object.entries(snapshot.counters)) {
+      const { name, tags } = parseMetricKey(key);
+      lines.push(`# TYPE ${name} counter`);
+      lines.push(formatPrometheusMetric(name, tags, value));
+    }
+
+    for (const [key, value] of Object.entries(snapshot.durations)) {
+      const { name, tags } = parseMetricKey(key);
+      const baseName = `${name}_ms`;
+      lines.push(`# TYPE ${baseName}_count gauge`);
+      lines.push(formatPrometheusMetric(`${baseName}_count`, tags, value.count));
+      lines.push(formatPrometheusMetric(`${baseName}_total`, tags, value.total_ms));
+      lines.push(formatPrometheusMetric(`${baseName}_avg`, tags, value.avg_ms));
+      lines.push(formatPrometheusMetric(`${baseName}_min`, tags, value.min_ms));
+      lines.push(formatPrometheusMetric(`${baseName}_max`, tags, value.max_ms));
+    }
+
+    return lines.join('\n');
+  },
 };
 
 function metricKey(name: string, tags?: MetricTags): string {
@@ -68,4 +91,49 @@ function metricKey(name: string, tags?: MetricTags): string {
     .join('|');
 
   return serializedTags ? `${name}|${serializedTags}` : name;
+}
+
+function parseMetricKey(key: string): { name: string; tags: Record<string, string> } {
+  const [rawName, tagList] = key.split('|', 2);
+  const name = rawName ?? 'metric';
+  const tags: Record<string, string> = {};
+  if (!tagList) {
+    return { name: sanitizeMetricName(name), tags };
+  }
+
+  for (const pair of tagList.split('|')) {
+    const [tagKey, ...rest] = pair.split(':');
+    if (!tagKey || rest.length === 0) {
+      continue;
+    }
+    tags[sanitizeMetricLabel(tagKey)] = rest.join(':');
+  }
+
+  return { name: sanitizeMetricName(name), tags };
+}
+
+function sanitizeMetricName(value: string): string {
+  return value.replace(/[^a-zA-Z0-9_:]/g, '_');
+}
+
+function sanitizeMetricLabel(value: string): string {
+  return value.replace(/[^a-zA-Z0-9_]/g, '_');
+}
+
+function formatPrometheusMetric(name: string, tags: Record<string, string>, value: number): string {
+  const tagEntries = Object.entries(tags);
+  if (tagEntries.length === 0) {
+    return `${name} ${String(value)}`;
+  }
+
+  const serializedTags = tagEntries
+    .sort(([left], [right]) => left.localeCompare(right))
+    .map(([key, tagValue]) => `${key}="${escapePrometheusLabelValue(tagValue)}"`)
+    .join(',');
+
+  return `${name}{${serializedTags}} ${String(value)}`;
+}
+
+function escapePrometheusLabelValue(value: string): string {
+  return value.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n');
 }

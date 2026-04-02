@@ -201,6 +201,10 @@ Returns readiness state plus workflow file metadata.
 
 Returns lightweight in-memory counters and duration aggregates for the HTTP transport. This is intended for operational inspection and basic monitoring.
 
+### `GET /metrics/prometheus`
+
+Returns the current in-process metrics in Prometheus text exposition format.
+
 ### `GET /docs-api.json`
 
 Returns the generated OpenAPI document. In production, set `PUBLIC_BASE_URL` so the documented server URL does not depend on request headers.

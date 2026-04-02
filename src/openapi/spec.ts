@@ -265,6 +265,26 @@ const openApiSpecTemplate = {
         },
       },
     },
+    '/metrics/prometheus': {
+      get: {
+        tags: ['Operational'],
+        summary: 'Get Prometheus-compatible metrics',
+        description: 'Returns the current in-process metrics in Prometheus text exposition format.',
+        operationId: 'getPrometheusMetrics',
+        responses: {
+          '200': {
+            description: 'Prometheus metrics payload.',
+            content: {
+              'text/plain': {
+                schema: {
+                  type: 'string',
+                },
+              },
+            },
+          },
+        },
+      },
+    },
     '/docs': {
       get: {
         tags: ['Documentation'],

@@ -20,7 +20,7 @@ describe('OpenAPI spec', () => {
 
   it('documents the expected HTTP paths', () => {
     expect(Object.keys(openApiSpec.paths)).toEqual(
-      expect.arrayContaining(['/health', '/metrics', '/mcp', '/docs', '/docs-api.json']),
+      expect.arrayContaining(['/health', '/metrics', '/metrics/prometheus', '/mcp', '/docs', '/docs-api.json']),
     );
     expect(openApiSpec.paths['/mcp']).toHaveProperty('post');
     expect(openApiSpec.paths['/mcp']).toHaveProperty('get');

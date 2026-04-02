@@ -150,6 +150,7 @@ All env vars are set in `k8s/configmap.yaml` for Kubernetes or in `docker-compos
 | `NODE_ENV` | `production` | Node environment |
 | `LOG_LEVEL` | `info` | Structured stderr log threshold: `debug`, `info`, `warn`, or `error` |
 | `PUBLIC_BASE_URL` | unset | Canonical base URL for generated API docs and OpenAPI server metadata |
+| `METRICS_ENABLED` | `true` | Expose `/metrics` and `/metrics/prometheus` when enabled |
 
 Additional deployment-time variables:
 
@@ -166,6 +167,7 @@ Additional deployment-time variables:
 |---|---|---|
 | `/health` | GET | Returns readiness status plus workflow metadata |
 | `/metrics` | GET | Returns in-process counters and duration aggregates |
+| `/metrics/prometheus` | GET | Returns Prometheus text exposition output |
 | `/mcp` | POST | MCP JSON-RPC messages |
 | `/mcp` | GET | MCP SSE stream |
 | `/mcp` | DELETE | Session teardown (no-op in stateless mode) |
@@ -179,4 +181,7 @@ curl http://localhost:<port>/health
 
 curl http://localhost:<port>/metrics
 # {"service":"workflow-os-mcp","transport":"http","counters":{...},"durations":{...}}
+
+curl http://localhost:<port>/metrics/prometheus
+# http_request_started_total{method="POST"} 1
 ```

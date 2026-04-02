@@ -7,6 +7,7 @@ let rootHandler: ((req: unknown, res: ReturnType<typeof createResponse>) => void
 let docsJsonHandler: ((req: unknown, res: ReturnType<typeof createResponse>) => void) | undefined;
 let healthHandler: ((req: unknown, res: ReturnType<typeof createResponse>) => void) | undefined;
 let metricsHandler: ((req: unknown, res: ReturnType<typeof createResponse>) => void) | undefined;
+let metricsPrometheusHandler: ((req: unknown, res: ReturnType<typeof createResponse>) => void) | undefined;
 let getMcpHandler: ((req: Record<string, unknown>, res: ReturnType<typeof createResponse>) => void) | undefined;
 let postMcpHandler: ((req: Record<string, unknown>, res: ReturnType<typeof createResponse>) => void) | undefined;
 let deleteMcpHandler: ((req: Record<string, unknown>, res: ReturnType<typeof createResponse>) => void) | undefined;
@@ -57,6 +58,8 @@ const expressMock = vi.fn(() => ({
         healthHandler = handler;
       } else if (path === '/metrics') {
         metricsHandler = handler;
+      } else if (path === '/metrics/prometheus') {
+        metricsPrometheusHandler = handler;
       } else if (path === '/mcp') {
         getMcpHandler = handler as typeof getMcpHandler;
       }
@@ -122,6 +125,7 @@ function createResponse() {
       return undefined;
     }),
     json: vi.fn(),
+    send: vi.fn(),
     sendFile: vi.fn(),
     status: vi.fn(function status(this: { json: unknown }, _code: number) {
       return this;
@@ -142,6 +146,7 @@ describe('HTTP transport', () => {
     docsJsonHandler = undefined;
     healthHandler = undefined;
     metricsHandler = undefined;
+    metricsPrometheusHandler = undefined;
     getMcpHandler = undefined;
     postMcpHandler = undefined;
     deleteMcpHandler = undefined;
@@ -197,6 +202,7 @@ describe('HTTP transport', () => {
     expect(docsSpec.paths).toHaveProperty('/health');
     expect(docsSpec.paths).toHaveProperty('/metrics');
     expect(docsSpec.paths).toHaveProperty('/mcp');
+    expect(docsSpec.paths).toHaveProperty('/metrics/prometheus');
     expect(docsRes.setHeader).toHaveBeenCalledWith('cache-control', 'no-store');
 
     const healthRes = createResponse();
@@ -224,6 +230,12 @@ describe('HTTP transport', () => {
       }),
     );
     expect(metricsRes.setHeader).toHaveBeenCalledWith('cache-control', 'no-store');
+
+    const prometheusRes = createResponse();
+    metricsPrometheusHandler?.({}, prometheusRes);
+    expect(prometheusRes.status).toHaveBeenCalledWith(200);
+    expect(prometheusRes.setHeader).toHaveBeenCalledWith('content-type', 'text/plain; version=0.0.4; charset=utf-8');
+    expect(prometheusRes.send).toHaveBeenCalledWith(expect.stringContaining('http_metrics_requested'));
 
     const req = {
       body: { jsonrpc: '2.0' },
@@ -283,6 +295,18 @@ describe('HTTP transport', () => {
     expect(docsSpec.servers[0]?.url).toBe('https://api.example.com');
 
     delete process.env['PUBLIC_BASE_URL'];
+  });
+
+  it('does not expose metrics endpoints when METRICS_ENABLED=false', async () => {
+    process.env['METRICS_ENABLED'] = 'false';
+
+    const { createHttpApp } = await import('../../../src/transports/http.js');
+    createHttpApp();
+
+    expect(metricsHandler).toBeUndefined();
+    expect(metricsPrometheusHandler).toBeUndefined();
+
+    delete process.env['METRICS_ENABLED'];
   });
 
   it('logs errors and returns a 500 response when request handling fails', async () => {

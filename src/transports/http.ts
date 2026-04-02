@@ -65,6 +65,7 @@ function resolveLandingPagePath(): string {
 export function createHttpApp(): express.Express {
   const app = express();
   const landingPagePath = resolveLandingPagePath();
+  const metricsEnabled = process.env['METRICS_ENABLED'] !== 'false';
 
   app.use(express.static(landingPagePath));
 
@@ -99,11 +100,20 @@ export function createHttpApp(): express.Express {
     res.status(readiness.status === 'ok' ? 200 : 503).json(buildHealthResponse(readiness));
   });
 
-  app.get('/metrics', (_req: Request, res: Response) => {
-    applyNoStore(res);
-    metrics.increment('http_metrics_requested');
-    res.status(200).json(buildMetricsResponse(metrics.snapshot()));
-  });
+  if (metricsEnabled) {
+    app.get('/metrics', (_req: Request, res: Response) => {
+      applyNoStore(res);
+      metrics.increment('http_metrics_requested');
+      res.status(200).json(buildMetricsResponse(metrics.snapshot()));
+    });
+
+    app.get('/metrics/prometheus', (_req: Request, res: Response) => {
+      applyNoStore(res);
+      setResponseHeader(res, 'content-type', 'text/plain; version=0.0.4; charset=utf-8');
+      metrics.increment('http_metrics_prometheus_requested');
+      res.status(200).send(metrics.toPrometheus());
+    });
+  }
 
   // ── MCP handler (POST + GET + DELETE) ─────────────────────────────────────────
   async function handleMcp(req: Request, res: Response): Promise<void> {
