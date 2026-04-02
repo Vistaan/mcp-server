@@ -18,7 +18,9 @@ make docker-run
 # Swagger UI: http://localhost:<port>/docs
 # OpenAPI JSON: http://localhost:<port>/docs-api.json
 # MCP endpoint: http://localhost:<port>/mcp
-# Health: http://localhost:<port>/health
+# Liveness: http://localhost:<port>/livez
+# Readiness: http://localhost:<port>/readyz
+# Legacy health: http://localhost:<port>/health
 ```
 
 ### docker-compose (recommended for local/staging)
@@ -63,7 +65,9 @@ This ensures both the TypeScript server build and generated HTML docs are curren
 | `/` | GET | Serves `landing-page/index.html` |
 | `/docs` | GET | Swagger UI from the shared Express HTTP app |
 | `/docs-api.json` | GET | Raw OpenAPI JSON |
-| `/health` | GET | Health response |
+| `/livez` | GET | Liveness response |
+| `/readyz` | GET | Readiness response |
+| `/health` | GET | Legacy health response |
 | `/mcp` | POST | Reliable MCP JSON-RPC path on Vercel |
 | `/mcp` | GET | Best-effort SSE stream |
 | `/mcp` | DELETE | Stateless teardown/no-op |

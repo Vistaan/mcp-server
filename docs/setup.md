@@ -35,7 +35,9 @@ MCP_TRANSPORT=http MCP_PORT=<port> node dist/index.js
 # Server starts on http://localhost:<port>
 # Swagger UI: http://localhost:<port>/docs
 # OpenAPI JSON: http://localhost:<port>/docs-api.json
-# Health check: http://localhost:<port>/health
+# Liveness: http://localhost:<port>/livez
+# Readiness: http://localhost:<port>/readyz
+# Legacy health: http://localhost:<port>/health
 # MCP endpoint: http://localhost:<port>/mcp
 ```
 

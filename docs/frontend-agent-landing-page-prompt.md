@@ -71,6 +71,8 @@ You must accurately reflect these product facts:
   - `stdio`
   - `http`
 - The HTTP transport exposes:
+  - `GET /livez`
+  - `GET /readyz`
   - `GET /health`
   - `GET /docs`
   - `GET /docs-api.json`

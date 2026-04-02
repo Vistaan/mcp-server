@@ -93,7 +93,9 @@ Then provide the client with:
 
 - base URL: `http://localhost:<port>`
 - MCP endpoint: `http://localhost:<port>/mcp`
-- health check: `http://localhost:<port>/health`
+- liveness check: `http://localhost:<port>/livez`
+- readiness check: `http://localhost:<port>/readyz`
+- legacy health check: `http://localhost:<port>/health`
 
 ## Verify The Integration
 
