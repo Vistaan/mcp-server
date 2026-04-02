@@ -6,6 +6,12 @@
  */
 
 type LogLevel = 'debug' | 'info' | 'warn' | 'error';
+const LOG_LEVEL_PRIORITY: Record<LogLevel, number> = {
+  debug: 10,
+  info: 20,
+  warn: 30,
+  error: 40,
+};
 
 interface LogEntry {
   level: LogLevel;
@@ -15,8 +21,24 @@ interface LogEntry {
 }
 
 function write(level: LogLevel, msg: string, data?: Record<string, unknown>): void {
+  if (!shouldLog(level)) {
+    return;
+  }
   const entry: LogEntry = { level, ts: new Date().toISOString(), msg, ...data };
   process.stderr.write(JSON.stringify(entry) + '\n');
+}
+
+function shouldLog(level: LogLevel): boolean {
+  return LOG_LEVEL_PRIORITY[level] >= LOG_LEVEL_PRIORITY[resolveLogLevel()];
+}
+
+function resolveLogLevel(): LogLevel {
+  const configured = process.env['LOG_LEVEL']?.trim().toLowerCase();
+  if (configured === 'debug' || configured === 'info' || configured === 'warn' || configured === 'error') {
+    return configured;
+  }
+
+  return 'info';
 }
 
 export const log = {

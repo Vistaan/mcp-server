@@ -148,6 +148,8 @@ All env vars are set in `k8s/configmap.yaml` for Kubernetes or in `docker-compos
 | `MCP_PORT` | defaults to `3000` | Current container HTTP port |
 | `WORKFLOW_ROOT` | bundled `workflows/` | Override to mount external files |
 | `NODE_ENV` | `production` | Node environment |
+| `LOG_LEVEL` | `info` | Structured stderr log threshold: `debug`, `info`, `warn`, or `error` |
+| `PUBLIC_BASE_URL` | unset | Canonical base URL for generated API docs and OpenAPI server metadata |
 
 Additional deployment-time variables:
 
@@ -162,7 +164,8 @@ Additional deployment-time variables:
 
 | Path | Method | Description |
 |---|---|---|
-| `/health` | GET | Returns `{"status":"ok"}` — used by K8s liveness + readiness probes |
+| `/health` | GET | Returns readiness status plus workflow metadata |
+| `/metrics` | GET | Returns in-process counters and duration aggregates |
 | `/mcp` | POST | MCP JSON-RPC messages |
 | `/mcp` | GET | MCP SSE stream |
 | `/mcp` | DELETE | Session teardown (no-op in stateless mode) |
@@ -172,5 +175,8 @@ Additional deployment-time variables:
 ```bash
 # If you keep your current local Docker/K8s port mapping, use:
 curl http://localhost:<port>/health
-# {"status":"ok","service":"workflow-os-mcp","transport":"http"}
+# {"status":"ok","service":"workflow-os-mcp","transport":"http",...}
+
+curl http://localhost:<port>/metrics
+# {"service":"workflow-os-mcp","transport":"http","counters":{...},"durations":{...}}
 ```

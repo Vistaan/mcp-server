@@ -68,4 +68,4 @@ No environment variables are required — workflow files are bundled.
 }
 ```
 
-**Logs**: The server writes structured JSON to stderr. Claude Desktop captures these in its logs.
+**Logs**: The server writes structured JSON to stderr. Claude Desktop captures these in its logs. Set `LOG_LEVEL=debug` in the server `env` block when you need verbose troubleshooting output.

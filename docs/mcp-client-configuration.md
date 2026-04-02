@@ -147,4 +147,5 @@ If the wrong workflow files are being used:
 If you need logs:
 
 - this server writes structured JSON logs to `stderr`
+- set `LOG_LEVEL=debug` for verbose troubleshooting output
 - many MCP clients expose these logs in a developer console, logs panel, or extension output pane
