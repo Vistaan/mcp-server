@@ -14,8 +14,8 @@ export function registerApplyTool(server: McpServer): void {
       inputSchema: applyUtilityPromptInputSchema,
       outputSchema: applyUtilityPromptOutputSchema,
     },
-    async (args) => {
-      const output = await applyUtility({
+    (args) => {
+      const output = applyUtility({
         utilityName: args.utility_name,
         content: args.content,
         ...(args.context ? { context: args.context } : {}),

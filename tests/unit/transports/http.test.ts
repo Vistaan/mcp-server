@@ -252,14 +252,11 @@ describe('HTTP transport', () => {
     const metricsRes = createResponse();
     metricsHandler?.({}, metricsRes);
     expect(metricsRes.status).toHaveBeenCalledWith(200);
-    expect(metricsRes.json).toHaveBeenCalledWith(
-      expect.objectContaining({
-        service: 'workflow-os-mcp',
-        transport: 'http',
-        counters: expect.any(Object),
-        durations: expect.any(Object),
-      }),
-    );
+    const [metricsPayload] = (metricsRes.json.mock.calls[0] ?? []) as [Record<string, unknown>?];
+    expect(metricsPayload?.['service']).toBe('workflow-os-mcp');
+    expect(metricsPayload?.['transport']).toBe('http');
+    expect(typeof metricsPayload?.['counters']).toBe('object');
+    expect(typeof metricsPayload?.['durations']).toBe('object');
     expect(metricsRes.setHeader).toHaveBeenCalledWith('cache-control', 'no-store');
 
     const prometheusRes = createResponse();
@@ -375,25 +372,20 @@ describe('HTTP transport', () => {
     postMcpHandler?.(req, res);
     await flushAsyncWork();
 
-    expect(errorMock).toHaveBeenCalledWith(
-      'HTTP MCP handler error',
-      expect.objectContaining({
-        error: 'Error: boom',
-        kind: 'internal',
-        statusCode: 500,
-        aborted: false,
-        timedOut: false,
-        requestId: expect.any(String),
-      }),
-    );
+    const internalLogCall = errorMock.mock.calls[0] as [string, Record<string, unknown>] | undefined;
+    expect(internalLogCall?.[0]).toBe('HTTP MCP handler error');
+    expect(internalLogCall?.[1]['error']).toBe('Error: boom');
+    expect(internalLogCall?.[1]['kind']).toBe('internal');
+    expect(internalLogCall?.[1]['statusCode']).toBe(500);
+    expect(internalLogCall?.[1]['aborted']).toBe(false);
+    expect(internalLogCall?.[1]['timedOut']).toBe(false);
+    expect(typeof internalLogCall?.[1]['requestId']).toBe('string');
     expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.json).toHaveBeenCalledWith({
-      error: {
-        code: 'internal',
-        message: 'Internal server error',
-        request_id: expect.any(String),
-      },
-    });
+    const [internalErrorPayload] = (res.json.mock.calls[0] ?? []) as [Record<string, unknown>?];
+    const internalError = internalErrorPayload?.['error'] as Record<string, unknown> | undefined;
+    expect(internalError?.['code']).toBe('internal');
+    expect(internalError?.['message']).toBe('Internal server error');
+    expect(typeof internalError?.['request_id']).toBe('string');
     expect(closeMock).toHaveBeenCalledTimes(1);
   });
 
@@ -410,17 +402,14 @@ describe('HTTP transport', () => {
     postMcpHandler?.({ body: undefined, method: 'POST', path: '/mcp', aborted: false, on: vi.fn(), off: vi.fn(), setTimeout: vi.fn() }, res);
     await flushAsyncWork();
 
-    expect(errorMock).toHaveBeenCalledWith(
-      'HTTP MCP handler error',
-      expect.objectContaining({
-        error: 'Error: connect failed',
-        kind: 'internal',
-        statusCode: 500,
-        aborted: false,
-        timedOut: false,
-        requestId: expect.any(String),
-      }),
-    );
+    const connectLogCall = errorMock.mock.calls[0] as [string, Record<string, unknown>] | undefined;
+    expect(connectLogCall?.[0]).toBe('HTTP MCP handler error');
+    expect(connectLogCall?.[1]['error']).toBe('Error: connect failed');
+    expect(connectLogCall?.[1]['kind']).toBe('internal');
+    expect(connectLogCall?.[1]['statusCode']).toBe(500);
+    expect(connectLogCall?.[1]['aborted']).toBe(false);
+    expect(connectLogCall?.[1]['timedOut']).toBe(false);
+    expect(typeof connectLogCall?.[1]['requestId']).toBe('string');
     expect(res.status).not.toHaveBeenCalled();
     expect(res.json).not.toHaveBeenCalled();
   });
@@ -457,18 +446,16 @@ describe('HTTP transport', () => {
     await flushAsyncWork();
 
     expect(res.status).toHaveBeenCalledWith(503);
-    expect(res.json).toHaveBeenCalledWith({
-      error: {
-        code: 'workflow_unavailable',
-        message: 'Workflow resources unavailable',
-        request_id: expect.any(String),
-      },
-    });
+    const [workflowUnavailablePayload] = (res.json.mock.calls[0] ?? []) as [Record<string, unknown>?];
+    const workflowUnavailableError = workflowUnavailablePayload?.['error'] as Record<string, unknown> | undefined;
+    expect(workflowUnavailableError?.['code']).toBe('workflow_unavailable');
+    expect(workflowUnavailableError?.['message']).toBe('Workflow resources unavailable');
+    expect(typeof workflowUnavailableError?.['request_id']).toBe('string');
     expect(createServerMock).not.toHaveBeenCalled();
   });
 
   it('classifies true aborted requests without treating normal close as an abort', async () => {
-    handleRequestMock.mockImplementationOnce(async (req: { on: ReturnType<typeof vi.fn> }) => {
+    handleRequestMock.mockImplementationOnce((req: { on: ReturnType<typeof vi.fn> }) => {
       const abortedHandler = req.on.mock.calls.find(([event]) => event === 'aborted')?.[1] as (() => void) | undefined;
       abortedHandler?.();
       throw new Error('socket closed');
@@ -483,15 +470,18 @@ describe('HTTP transport', () => {
     postMcpHandler?.(req, res);
     await flushAsyncWork();
 
-    expect(errorMock).toHaveBeenCalledWith(
-      'HTTP MCP handler error',
-      expect.objectContaining({ kind: 'request_aborted', statusCode: 408, aborted: true, timedOut: false, requestId: expect.any(String) }),
-    );
+    const abortedLogCall = errorMock.mock.calls[0] as [string, Record<string, unknown>] | undefined;
+    expect(abortedLogCall?.[0]).toBe('HTTP MCP handler error');
+    expect(abortedLogCall?.[1]['kind']).toBe('request_aborted');
+    expect(abortedLogCall?.[1]['statusCode']).toBe(408);
+    expect(abortedLogCall?.[1]['aborted']).toBe(true);
+    expect(abortedLogCall?.[1]['timedOut']).toBe(false);
+    expect(typeof abortedLogCall?.[1]['requestId']).toBe('string');
     expect(res.status).not.toHaveBeenCalled();
   });
 
   it('classifies timeout-triggered failures separately', async () => {
-    handleRequestMock.mockImplementationOnce(async () => {
+    handleRequestMock.mockImplementationOnce(() => {
       timerCallbacks[0]?.();
       throw new Error('timed out');
     });
@@ -504,17 +494,18 @@ describe('HTTP transport', () => {
     postMcpHandler?.({ body: {}, method: 'POST', path: '/mcp', aborted: false, on: vi.fn(), off: vi.fn(), setTimeout: vi.fn() }, res);
     await flushAsyncWork();
 
-    expect(errorMock).toHaveBeenCalledWith(
-      'HTTP MCP handler error',
-      expect.objectContaining({ kind: 'request_timeout', statusCode: 504, aborted: false, timedOut: true, requestId: expect.any(String) }),
-    );
+    const timeoutLogCall = errorMock.mock.calls[0] as [string, Record<string, unknown>] | undefined;
+    expect(timeoutLogCall?.[0]).toBe('HTTP MCP handler error');
+    expect(timeoutLogCall?.[1]['kind']).toBe('request_timeout');
+    expect(timeoutLogCall?.[1]['statusCode']).toBe(504);
+    expect(timeoutLogCall?.[1]['aborted']).toBe(false);
+    expect(timeoutLogCall?.[1]['timedOut']).toBe(true);
+    expect(typeof timeoutLogCall?.[1]['requestId']).toBe('string');
     expect(res.status).toHaveBeenCalledWith(504);
-    expect(res.json).toHaveBeenCalledWith({
-      error: {
-        code: 'request_timeout',
-        message: 'Request timed out',
-        request_id: expect.any(String),
-      },
-    });
+    const [timeoutPayload] = (res.json.mock.calls[0] ?? []) as [Record<string, unknown>?];
+    const timeoutError = timeoutPayload?.['error'] as Record<string, unknown> | undefined;
+    expect(timeoutError?.['code']).toBe('request_timeout');
+    expect(timeoutError?.['message']).toBe('Request timed out');
+    expect(typeof timeoutError?.['request_id']).toBe('string');
   });
 });

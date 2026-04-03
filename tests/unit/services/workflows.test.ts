@@ -30,8 +30,8 @@ describe('workflow services', () => {
     expect(result.supportingNotes.length).toBeGreaterThan(0);
   });
 
-  it('applies utility transformations with structured change tracking', async () => {
-    const result = await applyUtility({
+  it('applies utility transformations with structured change tracking', () => {
+    const result = applyUtility({
       utilityName: 'impact_compressor',
       content: 'Maybe this helps founders close clients faster. It also gives them scripts. It saves time.',
     });

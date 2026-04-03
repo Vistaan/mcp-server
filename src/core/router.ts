@@ -179,7 +179,7 @@ function rankSignals<TLabel extends string>(
       return total;
     }, 0);
 
-    return { label: label as TLabel, score, evidence };
+    return { label, score, evidence };
   });
 
   rankedChoices.sort((left, right) => {

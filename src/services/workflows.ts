@@ -52,7 +52,7 @@ export async function executeWorkflow(command: WorkflowExecutionCommand): Promis
   };
 }
 
-export async function applyUtility(command: UtilityExecutionCommand): Promise<UtilityExecutionResult> {
+export function applyUtility(command: UtilityExecutionCommand): UtilityExecutionResult {
   const issuesFound = inferUtilityIssues(command.utilityName, command.content);
   const normalized = normalizeWhitespace(command.content);
   const changesApplied: string[] = [];

@@ -9,14 +9,14 @@ import {
   selectDomainWorkflowOutputSchema,
 } from '../schemas/tools.js';
 
-type ParsedOutput<TSchema extends z.ZodTypeAny> = z.infer<TSchema>;
+type ParsedOutput<TOutput extends Record<string, unknown>> = TOutput;
 
-function buildValidatedToolResult<TSchema extends z.ZodTypeAny>(
-  schema: TSchema,
-  output: ParsedOutput<TSchema>,
+function buildValidatedToolResult<TOutput extends Record<string, unknown>>(
+  schema: z.ZodType<TOutput>,
+  output: ParsedOutput<TOutput>,
 ) {
   const parsed = schema.parse(output);
-  return toToolResult(parsed as Record<string, unknown>);
+  return toToolResult(parsed);
 }
 
 export function buildRouteTaskResult(route: RouteResult) {
@@ -31,18 +31,18 @@ export function buildRouteTaskResult(route: RouteResult) {
   });
 }
 
-export function buildSelectDomainWorkflowResult(output: ParsedOutput<typeof selectDomainWorkflowOutputSchema>) {
+export function buildSelectDomainWorkflowResult(output: ParsedOutput<z.infer<typeof selectDomainWorkflowOutputSchema>>) {
   return buildValidatedToolResult(selectDomainWorkflowOutputSchema, output);
 }
 
-export function buildRunWorkflowSequenceResult(output: ParsedOutput<typeof runWorkflowSequenceOutputSchema>) {
+export function buildRunWorkflowSequenceResult(output: ParsedOutput<z.infer<typeof runWorkflowSequenceOutputSchema>>) {
   return buildValidatedToolResult(runWorkflowSequenceOutputSchema, output);
 }
 
-export function buildApplyUtilityPromptResult(output: ParsedOutput<typeof applyUtilityPromptOutputSchema>) {
+export function buildApplyUtilityPromptResult(output: ParsedOutput<z.infer<typeof applyUtilityPromptOutputSchema>>) {
   return buildValidatedToolResult(applyUtilityPromptOutputSchema, output);
 }
 
-export function buildGenerateNextActionResult(output: ParsedOutput<typeof generateNextActionOutputSchema>) {
+export function buildGenerateNextActionResult(output: ParsedOutput<z.infer<typeof generateNextActionOutputSchema>>) {
   return buildValidatedToolResult(generateNextActionOutputSchema, output);
 }
