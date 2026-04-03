@@ -103,4 +103,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Console log for debugging (remove in production)
   console.log('workflow-os-mcp landing page loaded successfully');
+
+  // Set current year in footer
+  const yearSpan = document.getElementById('current-year');
+  if (yearSpan) {
+    yearSpan.textContent = new Date().getFullYear();
+  }
 });
