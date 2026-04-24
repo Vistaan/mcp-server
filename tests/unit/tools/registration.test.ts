@@ -63,8 +63,8 @@ describe('tool registration', () => {
       stage: 'idea',
     }) as { structuredContent: Record<string, unknown> };
 
-    expect(result.structuredContent['resource_uri']).toBe('workflow://products/v4');
-    expect(result.structuredContent['subsection_uri']).toBe('workflow://products/v4/execution/sequence');
+    expect(result.structuredContent['resource_uri']).toBe('workflow://products/v1');
+    expect(result.structuredContent['subsection_uri']).toBe('workflow://products/v1/execution/sequence');
   });
 
   it('registers run_workflow_sequence and returns structured execution output', async () => {
@@ -94,7 +94,7 @@ describe('tool registration', () => {
     })) as { structuredContent: Record<string, unknown> };
 
     expect(String(withNext.structuredContent['execution_summary'])).toContain('launch a productized service');
-    expect(withNext.structuredContent['workflow_reference']).toBe('workflow://products/v4');
+    expect(withNext.structuredContent['workflow_reference']).toBe('workflow://products/v1');
     expect(String(withNext.structuredContent['stage_outcome']).toLowerCase()).toContain('price');
     expect(Array.isArray(withNext.structuredContent['recommendations'])).toBe(true);
     expect(Array.isArray(withNext.structuredContent['supporting_notes'])).toBe(true);

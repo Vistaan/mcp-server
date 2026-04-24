@@ -423,7 +423,7 @@ describe('HTTP transport', () => {
         ({
           status: 'degraded',
           workflowRoot: '/broken',
-          missingFiles: ['WORKFLOW_OS_v4.md'],
+          missingFiles: ['WORKFLOW_OS_v1.md'],
           checkedAt: '2026-04-02T00:00:00.000Z',
         }) as {
           status: 'ok' | 'degraded';

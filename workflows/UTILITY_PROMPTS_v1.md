@@ -1,4 +1,4 @@
-# UTILITY PROMPTS v4 — Machine-Grade
+# UTILITY PROMPTS v1 — Machine-Grade
 
 ## 1. PURPOSE
 Provide subordinate utility operations that sharpen outputs from the main workflows without replacing the primary file selection logic.

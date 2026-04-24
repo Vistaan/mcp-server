@@ -37,7 +37,7 @@ describe('resource loader', () => {
     accessSyncMock.mockImplementation(() => undefined);
     readFileMock.mockResolvedValue('# Workflow');
 
-    await expect(readWorkflowFile('WORKFLOW_OS_v4.md')).resolves.toBe('# Workflow');
+    await expect(readWorkflowFile('WORKFLOW_OS_v1.md')).resolves.toBe('# Workflow');
   });
 
   it('throws a typed error when a file is missing', async () => {
@@ -62,15 +62,15 @@ describe('resource loader', () => {
         }),
     );
 
-    const firstRead = readWorkflowFile('WORKFLOW_OS_v4.md');
-    const secondRead = readWorkflowFile('WORKFLOW_OS_v4.md');
+    const firstRead = readWorkflowFile('WORKFLOW_OS_v1.md');
+    const secondRead = readWorkflowFile('WORKFLOW_OS_v1.md');
 
     expect(readFileMock).toHaveBeenCalledTimes(1);
 
     resolveRead?.('# Workflow');
 
     await expect(Promise.all([firstRead, secondRead])).resolves.toEqual(['# Workflow', '# Workflow']);
-    await expect(readWorkflowFile('WORKFLOW_OS_v4.md')).resolves.toBe('# Workflow');
+    await expect(readWorkflowFile('WORKFLOW_OS_v1.md')).resolves.toBe('# Workflow');
     expect(readFileMock).toHaveBeenCalledTimes(1);
   });
 

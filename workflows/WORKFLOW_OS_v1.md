@@ -1,4 +1,4 @@
-# WORKFLOW OS v4 — Machine-Grade
+# WORKFLOW OS v1 — Machine-Grade
 
 ## 1. PURPOSE
 Provide the single front door for the full workflow system. Route any request into the correct operating mode, enforce one execution path, and keep output disciplined.

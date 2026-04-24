@@ -1,4 +1,4 @@
-# WORKFLOW FREELANCING v4 — Machine-Grade
+# WORKFLOW FREELANCING v1 — Machine-Grade
 
 ## 1. PURPOSE
 Turn skills or experience into a sellable freelance offer with clear pricing, proof, client acquisition, and first-client execution.

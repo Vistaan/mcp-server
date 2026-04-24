@@ -181,19 +181,19 @@ Front-door prompt:
 
 Full workflow resources:
 
-- `workflow://os/v4`
-- `workflow://freelancing/v4`
-- `workflow://products/v4`
-- `workflow://content/v4`
-- `workflow://execution/v4`
-- `workflow://investing/v4`
-- `workflow://utility/v4`
-- `workflow://execute-referencing/v4`
-- `workflow://design-reference/v4`
+- `workflow://os/v1`
+- `workflow://freelancing/v1`
+- `workflow://products/v1`
+- `workflow://content/v1`
+- `workflow://execution/v1`
+- `workflow://investing/v1`
+- `workflow://utility/v1`
+- `workflow://execute-referencing/v1`
+- `workflow://design-reference/v1`
 
 ### DESIGN.md Reference Resource
 
-The `workflow://design-reference/v4` resource contains the full Google DESIGN.md specification. Use this when:
+The `workflow://design-reference/v1` resource contains the full Google DESIGN.md specification. Use this when:
 
 - Building UI components that need to follow a design system
 - Creating or validating DESIGN.md files for your projects
@@ -210,13 +210,13 @@ The spec covers:
 Section resources follow this template:
 
 ```text
-workflow://{domain}/v4/{sectionGroup}/{sectionName}
+workflow://{domain}/v1/{sectionGroup}/{sectionName}
 ```
 
 Examples:
 
-- `workflow://products/v4/execution/sequence`
-- `workflow://content/v4/output/response-shape`
+- `workflow://products/v1/execution/sequence`
+- `workflow://content/v1/output/response-shape`
 
 ## Recommended Client Flow
 

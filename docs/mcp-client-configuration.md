@@ -110,15 +110,15 @@ After adding the server to a client:
    - `apply_utility_prompt`
    - `generate_next_action`
 4. Confirm the resources appear:
-   - `workflow://os/v4`
-   - `workflow://freelancing/v4`
-   - `workflow://products/v4`
-   - `workflow://content/v4`
-   - `workflow://execution/v4`
-   - `workflow://investing/v4`
-   - `workflow://utility/v4`
-   - `workflow://execute-referencing/v4`
-   - `workflow://design-reference/v4`
+   - `workflow://os/v1`
+   - `workflow://freelancing/v1`
+   - `workflow://products/v1`
+   - `workflow://content/v1`
+   - `workflow://execution/v1`
+   - `workflow://investing/v1`
+   - `workflow://utility/v1`
+   - `workflow://execute-referencing/v1`
+   - `workflow://design-reference/v1`
 
 ## Recommended Usage Pattern
 

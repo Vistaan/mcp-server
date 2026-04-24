@@ -41,13 +41,13 @@ No environment variables are required — workflow files are bundled.
    - `apply_utility_prompt`
    - `generate_next_action`
 4. Check that the following resources are available:
-   - `workflow://os/v4`
-   - `workflow://freelancing/v4`
-   - `workflow://products/v4`
-   - `workflow://content/v4`
-   - `workflow://execution/v4`
-   - `workflow://investing/v4`
-   - `workflow://utility/v4`
+   - `workflow://os/v1`
+   - `workflow://freelancing/v1`
+   - `workflow://products/v1`
+   - `workflow://content/v1`
+   - `workflow://execution/v1`
+   - `workflow://investing/v1`
+   - `workflow://utility/v1`
 
 ## Troubleshooting
 

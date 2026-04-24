@@ -525,49 +525,49 @@
 </thead>
 <tbody>
 <tr>
-<td><code>workflow://os/v4</code></td>
-<td><code>WORKFLOW_OS_v4.md</code></td>
+<td><code>workflow://os/v1</code></td>
+<td><code>WORKFLOW_OS_v1.md</code></td>
 </tr>
 <tr>
-<td><code>workflow://freelancing/v4</code></td>
-<td><code>WORKFLOW_FREELANCING_v4.md</code></td>
+<td><code>workflow://freelancing/v1</code></td>
+<td><code>WORKFLOW_FREELANCING_v1.md</code></td>
 </tr>
 <tr>
-<td><code>workflow://products/v4</code></td>
-<td><code>WORKFLOW_PRODUCTS_v4.md</code></td>
+<td><code>workflow://products/v1</code></td>
+<td><code>WORKFLOW_PRODUCTS_v1.md</code></td>
 </tr>
 <tr>
-<td><code>workflow://content/v4</code></td>
-<td><code>WORKFLOW_CONTENT_v4.md</code></td>
+<td><code>workflow://content/v1</code></td>
+<td><code>WORKFLOW_CONTENT_v1.md</code></td>
 </tr>
 <tr>
-<td><code>workflow://execution/v4</code></td>
-<td><code>WORKFLOW_EXECUTION_v4.md</code></td>
+<td><code>workflow://execution/v1</code></td>
+<td><code>WORKFLOW_EXECUTION_v1.md</code></td>
 </tr>
 <tr>
-<td><code>workflow://investing/v4</code></td>
-<td><code>WORKFLOW_INVESTING_v4.md</code></td>
+<td><code>workflow://investing/v1</code></td>
+<td><code>WORKFLOW_INVESTING_v1.md</code></td>
 </tr>
 <tr>
-<td><code>workflow://utility/v4</code></td>
-<td><code>UTILITY_PROMPTS_v4.md</code></td>
+<td><code>workflow://utility/v1</code></td>
+<td><code>UTILITY_PROMPTS_v1.md</code></td>
 </tr>
 <tr>
-<td><code>workflow://execute-referencing/v4</code></td>
-<td><code>WORKFLOW_EXECUTE_REFERENCING_v4.md</code></td>
+<td><code>workflow://execute-referencing/v1</code></td>
+<td><code>WORKFLOW_EXECUTE_REFERENCING_v1.md</code></td>
 </tr>
 </tbody>
 </table>
 <h3>Subsection resources</h3>
 <p>Fetch only a specific section of a workflow file:</p>
-<pre class="hljs"><code class="hljs">workflow://{domain}/v4/execution/input
-workflow://{domain}/v4/execution/decision-rule
-workflow://{domain}/v4/execution/sequence
-workflow://{domain}/v4/execution/command-format
-workflow://{domain}/v4/execution/operating-rules
-workflow://{domain}/v4/output/response-shape
-workflow://{domain}/v4/output/output-rules
-workflow://{domain}/v4/output/completion-rule
+<pre class="hljs"><code class="hljs">workflow://{domain}/v1/execution/input
+workflow://{domain}/v1/execution/decision-rule
+workflow://{domain}/v1/execution/sequence
+workflow://{domain}/v1/execution/command-format
+workflow://{domain}/v1/execution/operating-rules
+workflow://{domain}/v1/output/response-shape
+workflow://{domain}/v1/output/output-rules
+workflow://{domain}/v1/output/completion-rule
 </code></pre>
 <hr>
 <h2>Prompts</h2>
@@ -702,8 +702,8 @@ workflow://{domain}/v4/output/completion-rule
 </code></pre>
 <p><strong>Output:</strong></p>
 <pre class="hljs"><code class="hljs language-json"><span class="hljs-punctuation">{</span>
-  <span class="hljs-attr">&quot;resource_uri&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;workflow://products/v4&quot;</span><span class="hljs-punctuation">,</span>
-  <span class="hljs-attr">&quot;subsection_uri&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;workflow://products/v4/execution/sequence&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;resource_uri&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;workflow://products/v1&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;subsection_uri&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;workflow://products/v1/execution/sequence&quot;</span><span class="hljs-punctuation">,</span>
   <span class="hljs-attr">&quot;stage&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;pricing&quot;</span><span class="hljs-punctuation">,</span>
   <span class="hljs-attr">&quot;command_format&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;RUN: &lt;mode&gt; | &lt;domain&gt; | &lt;task&gt; | &lt;stage?&gt; | &lt;constraints?&gt;&quot;</span><span class="hljs-punctuation">,</span>
   <span class="hljs-attr">&quot;response_shape&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;{ mode, domain, main_deliverable, supporting_notes?, optimization_applied, next_action }&quot;</span>
@@ -727,7 +727,7 @@ workflow://{domain}/v4/output/completion-rule
 <pre class="hljs"><code class="hljs language-json"><span class="hljs-punctuation">{</span>
   <span class="hljs-attr">&quot;mode&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;strategy&quot;</span><span class="hljs-punctuation">,</span>
   <span class="hljs-attr">&quot;domain&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;products&quot;</span><span class="hljs-punctuation">,</span>
-  <span class="hljs-attr">&quot;main_deliverable&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Mode: strategy\nDomain: products\nStage: auto\nTask: ...\nSequence: idea -&gt; validate -&gt; ...\nUse the resource workflow://products/v4 as the source-of-truth workflow reference.&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;main_deliverable&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Mode: strategy\nDomain: products\nStage: auto\nTask: ...\nSequence: idea -&gt; validate -&gt; ...\nUse the resource workflow://products/v1 as the source-of-truth workflow reference.&quot;</span><span class="hljs-punctuation">,</span>
   <span class="hljs-attr">&quot;applied_sequence&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;idea&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;validate&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;build&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;value&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;pricing&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;offer&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;first_sale&quot;</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
   <span class="hljs-attr">&quot;optimization_applied&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">true</span></span><span class="hljs-punctuation">,</span>
   <span class="hljs-attr">&quot;next_action&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Write the one-sentence product promise and list the first five components.&quot;</span>

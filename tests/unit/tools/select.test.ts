@@ -24,7 +24,7 @@ describe('select_domain_workflow logic', () => {
     const stage = normalizeStage('products', 'idea');
     const uri = DOMAIN_URI_MAP.products;
     const subsectionUri = stage !== 'auto' ? `${uri}/execution/sequence` : undefined;
-    expect(subsectionUri).toBe('workflow://products/v4/execution/sequence');
+    expect(subsectionUri).toBe('workflow://products/v1/execution/sequence');
   });
 
   it('subsection_uri is undefined when stage is auto', () => {

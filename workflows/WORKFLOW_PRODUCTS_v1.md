@@ -1,4 +1,4 @@
-# WORKFLOW PRODUCTS v4 — Machine-Grade
+# WORKFLOW PRODUCTS v1 — Machine-Grade
 
 ## 1. PURPOSE
 Turn an idea, skill, or interest into a simple digital product with validation, value framing, pricing, offer design, and first-sale execution.

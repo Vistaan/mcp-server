@@ -1,4 +1,4 @@
-# WORKFLOW INVESTING v4 — Machine-Grade
+# WORKFLOW INVESTING v1 — Machine-Grade
 
 ## 1. PURPOSE
 Support disciplined stock and market analysis through watchlists, trade setup structure, risk review, and investing-system clarity.

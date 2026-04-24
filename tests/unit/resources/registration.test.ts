@@ -44,8 +44,8 @@ describe('resource registration', () => {
 
     expect(server.registerResource).toHaveBeenCalledTimes(9);
 
-    const result = await resources[0]!.handler(new URL('workflow://os/v4'), {});
-    expect(result.contents[0]).toEqual({ uri: 'workflow://os/v4', text: 'workflow body' });
+    const result = await resources[0]!.handler(new URL('workflow://os/v1'), {});
+    expect(result.contents[0]).toEqual({ uri: 'workflow://os/v1', text: 'workflow body' });
   });
 
   it('registers section resources, lists entries, and resolves a section', async () => {
@@ -59,7 +59,7 @@ describe('resource registration', () => {
     const listResult = await (
       section.target as { _callbacks: { list: () => Promise<{ resources: unknown[] }> } }
     )._callbacks.list();
-    const result = await section.handler(new URL('workflow://os/v4/execution/input'), {
+    const result = await section.handler(new URL('workflow://os/v1/execution/input'), {
       domain: 'os',
       sectionGroup: 'execution',
       sectionName: 'input',
@@ -81,7 +81,7 @@ describe('resource registration', () => {
     const section = resources[0]!;
 
     await expect(
-      section.handler(new URL('workflow://os/v4/bad/section'), {
+      section.handler(new URL('workflow://os/v1/bad/section'), {
         domain: 'os',
         sectionGroup: 'bad',
         sectionName: 'section',
@@ -89,7 +89,7 @@ describe('resource registration', () => {
     ).rejects.toThrow('Unsupported section');
 
     await expect(
-      section.handler(new URL('workflow://unknown/v4/execution/input'), {
+      section.handler(new URL('workflow://unknown/v1/execution/input'), {
         domain: 'unknown',
         sectionGroup: 'execution',
         sectionName: 'input',

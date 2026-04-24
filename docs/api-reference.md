@@ -6,28 +6,28 @@ All resources use the `workflow://` URI scheme and return `text/markdown`.
 
 | URI | File |
 |---|---|
-| `workflow://os/v4` | `WORKFLOW_OS_v4.md` |
-| `workflow://freelancing/v4` | `WORKFLOW_FREELANCING_v4.md` |
-| `workflow://products/v4` | `WORKFLOW_PRODUCTS_v4.md` |
-| `workflow://content/v4` | `WORKFLOW_CONTENT_v4.md` |
-| `workflow://execution/v4` | `WORKFLOW_EXECUTION_v4.md` |
-| `workflow://investing/v4` | `WORKFLOW_INVESTING_v4.md` |
-| `workflow://utility/v4` | `UTILITY_PROMPTS_v4.md` |
-| `workflow://execute-referencing/v4` | `WORKFLOW_EXECUTE_REFERENCING_v4.md` |
+| `workflow://os/v1` | `WORKFLOW_OS_v1.md` |
+| `workflow://freelancing/v1` | `WORKFLOW_FREELANCING_v1.md` |
+| `workflow://products/v1` | `WORKFLOW_PRODUCTS_v1.md` |
+| `workflow://content/v1` | `WORKFLOW_CONTENT_v1.md` |
+| `workflow://execution/v1` | `WORKFLOW_EXECUTION_v1.md` |
+| `workflow://investing/v1` | `WORKFLOW_INVESTING_v1.md` |
+| `workflow://utility/v1` | `UTILITY_PROMPTS_v1.md` |
+| `workflow://execute-referencing/v1` | `WORKFLOW_EXECUTE_REFERENCING_v1.md` |
 
 ### Subsection resources
 
 Fetch only a specific section of a workflow file:
 
 ```
-workflow://{domain}/v4/execution/input
-workflow://{domain}/v4/execution/decision-rule
-workflow://{domain}/v4/execution/sequence
-workflow://{domain}/v4/execution/command-format
-workflow://{domain}/v4/execution/operating-rules
-workflow://{domain}/v4/output/response-shape
-workflow://{domain}/v4/output/output-rules
-workflow://{domain}/v4/output/completion-rule
+workflow://{domain}/v1/execution/input
+workflow://{domain}/v1/execution/decision-rule
+workflow://{domain}/v1/execution/sequence
+workflow://{domain}/v1/execution/command-format
+workflow://{domain}/v1/execution/operating-rules
+workflow://{domain}/v1/output/response-shape
+workflow://{domain}/v1/output/output-rules
+workflow://{domain}/v1/output/completion-rule
 ```
 
 ---
@@ -121,8 +121,8 @@ Resolve which resource URI and stage to use.
 **Output:**
 ```json
 {
-  "resource_uri": "workflow://products/v4",
-  "subsection_uri": "workflow://products/v4/execution/sequence",
+  "resource_uri": "workflow://products/v1",
+  "subsection_uri": "workflow://products/v1/execution/sequence",
   "stage": "pricing",
   "command_format": "RUN: <mode> | <domain> | <task> | <stage?> | <constraints?>",
   "response_shape": "{ mode, domain, main_deliverable, supporting_notes?, optimization_applied, next_action }"
@@ -153,7 +153,7 @@ Resolve which resource URI and stage to use.
 {
   "mode": "strategy",
   "domain": "products",
-  "main_deliverable": "Mode: strategy\nDomain: products\nStage: auto\nTask: ...\nSequence: idea -> validate -> ...\nUse the resource workflow://products/v4 as the source-of-truth workflow reference.",
+  "main_deliverable": "Mode: strategy\nDomain: products\nStage: auto\nTask: ...\nSequence: idea -> validate -> ...\nUse the resource workflow://products/v1 as the source-of-truth workflow reference.",
   "applied_sequence": ["idea", "validate", "build", "value", "pricing", "offer", "first_sale"],
   "optimization_applied": true,
   "next_action": "Write the one-sentence product promise and list the first five components."

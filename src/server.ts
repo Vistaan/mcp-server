@@ -7,7 +7,7 @@ const SERVER_NAME = 'workflow-os';
 const SERVER_VERSION = '1.0.0';
 
 const SERVER_INSTRUCTIONS = [
-  'Treat the seven v4 workflow files as the source of truth.',
+  'Treat the seven v1 workflow files as the source of truth.',
   'Route first, run one main workflow, use utility prompts only in a supporting role,',
   'optimize at most once, and end with one immediate next action.',
 ].join(' ');

@@ -1,4 +1,4 @@
-# WORKFLOW CONTENT v4 — Machine-Grade
+# WORKFLOW CONTENT v1 — Machine-Grade
 
 ## 1. PURPOSE
 Create or improve persuasive content, copy, hooks, positioning, and content systems that drive attention, trust, and conversion.

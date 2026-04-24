@@ -25,7 +25,7 @@ describe('workflow services', () => {
     });
 
     expect(result.stage).toBe('validate');
-    expect(result.workflowReference).toBe('workflow://products/v4');
+    expect(result.workflowReference).toBe('workflow://products/v1');
     expect(result.stageOutcome).toContain('buyer pain');
     expect(result.supportingNotes.length).toBeGreaterThan(0);
   });
@@ -76,9 +76,9 @@ describe('workflow services', () => {
     const snapshot = metrics.snapshot();
     expect(snapshot.counters).toEqual(
       expect.objectContaining({
-        'workflow_file_cache_miss|file:WORKFLOW_PRODUCTS_v4.md': 1,
-        'workflow_file_singleflight_join|file:WORKFLOW_PRODUCTS_v4.md': 1,
-        'workflow_file_cache_hit|file:WORKFLOW_PRODUCTS_v4.md': 1,
+        'workflow_file_cache_miss|file:WORKFLOW_PRODUCTS_v1.md': 1,
+        'workflow_file_singleflight_join|file:WORKFLOW_PRODUCTS_v1.md': 1,
+        'workflow_file_cache_hit|file:WORKFLOW_PRODUCTS_v1.md': 1,
       }),
     );
   });

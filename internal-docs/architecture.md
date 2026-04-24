@@ -2,7 +2,7 @@
 
 ## What This Is
 
-`workflow-os-mcp` is a Model Context Protocol (MCP) server that wraps seven authoritative workflow Markdown files as runtime-accessible resources, prompts, and tools. It does not contain its own intelligence — it exposes the v4 workflow files so any MCP client (Claude Desktop, API clients) can route tasks through a structured execution framework.
+`workflow-os-mcp` is a Model Context Protocol (MCP) server that wraps seven authoritative workflow Markdown files as runtime-accessible resources, prompts, and tools. It does not contain its own intelligence — it exposes the v1 workflow files so any MCP client (Claude Desktop, API clients) can route tasks through a structured execution framework.
 
 ## Core Design Principle
 
@@ -106,18 +106,18 @@ src/tools/run.ts
 ## Resource URI Scheme
 
 ```
-workflow://os/v4                    ← full WORKFLOW_OS_v4.md
-workflow://freelancing/v4           ← full WORKFLOW_FREELANCING_v4.md
-workflow://products/v4              ← ...
-workflow://content/v4
-workflow://execution/v4
-workflow://investing/v4
-workflow://utility/v4
-workflow://execute-referencing/v4   ← dispatcher/orchestration policy
+workflow://os/v1                    ← full WORKFLOW_OS_v1.md
+workflow://freelancing/v1           ← full WORKFLOW_FREELANCING_v1.md
+workflow://products/v1              ← ...
+workflow://content/v1
+workflow://execution/v1
+workflow://investing/v1
+workflow://utility/v1
+workflow://execute-referencing/v1   ← dispatcher/orchestration policy
 
-workflow://{domain}/v4/execution/input         ← subsection
-workflow://{domain}/v4/execution/sequence      ← subsection
-workflow://{domain}/v4/output/response-shape   ← subsection
+workflow://{domain}/v1/execution/input         ← subsection
+workflow://{domain}/v1/execution/sequence      ← subsection
+workflow://{domain}/v1/output/response-shape   ← subsection
 ```
 
 ## The 6 Modes × 7 Domains Grid

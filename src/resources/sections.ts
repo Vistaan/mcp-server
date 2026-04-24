@@ -16,7 +16,7 @@ const sectionResourceParamsSchema = z.object({
 export function registerSectionResources(server: McpServer): void {
   server.registerResource(
     'workflow-sections',
-    new ResourceTemplate('workflow://{domain}/v4/{sectionGroup}/{sectionName}', {
+    new ResourceTemplate('workflow://{domain}/v1/{sectionGroup}/{sectionName}', {
       list: () => ({
         resources: SECTION_SEGMENTS.flatMap((segment) =>
           (Object.keys(DOMAIN_URI_MAP) as Domain[]).map((domain) => ({

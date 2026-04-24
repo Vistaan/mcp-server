@@ -82,7 +82,7 @@ describe('runWorkflowSequenceOutputSchema', () => {
       mode: 'build',
       domain: 'products',
       stage: 'validate',
-      workflow_reference: 'workflow://products/v4',
+      workflow_reference: 'workflow://products/v1',
       stage_outcome: 'Confirm demand',
       execution_summary: 'summary',
       recommendations: ['one'],

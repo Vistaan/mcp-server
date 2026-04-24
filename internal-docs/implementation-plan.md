@@ -190,4 +190,4 @@ Copy to `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS
 4. `pnpm run lint` — no ESLint errors
 5. `pnpm run test` — all unit tests pass; integration smoke test passes
 6. `WORKFLOW_ROOT=/path/to/workflows npm run start` — server starts on stdio, logs to stderr
-7. Add to Claude Desktop config → verify `route_task` tool, `run_freelancing_workflow` prompt, and `workflow://os/v4` resource all resolve in Claude Desktop
+7. Add to Claude Desktop config → verify `route_task` tool, `run_freelancing_workflow` prompt, and `workflow://os/v1` resource all resolve in Claude Desktop

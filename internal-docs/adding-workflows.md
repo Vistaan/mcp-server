@@ -4,9 +4,9 @@
 
 ### 1. Add the Markdown file
 
-Drop the v4 workflow file in `workflows/`:
+Drop the v1 workflow file in `workflows/`:
 ```
-workflows/WORKFLOW_MYNEWTHING_v4.md
+workflows/WORKFLOW_MYNEWTHING_v1.md
 ```
 
 ### 2. Register it in `src/core/catalog.ts`
@@ -15,10 +15,10 @@ Add to `DOMAIN_FILES`, `DOMAIN_URI_MAP`, `DOMAIN_SEQUENCES`, and `STATIC_RESOURC
 
 ```typescript
 // DOMAIN_FILES
-mynewthing: 'WORKFLOW_MYNEWTHING_v4.md',
+mynewthing: 'WORKFLOW_MYNEWTHING_v1.md',
 
 // DOMAIN_URI_MAP
-mynewthing: 'workflow://mynewthing/v4',
+mynewthing: 'workflow://mynewthing/v1',
 
 // DOMAIN_SEQUENCES
 mynewthing: ['stage1', 'stage2', 'stage3'],
@@ -29,7 +29,7 @@ mynewthing: ['stage1', 'stage2', 'stage3'],
   domain: 'mynewthing',
   uri: DOMAIN_URI_MAP.mynewthing,
   fileName: DOMAIN_FILES.mynewthing,
-  title: 'Workflow My New Thing v4',
+  title: 'Workflow My New Thing v1',
   description: 'Short description.',
   mimeType: 'text/markdown',
 },

@@ -50,7 +50,7 @@ make test-coverage    # with coverage report
 
 ## Workflow Files
 
-The 8 v4 Markdown workflow files are **bundled** in `workflows/`. They are automatically found by the server. No environment variables needed for local development.
+The 8 v1 Markdown workflow files are **bundled** in `workflows/`. They are automatically found by the server. No environment variables needed for local development.
 
 To use custom/external workflow files:
 ```bash

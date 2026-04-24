@@ -109,7 +109,7 @@ Registers 9 static resources via `server.registerResource()`. Calls `readWorkflo
 
 ## `src/resources/sections.ts`
 
-Registers one `ResourceTemplate` for subsection URIs (`workflow://{domain}/v4/{group}/{name}`). Calls `extractMarkdownSection` to serve specific sections.
+Registers one `ResourceTemplate` for subsection URIs (`workflow://{domain}/v1/{group}/{name}`). Calls `extractMarkdownSection` to serve specific sections.
 
 ---
 

@@ -1,7 +1,7 @@
-# WORKFLOW_EXECUTE_REFERENCING_v4
+# WORKFLOW_EXECUTE_REFERENCING_v1
 
 ## 1. PURPOSE
-This file is the execution dispatcher for the v4 machine-grade workflow system.
+This file is the execution dispatcher for the v1 machine-grade workflow system.
 
 It tells the agent what to do next after receiving a user request.
 It does not replace the seven domain files. It routes into them, controls execution order, enforces minimal branching, and ensures every run ends with one clear next action.
@@ -27,26 +27,26 @@ Expected input:
 - optional constraints
 
 Available referenced files:
-- `WORKFLOW_OS_v4.md`
-- `WORKFLOW_FREELANCING_v4.md`
-- `WORKFLOW_PRODUCTS_v4.md`
-- `WORKFLOW_CONTENT_v4.md`
-- `WORKFLOW_EXECUTION_v4.md`
-- `WORKFLOW_INVESTING_v4.md`
-- `UTILITY_PROMPTS_v4.md`
+- `WORKFLOW_OS_v1.md`
+- `WORKFLOW_FREELANCING_v1.md`
+- `WORKFLOW_PRODUCTS_v1.md`
+- `WORKFLOW_CONTENT_v1.md`
+- `WORKFLOW_EXECUTION_v1.md`
+- `WORKFLOW_INVESTING_v1.md`
+- `UTILITY_PROMPTS_v1.md`
 
 ### 3.2 DECISION RULE
 Apply this routing order exactly.
 
-1. If the request is vague, conflicted, or underspecified, start with `WORKFLOW_OS_v4.md`.
-2. If the request is about services, offers, niches, pricing, outreach, portfolio, freelancing, or client acquisition, run `WORKFLOW_FREELANCING_v4.md`.
-3. If the request is about product ideas, validation, packaging, pricing, launch, or first sales, run `WORKFLOW_PRODUCTS_v4.md`.
-4. If the request is about hooks, copy, messaging, content strategy, posts, persuasion, or conversion, run `WORKFLOW_CONTENT_v4.md`.
-5. If the request is about confusion, procrastination, prioritization, momentum, focus, or task simplification, run `WORKFLOW_EXECUTION_v4.md`.
-6. If the request is about stocks, watchlists, trade setup, market interpretation, or investing process, run `WORKFLOW_INVESTING_v4.md`.
-7. If the request is not a primary workflow but needs rewriting, compression, restructuring, leverage analysis, blind-spot analysis, or tone adaptation, run `UTILITY_PROMPTS_v4.md` only after a primary workflow has produced a main output.
+1. If the request is vague, conflicted, or underspecified, start with `WORKFLOW_OS_v1.md`.
+2. If the request is about services, offers, niches, pricing, outreach, portfolio, freelancing, or client acquisition, run `WORKFLOW_FREELANCING_v1.md`.
+3. If the request is about product ideas, validation, packaging, pricing, launch, or first sales, run `WORKFLOW_PRODUCTS_v1.md`.
+4. If the request is about hooks, copy, messaging, content strategy, posts, persuasion, or conversion, run `WORKFLOW_CONTENT_v1.md`.
+5. If the request is about confusion, procrastination, prioritization, momentum, focus, or task simplification, run `WORKFLOW_EXECUTION_v1.md`.
+6. If the request is about stocks, watchlists, trade setup, market interpretation, or investing process, run `WORKFLOW_INVESTING_v1.md`.
+7. If the request is not a primary workflow but needs rewriting, compression, restructuring, leverage analysis, blind-spot analysis, or tone adaptation, run `UTILITY_PROMPTS_v1.md` only after a primary workflow has produced a main output.
 8. If multiple domains appear in one request, choose one primary workflow first, complete the main output there, then use one secondary workflow only if it directly improves the same deliverable.
-9. Never start with `UTILITY_PROMPTS_v4.md` when a domain workflow clearly applies.
+9. Never start with `UTILITY_PROMPTS_v1.md` when a domain workflow clearly applies.
 10. Never run more than one optimization pass unless explicitly requested.
 
 ### 3.3 SEQUENCE
@@ -62,12 +62,12 @@ Follow this sequence on every run.
 3. Open and apply the selected workflow's sequence.
 4. Produce one main deliverable only.
 5. Check whether the output needs one utility-layer improvement.
-6. If needed, apply exactly one utility pass from `UTILITY_PROMPTS_v4.md`.
+6. If needed, apply exactly one utility pass from `UTILITY_PROMPTS_v1.md`.
 7. Convert the result into an actionable response.
 8. End with one immediate next concrete step.
 
 Fallback sequence:
-1. Run `WORKFLOW_OS_v4.md` if the request does not map cleanly.
+1. Run `WORKFLOW_OS_v1.md` if the request does not map cleanly.
 2. Use its routing logic to select the primary domain file.
 3. Resume the standard sequence above.
 
@@ -75,13 +75,13 @@ Fallback sequence:
 Use these command formats internally when deciding what to run next.
 
 ```text
-RUN: WORKFLOW_OS_v4 -> classify the request -> choose one primary workflow
-RUN: WORKFLOW_FREELANCING_v4 -> build service / pricing / outreach / growth output
-RUN: WORKFLOW_PRODUCTS_v4 -> build product / validation / offer / first-sale output
-RUN: WORKFLOW_CONTENT_v4 -> build copy / hooks / content / persuasion output
-RUN: WORKFLOW_EXECUTION_v4 -> build focus / priority / action / sprint output
-RUN: WORKFLOW_INVESTING_v4 -> build analysis / watchlist / trade / system output
-RUN: UTILITY_PROMPTS_v4 -> improve clarity / persuasion / structure / leverage / compression
+RUN: WORKFLOW_OS_v1 -> classify the request -> choose one primary workflow
+RUN: WORKFLOW_FREELANCING_v1 -> build service / pricing / outreach / growth output
+RUN: WORKFLOW_PRODUCTS_v1 -> build product / validation / offer / first-sale output
+RUN: WORKFLOW_CONTENT_v1 -> build copy / hooks / content / persuasion output
+RUN: WORKFLOW_EXECUTION_v1 -> build focus / priority / action / sprint output
+RUN: WORKFLOW_INVESTING_v1 -> build analysis / watchlist / trade / system output
+RUN: UTILITY_PROMPTS_v1 -> improve clarity / persuasion / structure / leverage / compression
 ```
 
 Allowed chaining patterns:
@@ -148,7 +148,7 @@ Immediate next action:
 - `Utility pass used` must say `None` if no utility layer was needed.
 - `Immediate next action` must be singular, concrete, and executable.
 - If a second file was referenced, it must be supportive, not competing.
-- If the task was unclear, say that routing started from `WORKFLOW_OS_v4.md`.
+- If the task was unclear, say that routing started from `WORKFLOW_OS_v1.md`.
 
 ### 4.3 COMPLETION RULE
 A run is complete only when:
