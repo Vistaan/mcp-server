@@ -755,6 +755,16 @@ workflow://{domain}/v1/output/completion-rule
 <p>Available <code>utility_name</code> values:
 <code>clarity_rewrite</code> · <code>conversion_rewrite</code> · <code>tone_calibration</code> · <code>structure_rebuild</code> · <code>audience_rewrite</code> · <code>impact_compressor</code> · <code>blind_spot_finder</code> · <code>shortcut_strategy</code> · <code>ultra_leverage</code> · <code>momentum_amplifier</code></p>
 <hr>
+<h2>Operational HTTP Endpoints</h2>
+<h3><code>GET /health</code></h3>
+<p>Returns readiness state plus workflow file metadata.</p>
+<h3><code>GET /metrics</code></h3>
+<p>Returns lightweight in-memory counters and duration aggregates for the HTTP transport. This is intended for operational inspection and basic monitoring.</p>
+<h3><code>GET /metrics/prometheus</code></h3>
+<p>Returns the current in-process metrics in Prometheus text exposition format.</p>
+<h3><code>GET /docs-api.json</code></h3>
+<p>Returns the generated OpenAPI document. In production, set <code>PUBLIC_BASE_URL</code> so the documented server URL does not depend on request headers.</p>
+<hr>
 <h3><code>generate_next_action</code></h3>
 <p>Return exactly one immediate next step.</p>
 <p><strong>Input:</strong></p>

@@ -78,9 +78,26 @@ Typical override example:
 }
 ```
 
+## Online MCP Server
+
+A hosted instance is available at `mcp.vistaan.com` if you prefer not to run the server locally.
+
+```json
+{
+  "mcpServers": {
+    "workflow-os": {
+      "transport": "http",
+      "url": "https://mcp.vistaan.com/mcp"
+    }
+  }
+}
+```
+
+See [Using the Online MCP Server](./online-usage.md) for full details.
+
 ## When To Use HTTP Instead
 
-Use HTTP only if a client explicitly asks for an MCP endpoint URL instead of launching a local command.
+Use HTTP only if a client explicitly asks for a MCP endpoint URL instead of launching a local command.
 
 Start the server:
 

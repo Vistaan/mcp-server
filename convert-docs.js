@@ -571,6 +571,7 @@ const files = [
   { src: 'docs/api-reference.md', dest: 'docs/api-reference.html', title: 'API Reference' },
   { src: 'docs/setup.md', dest: 'docs/setup.html', title: 'Setup Guide' },
   { src: 'docs/claude-desktop.md', dest: 'docs/claude-desktop.html', title: 'Claude Desktop Integration' },
+  { src: 'docs/online-usage.md', dest: 'docs/online-usage.html', title: 'Using the Online MCP Server' },
 ];
 
 const htmlTargetBySource = new Map(files.map((file) => [file.src, file.dest]));
@@ -583,18 +584,14 @@ function rewriteMarkdownLinks(html, currentFile) {
       return `href="${href}"`;
     }
 
-    const normalizedSourcePath = path
-      .normalize(path.join(path.dirname(currentFile.src), rawPath))
-      .replace(/\\/g, '/');
+    const normalizedSourcePath = path.normalize(path.join(path.dirname(currentFile.src), rawPath)).replace(/\\/g, '/');
     const targetHtmlPath = htmlTargetBySource.get(normalizedSourcePath);
 
     if (!targetHtmlPath) {
       return `href="${href}"`;
     }
 
-    const rewrittenPath = path
-      .relative(path.dirname(currentFile.dest), targetHtmlPath)
-      .replace(/\\/g, '/');
+    const rewrittenPath = path.relative(path.dirname(currentFile.dest), targetHtmlPath).replace(/\\/g, '/');
     const normalizedPath =
       rewrittenPath.startsWith('.') || rewrittenPath.startsWith('/') ? rewrittenPath : `./${rewrittenPath}`;
     const finalPath = hash ? `${normalizedPath}#${hash}` : normalizedPath;

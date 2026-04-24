@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MCP Client Configuration - workflow-os-mcp</title>
+    <title>Using the Online MCP Server - workflow-os-mcp</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github.min.css">
     <link rel="stylesheet" href="../styles.css">
@@ -513,73 +513,37 @@
     <!-- Content -->
     <main class="markdown-container">
         <article class="markdown-body">
-            <h1>Generic MCP Client Configuration</h1>
-<p>Use this guide for any client that can launch an MCP server over <code>stdio</code> by providing:</p>
+            <h1>Using the Online MCP Server</h1>
+<p>This guide covers using the hosted instance of <code>workflow-os-mcp</code> at <code>mcp.vistaan.com</code> instead of running your own local server.</p>
+<h2>Overview</h2>
+<p>The online version provides the same MCP capabilities without local installation. Access the server via HTTP at:</p>
 <ul>
-<li>a command</li>
-<li>command arguments</li>
-<li>optional environment variables</li>
+<li><strong>Base URL:</strong> <code>https://mcp.vistaan.com</code></li>
+<li><strong>MCP Endpoint:</strong> <code>https://mcp.vistaan.com/mcp</code></li>
+<li><strong>Health Check:</strong> <code>https://mcp.vistaan.com/health</code></li>
+<li><strong>Interactive Docs:</strong> <code>https://mcp.vistaan.com/docs</code></li>
+<li><strong>OpenAPI Spec:</strong> <code>https://mcp.vistaan.com/docs-api.json</code></li>
 </ul>
-<p>That generic pattern is the same for:</p>
+<h2>When to Use the Online Version</h2>
+<p>Use the online MCP server when:</p>
 <ul>
-<li>Codex app</li>
-<li>Codex VS Code extension</li>
-<li>Claude Code VS Code extension</li>
-<li>Claude web</li>
-<li>ChatGPT web</li>
-<li>Kimi web</li>
-<li>Kimi Code VS Code extension</li>
-<li>Kimi Claw</li>
-<li>Open Claw</li>
+<li>You want to start immediately without installation</li>
+<li>Your client supports HTTP MCP connections</li>
+<li>You don’t need to customize workflow files</li>
+<li>You want automatic updates and zero maintenance</li>
+<li>Local resource constraints prevent running the server</li>
 </ul>
-<p>The exact UI, JSON field names, and file location may differ by client, but the server contract is the same.</p>
-<h2>Build First</h2>
-<pre class="hljs"><code class="hljs language-bash">pnpm install
-pnpm run build
-</code></pre>
-<h2>Generic Stdio Configuration</h2>
-<p>Most MCP-capable clients need the equivalent of:</p>
-<pre class="hljs"><code class="hljs language-json"><span class="hljs-punctuation">{</span>
-  <span class="hljs-attr">&quot;mcpServers&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
-    <span class="hljs-attr">&quot;workflow-os&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
-      <span class="hljs-attr">&quot;command&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;node&quot;</span><span class="hljs-punctuation">,</span>
-      <span class="hljs-attr">&quot;args&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;/absolute/path/to/mcp-server/dist/index.js&quot;</span><span class="hljs-punctuation">]</span>
-    <span class="hljs-punctuation">}</span>
-  <span class="hljs-punctuation">}</span>
-<span class="hljs-punctuation">}</span>
-</code></pre>
-<p>If the client exposes form fields instead of raw JSON, map them like this:</p>
+<h2>When to Use Local/Offline</h2>
+<p>Run your own instance when:</p>
 <ul>
-<li>server name: <code>workflow-os</code></li>
-<li>transport: <code>stdio</code></li>
-<li>command: <code>node</code></li>
-<li>args: <code>/absolute/path/to/mcp-server/dist/index.js</code></li>
-<li>env: optional</li>
+<li>Your client only supports stdio transport</li>
+<li>You need custom workflow files</li>
+<li>You require network isolation</li>
+<li>You want full control over the environment</li>
 </ul>
-<h2>Optional Environment Variables</h2>
-<p>You usually do not need any environment variables because the bundled workflow files are included in the repo.</p>
-<p>If your client allows custom environment variables, these are supported:</p>
-<ul>
-<li><code>WORKFLOW_ROOT</code></li>
-<li><code>MCP_TRANSPORT</code></li>
-<li><code>MCP_PORT</code></li>
-</ul>
-<p><code>MCP_PORT</code> is configurable. The app currently defaults to <code>3000</code> only if you do not provide a value.</p>
-<p>Typical override example:</p>
-<pre class="hljs"><code class="hljs language-json"><span class="hljs-punctuation">{</span>
-  <span class="hljs-attr">&quot;mcpServers&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
-    <span class="hljs-attr">&quot;workflow-os&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
-      <span class="hljs-attr">&quot;command&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;node&quot;</span><span class="hljs-punctuation">,</span>
-      <span class="hljs-attr">&quot;args&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;/absolute/path/to/mcp-server/dist/index.js&quot;</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
-      <span class="hljs-attr">&quot;env&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
-        <span class="hljs-attr">&quot;WORKFLOW_ROOT&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;/absolute/path/to/custom/workflows&quot;</span>
-      <span class="hljs-punctuation">}</span>
-    <span class="hljs-punctuation">}</span>
-  <span class="hljs-punctuation">}</span>
-<span class="hljs-punctuation">}</span>
-</code></pre>
-<h2>Online MCP Server</h2>
-<p>A hosted instance is available at <code>mcp.vistaan.com</code> if you prefer not to run the server locally.</p>
+<h2>Connecting to the Online Server</h2>
+<h3>HTTP Mode Clients</h3>
+<p>For clients that support HTTP MCP endpoints, configure:</p>
 <pre class="hljs"><code class="hljs language-json"><span class="hljs-punctuation">{</span>
   <span class="hljs-attr">&quot;mcpServers&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
     <span class="hljs-attr">&quot;workflow-os&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
@@ -589,36 +553,15 @@ pnpm run build
   <span class="hljs-punctuation">}</span>
 <span class="hljs-punctuation">}</span>
 </code></pre>
-<p>See <a href="./online-usage.html">Using the Online MCP Server</a> for full details.</p>
-<h2>When To Use HTTP Instead</h2>
-<p>Use HTTP only if a client explicitly asks for a MCP endpoint URL instead of launching a local command.</p>
-<p>Start the server:</p>
-<pre class="hljs"><code class="hljs language-bash">MCP_TRANSPORT=http MCP_PORT=&lt;port&gt; node dist/index.js
-<span class="hljs-comment"># Example: MCP_TRANSPORT=http MCP_PORT=3000 node dist/index.js</span>
-</code></pre>
-<p>Then provide the client with:</p>
+<p>The exact configuration format varies by client. Some clients may call this:</p>
 <ul>
-<li>base URL: <code>http://localhost:&lt;port&gt;</code></li>
-<li>MCP endpoint: <code>http://localhost:&lt;port&gt;/mcp</code></li>
-<li>liveness check: <code>http://localhost:&lt;port&gt;/livez</code></li>
-<li>readiness check: <code>http://localhost:&lt;port&gt;/readyz</code></li>
-<li>legacy health check: <code>http://localhost:&lt;port&gt;/health</code></li>
+<li>“Remote MCP”</li>
+<li>“HTTP MCP”</li>
+<li>“Server URL”</li>
+<li>“Endpoint”</li>
 </ul>
-<h2>Verify The Integration</h2>
-<p>After adding the server to a client:</p>
-<ol>
-<li>Restart or refresh the client</li>
-<li>Open a new session or workspace</li>
-<li>Confirm the tools appear:
-<ul>
-<li><code>route_task</code></li>
-<li><code>select_domain_workflow</code></li>
-<li><code>run_workflow_sequence</code></li>
-<li><code>apply_utility_prompt</code></li>
-<li><code>generate_next_action</code></li>
-</ul>
-</li>
-<li>Confirm the resources appear:
+<h3>Available Resources</h3>
+<p>The online server exposes the same bundled workflow resources:</p>
 <ul>
 <li><code>workflow://os/v1</code></li>
 <li><code>workflow://freelancing/v1</code></li>
@@ -630,40 +573,111 @@ pnpm run build
 <li><code>workflow://execute-referencing/v1</code></li>
 <li><code>workflow://design-reference/v1</code></li>
 </ul>
-</li>
-</ol>
-<h2>Recommended Usage Pattern</h2>
-<p>For most clients, the best flow is:</p>
-<ol>
-<li>Call <code>route_task</code></li>
-<li>Optionally inspect a workflow resource</li>
-<li>Call <code>run_workflow_sequence</code></li>
-<li>Optionally call <code>apply_utility_prompt</code> once</li>
-<li>End with the returned <code>next_action</code></li>
-</ol>
+<h3>Available Tools</h3>
+<p>All standard tools work identically to the local version:</p>
+<ul>
+<li><code>route_task</code></li>
+<li><code>select_domain_workflow</code></li>
+<li><code>run_workflow_sequence</code></li>
+<li><code>apply_utility_prompt</code></li>
+<li><code>generate_next_action</code></li>
+</ul>
+<h2>Rate Limits and Usage</h2>
+<p>The online service may impose:</p>
+<ul>
+<li>Rate limits on requests</li>
+<li>Session timeouts for long-running connections</li>
+<li>Limits on concurrent connections</li>
+</ul>
+<p>For high-volume or production use, consider running your own instance.</p>
+<h2>API Endpoints</h2>
+<table>
+<thead>
+<tr>
+<th>Endpoint</th>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/mcp</code></td>
+<td>POST</td>
+<td>MCP JSON-RPC messages</td>
+</tr>
+<tr>
+<td><code>/mcp</code></td>
+<td>GET</td>
+<td>MCP SSE stream (best-effort)</td>
+</tr>
+<tr>
+<td><code>/docs</code></td>
+<td>GET</td>
+<td>Interactive Swagger UI</td>
+</tr>
+<tr>
+<td><code>/docs-api.json</code></td>
+<td>GET</td>
+<td>OpenAPI specification</td>
+</tr>
+<tr>
+<td><code>/health</code></td>
+<td>GET</td>
+<td>Health status</td>
+</tr>
+<tr>
+<td><code>/livez</code></td>
+<td>GET</td>
+<td>Liveness probe</td>
+</tr>
+<tr>
+<td><code>/readyz</code></td>
+<td>GET</td>
+<td>Readiness probe</td>
+</tr>
+</tbody>
+</table>
+<h2>Example: Testing the Connection</h2>
+<pre class="hljs"><code class="hljs language-bash"><span class="hljs-comment"># Check health</span>
+curl https://mcp.vistaan.com/health
+
+<span class="hljs-comment"># View OpenAPI spec</span>
+curl https://mcp.vistaan.com/docs-api.json
+
+<span class="hljs-comment"># Interactive docs (open in browser)</span>
+open https://mcp.vistaan.com/docs
+</code></pre>
+<h2>Privacy Considerations</h2>
+<p>When using the online MCP server:</p>
+<ul>
+<li>Task content is sent to the server for processing</li>
+<li>Workflow content is served from the server’s bundled files</li>
+<li>No persistent storage of your requests</li>
+</ul>
+<p>For sensitive workflows, running a local instance is recommended.</p>
 <h2>Troubleshooting</h2>
-<p>If the server does not start:</p>
+<p><strong>Connection refused:</strong></p>
 <ul>
-<li>confirm <code>dist/index.js</code> exists</li>
-<li>run <code>pnpm run build</code></li>
-<li>confirm the configured path is absolute</li>
-<li>confirm the client is allowed to launch local commands</li>
+<li>Verify the URL is <code>https://mcp.vistaan.com/mcp</code></li>
+<li>Check that your client supports HTTP transport</li>
 </ul>
-<p>If the client expects HTTP instead of <code>stdio</code>:</p>
+<p><strong>Timeout errors:</strong></p>
 <ul>
-<li>run the server with <code>MCP_TRANSPORT=http</code></li>
-<li>provide <code>http://localhost:&lt;your-configured-port&gt;/mcp</code></li>
+<li>Large or complex workflows may hit timeout limits</li>
+<li>Try breaking tasks into smaller chunks</li>
 </ul>
-<p>If the wrong workflow files are being used:</p>
+<p><strong>Client not compatible:</strong></p>
 <ul>
-<li>set <code>WORKFLOW_ROOT</code> explicitly</li>
+<li>Some clients only support stdio transport</li>
+<li>These require running the server locally</li>
 </ul>
-<p>If you need logs:</p>
-<ul>
-<li>this server writes structured JSON logs to <code>stderr</code></li>
-<li>set <code>LOG_LEVEL=debug</code> for verbose troubleshooting output</li>
-<li>many MCP clients expose these logs in a developer console, logs panel, or extension output pane</li>
-</ul>
+<h2>Switching Between Online and Local</h2>
+<p>Your MCP client configuration determines which server is used. To switch:</p>
+<ol>
+<li><strong>To online:</strong> Change server URL to <code>https://mcp.vistaan.com/mcp</code></li>
+<li><strong>To local:</strong> Change to local stdio command or <code>http://localhost:3000/mcp</code></li>
+</ol>
+<p>The tools, resources, and workflow behavior are identical in both modes.</p>
 
         </article>
     </main>

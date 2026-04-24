@@ -526,7 +526,9 @@
 <span class="hljs-comment"># Swagger UI: http://localhost:&lt;port&gt;/docs</span>
 <span class="hljs-comment"># OpenAPI JSON: http://localhost:&lt;port&gt;/docs-api.json</span>
 <span class="hljs-comment"># MCP endpoint: http://localhost:&lt;port&gt;/mcp</span>
-<span class="hljs-comment"># Health: http://localhost:&lt;port&gt;/health</span>
+<span class="hljs-comment"># Liveness: http://localhost:&lt;port&gt;/livez</span>
+<span class="hljs-comment"># Readiness: http://localhost:&lt;port&gt;/readyz</span>
+<span class="hljs-comment"># Legacy health: http://localhost:&lt;port&gt;/health</span>
 </code></pre>
 <h3>docker-compose (recommended for local/staging)</h3>
 <pre class="hljs"><code class="hljs language-bash">make compose-up     <span class="hljs-comment"># build + start in background</span>
@@ -576,9 +578,19 @@ make compose-down   <span class="hljs-comment"># stop</span>
 <td>Raw OpenAPI JSON</td>
 </tr>
 <tr>
+<td><code>/livez</code></td>
+<td>GET</td>
+<td>Liveness response</td>
+</tr>
+<tr>
+<td><code>/readyz</code></td>
+<td>GET</td>
+<td>Readiness response</td>
+</tr>
+<tr>
 <td><code>/health</code></td>
 <td>GET</td>
-<td>Health response</td>
+<td>Legacy health response</td>
 </tr>
 <tr>
 <td><code>/mcp</code></td>
@@ -669,6 +681,12 @@ make k8s-restart
 </tbody>
 </table>
 <p>Adjust per your cluster capacity. The server is stateless — scale replicas freely.</p>
+<p>The default manifest also includes:</p>
+<ul>
+<li>a <code>startupProbe</code> on <code>/livez</code> so cold starts do not immediately fail liveness</li>
+<li>a <code>livenessProbe</code> on <code>/livez</code></li>
+<li>a <code>readinessProbe</code> on <code>/readyz</code></li>
+</ul>
 <hr>
 <h2>Environment Variables</h2>
 <p>All env vars are set in <code>k8s/configmap.yaml</code> for Kubernetes or in <code>docker-compose.yml</code> for Compose.</p>
@@ -700,6 +718,21 @@ make k8s-restart
 <td><code>NODE_ENV</code></td>
 <td><code>production</code></td>
 <td>Node environment</td>
+</tr>
+<tr>
+<td><code>LOG_LEVEL</code></td>
+<td><code>info</code></td>
+<td>Structured stderr log threshold: <code>debug</code>, <code>info</code>, <code>warn</code>, or <code>error</code></td>
+</tr>
+<tr>
+<td><code>PUBLIC_BASE_URL</code></td>
+<td>unset</td>
+<td>Canonical base URL for generated API docs and OpenAPI server metadata</td>
+</tr>
+<tr>
+<td><code>METRICS_ENABLED</code></td>
+<td><code>true</code></td>
+<td>Expose <code>/metrics</code> and <code>/metrics/prometheus</code> when enabled</td>
 </tr>
 </tbody>
 </table>
@@ -737,9 +770,29 @@ make k8s-restart
 </thead>
 <tbody>
 <tr>
+<td><code>/livez</code></td>
+<td>GET</td>
+<td>Returns process liveness for container/orchestrator probes</td>
+</tr>
+<tr>
+<td><code>/readyz</code></td>
+<td>GET</td>
+<td>Returns readiness status plus workflow metadata</td>
+</tr>
+<tr>
 <td><code>/health</code></td>
 <td>GET</td>
-<td>Returns <code>{&quot;status&quot;:&quot;ok&quot;}</code> — used by K8s liveness + readiness probes</td>
+<td>Legacy combined readiness endpoint</td>
+</tr>
+<tr>
+<td><code>/metrics</code></td>
+<td>GET</td>
+<td>Returns in-process counters and duration aggregates</td>
+</tr>
+<tr>
+<td><code>/metrics/prometheus</code></td>
+<td>GET</td>
+<td>Returns Prometheus text exposition output</td>
 </tr>
 <tr>
 <td><code>/mcp</code></td>
@@ -760,8 +813,20 @@ make k8s-restart
 </table>
 <h3>Manual health check</h3>
 <pre class="hljs"><code class="hljs language-bash"><span class="hljs-comment"># If you keep your current local Docker/K8s port mapping, use:</span>
-curl http://localhost:&lt;port&gt;/health
+curl http://localhost:&lt;port&gt;/livez
 <span class="hljs-comment"># {&quot;status&quot;:&quot;ok&quot;,&quot;service&quot;:&quot;workflow-os-mcp&quot;,&quot;transport&quot;:&quot;http&quot;}</span>
+
+curl http://localhost:&lt;port&gt;/readyz
+<span class="hljs-comment"># {&quot;status&quot;:&quot;ok&quot;,&quot;service&quot;:&quot;workflow-os-mcp&quot;,&quot;transport&quot;:&quot;http&quot;,...}</span>
+
+curl http://localhost:&lt;port&gt;/health
+<span class="hljs-comment"># {&quot;status&quot;:&quot;ok&quot;,&quot;service&quot;:&quot;workflow-os-mcp&quot;,&quot;transport&quot;:&quot;http&quot;,...}</span>
+
+curl http://localhost:&lt;port&gt;/metrics
+<span class="hljs-comment"># {&quot;service&quot;:&quot;workflow-os-mcp&quot;,&quot;transport&quot;:&quot;http&quot;,&quot;counters&quot;:{...},&quot;durations&quot;:{...}}</span>
+
+curl http://localhost:&lt;port&gt;/metrics/prometheus
+<span class="hljs-comment"># http_request_started_total{method=&quot;POST&quot;} 1</span>
 </code></pre>
 
         </article>
