@@ -4,15 +4,15 @@
 
 All resources use the `workflow://` URI scheme and return `text/markdown`.
 
-| URI | File |
-|---|---|
-| `workflow://os/v1` | `WORKFLOW_OS_v1.md` |
-| `workflow://freelancing/v1` | `WORKFLOW_FREELANCING_v1.md` |
-| `workflow://products/v1` | `WORKFLOW_PRODUCTS_v1.md` |
-| `workflow://content/v1` | `WORKFLOW_CONTENT_v1.md` |
-| `workflow://execution/v1` | `WORKFLOW_EXECUTION_v1.md` |
-| `workflow://investing/v1` | `WORKFLOW_INVESTING_v1.md` |
-| `workflow://utility/v1` | `UTILITY_PROMPTS_v1.md` |
+| URI                                 | File                                 |
+| ----------------------------------- | ------------------------------------ |
+| `workflow://os/v1`                  | `WORKFLOW_OS_v1.md`                  |
+| `workflow://freelancing/v1`         | `WORKFLOW_FREELANCING_v1.md`         |
+| `workflow://products/v1`            | `WORKFLOW_PRODUCTS_v1.md`            |
+| `workflow://content/v1`             | `WORKFLOW_CONTENT_v1.md`             |
+| `workflow://execution/v1`           | `WORKFLOW_EXECUTION_v1.md`           |
+| `workflow://investing/v1`           | `WORKFLOW_INVESTING_v1.md`           |
+| `workflow://utility/v1`             | `UTILITY_PROMPTS_v1.md`              |
 | `workflow://execute-referencing/v1` | `WORKFLOW_EXECUTE_REFERENCING_v1.md` |
 
 ### Subsection resources
@@ -36,25 +36,25 @@ workflow://{domain}/v1/output/completion-rule
 
 ### Mode prompts
 
-| Name | Purpose | Key arguments |
-|---|---|---|
-| `clarify_task` | Clarify a vague/fuzzy task | `task`, `goal?`, `audience?`, `constraints?` |
-| `strategize_task` | Select direction or priorities | `task`, `domain?`, `context?` |
-| `build_output` | Convert idea to asset | `task`, `domain?`, `context?` |
-| `improve_persuasion` | Strengthen copy/messaging | `task`, `audience?`, `platform?` |
-| `force_execution` | Break through overwhelm | `task`, `energy_level?` |
-| `review_optimize` | Tighten an existing output | `task`, `domain?`, `content?` |
+| Name                 | Purpose                        | Key arguments                                |
+| -------------------- | ------------------------------ | -------------------------------------------- |
+| `clarify_task`       | Clarify a vague/fuzzy task     | `task`, `goal?`, `audience?`, `constraints?` |
+| `strategize_task`    | Select direction or priorities | `task`, `domain?`, `context?`                |
+| `build_output`       | Convert idea to asset          | `task`, `domain?`, `context?`                |
+| `improve_persuasion` | Strengthen copy/messaging      | `task`, `audience?`, `platform?`             |
+| `force_execution`    | Break through overwhelm        | `task`, `energy_level?`                      |
+| `review_optimize`    | Tighten an existing output     | `task`, `domain?`, `content?`                |
 
 ### Domain prompts
 
-| Name | Domain | Stage argument values |
-|---|---|---|
-| `run_freelancing_workflow` | freelancing | `skill \| niche \| offer \| pricing \| portfolio \| outreach \| first_client \| premium \| growth` |
-| `run_products_workflow` | products | `idea \| validate \| build \| value \| pricing \| offer \| first_sale` |
-| `run_content_workflow` | content | `audience_pain \| direction \| ideas \| hooks \| write \| improve \| optimize \| consistency` |
-| `run_execution_workflow` | execution | `do_now \| organize \| simplify \| unblock \| sprint \| priorities \| momentum` |
-| `run_investing_workflow` | investing | `analyze \| watchlist \| news \| trade_setup \| red_flags \| trade_review \| system` |
-| `run_utility_workflow` | utility | `clarity_rewrite \| conversion_rewrite \| tone_calibration \| structure_rebuild \| audience_rewrite \| impact_compressor \| blind_spot_finder \| shortcut_strategy \| ultra_leverage \| momentum_amplifier` |
+| Name                       | Domain      | Stage argument values                                                                                                                                                                                       |
+| -------------------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `run_freelancing_workflow` | freelancing | `skill \| niche \| offer \| pricing \| portfolio \| outreach \| first_client \| premium \| growth`                                                                                                          |
+| `run_products_workflow`    | products    | `idea \| validate \| build \| value \| pricing \| offer \| first_sale`                                                                                                                                      |
+| `run_content_workflow`     | content     | `audience_pain \| direction \| ideas \| hooks \| write \| improve \| optimize \| consistency`                                                                                                               |
+| `run_execution_workflow`   | execution   | `do_now \| organize \| simplify \| unblock \| sprint \| priorities \| momentum`                                                                                                                             |
+| `run_investing_workflow`   | investing   | `analyze \| watchlist \| news \| trade_setup \| red_flags \| trade_review \| system`                                                                                                                        |
+| `run_utility_workflow`     | utility     | `clarity_rewrite \| conversion_rewrite \| tone_calibration \| structure_rebuild \| audience_rewrite \| impact_compressor \| blind_spot_finder \| shortcut_strategy \| ultra_leverage \| momentum_amplifier` |
 
 ### Front-door prompt
 
@@ -65,9 +65,9 @@ workflow://{domain}/v1/output/completion-rule
   "task": "string (required)",
   "goal": "string (optional)",
   "audience": "string (optional)",
-  "constraints": ["string"] ,
+  "constraints": ["string"],
   "preferred_mode": "auto | clarify | strategy | build | persuasion | execution | review",
-  "preferred_domain": "auto | os | freelancing | products | content | execution | investing | utility"
+  "preferred_domain": "auto | os | freelancing | products | content | execution | investing | utility | pentest-web | pentest-mobile | pentest-api | pentest-infra"
 }
 ```
 
@@ -80,6 +80,7 @@ workflow://{domain}/v1/output/completion-rule
 Classify a task into mode + domain + sequence. **Call this first.**
 
 **Input:**
+
 ```json
 {
   "task": "string",
@@ -87,11 +88,12 @@ Classify a task into mode + domain + sequence. **Call this first.**
   "audience": "string (optional)",
   "constraints": ["string"],
   "preferred_mode": "auto | clarify | strategy | build | persuasion | execution | review",
-  "preferred_domain": "auto | os | freelancing | products | content | execution | investing | utility"
+  "preferred_domain": "auto | os | freelancing | products | content | execution | investing | utility | pentest-web | pentest-mobile | pentest-api | pentest-infra"
 }
 ```
 
 **Output:**
+
 ```json
 {
   "mode": "build",
@@ -111,6 +113,7 @@ Classify a task into mode + domain + sequence. **Call this first.**
 Resolve which resource URI and stage to use.
 
 **Input:**
+
 ```json
 {
   "domain": "products",
@@ -119,6 +122,7 @@ Resolve which resource URI and stage to use.
 ```
 
 **Output:**
+
 ```json
 {
   "resource_uri": "workflow://products/v1",
@@ -136,6 +140,7 @@ Resolve which resource URI and stage to use.
 **Main workhorse.** Runs the workflow and returns one deliverable + one next action.
 
 **Input:**
+
 ```json
 {
   "mode": "strategy",
@@ -149,6 +154,7 @@ Resolve which resource URI and stage to use.
 ```
 
 **Output:**
+
 ```json
 {
   "mode": "strategy",
@@ -167,6 +173,7 @@ Resolve which resource URI and stage to use.
 Apply one supporting utility **after** a primary workflow has run.
 
 **Input:**
+
 ```json
 {
   "utility_name": "blind_spot_finder",
@@ -176,13 +183,12 @@ Apply one supporting utility **after** a primary workflow has run.
 ```
 
 **Output:**
+
 ```json
 {
   "utility_name": "blind_spot_finder",
   "revised_content": "...",
-  "issues_found": [
-    "Potential hidden assumption: target audience and proof level may be underspecified."
-  ]
+  "issues_found": ["Potential hidden assumption: target audience and proof level may be underspecified."]
 }
 ```
 
@@ -216,6 +222,7 @@ Returns the generated OpenAPI document. In production, set `PUBLIC_BASE_URL` so 
 Return exactly one immediate next step.
 
 **Input:**
+
 ```json
 {
   "domain": "freelancing",
@@ -225,6 +232,7 @@ Return exactly one immediate next step.
 ```
 
 **Output:**
+
 ```json
 {
   "next_action": "Turn the current freelancing output into a one-page offer brief while respecting: no portfolio yet, need first client fast.",

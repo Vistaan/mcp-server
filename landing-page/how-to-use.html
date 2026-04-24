@@ -692,6 +692,10 @@ pnpm run build
 <li><code>workflow://utility/v1</code></li>
 <li><code>workflow://execute-referencing/v1</code></li>
 <li><code>workflow://design-reference/v1</code></li>
+<li><code>workflow://pentest-web/v1</code></li>
+<li><code>workflow://pentest-mobile/v1</code></li>
+<li><code>workflow://pentest-api/v1</code></li>
+<li><code>workflow://pentest-infra/v1</code></li>
 </ul>
 <h3><a href="http://DESIGN.md">DESIGN.md</a> Reference Resource</h3>
 <p>The <code>workflow://design-reference/v1</code> resource contains the full Google <a href="http://DESIGN.md">DESIGN.md</a> specification. Use this when:</p>
@@ -708,6 +712,15 @@ pnpm run build
 <li>Token types: Color, Dimension, Typography, Token References</li>
 <li>Component property tokens and variants</li>
 </ul>
+<h3>Penetration Testing Resources</h3>
+<p>Four dedicated penetration testing workflow resources are available:</p>
+<ul>
+<li><strong><code>workflow://pentest-web/v1</code></strong> — Web Application Penetration Testing following OWASP Testing Guide, OWASP Top 10, WSTG, NIST SP 800-115, and PTES</li>
+<li><strong><code>workflow://pentest-mobile/v1</code></strong> — Mobile Application Penetration Testing following OWASP MASVS, OWASP Mobile Top 10, MSTG, and NIST SP 800-163</li>
+<li><strong><code>workflow://pentest-api/v1</code></strong> — API Penetration Testing following OWASP API Security Top 10, NIST SP 800-115, and RFC standards</li>
+<li><strong><code>workflow://pentest-infra/v1</code></strong> — Infrastructure Penetration Testing following PTES, CIS Benchmarks, NIST SP 800-115, and MITRE ATT&amp;CK</li>
+</ul>
+<p>Use these when conducting security assessments, vulnerability identification, or generating client-ready penetration test reports.</p>
 <p>Section resources follow this template:</p>
 <pre class="hljs"><code class="hljs language-text">workflow://{domain}/v1/{sectionGroup}/{sectionName}
 </code></pre>

@@ -1,16 +1,19 @@
 # WORKFLOW_EXECUTE_REFERENCING_v1
 
 ## 1. PURPOSE
+
 This file is the execution dispatcher for the v1 machine-grade workflow system.
 
 It tells the agent what to do next after receiving a user request.
-It does not replace the seven domain files. It routes into them, controls execution order, enforces minimal branching, and ensures every run ends with one clear next action.
+It does not replace the eleven domain files. It routes into them, controls execution order, enforces minimal branching, and ensures every run ends with one clear next action.
 
 ## 2. WHEN TO USE
+
 Use this file first whenever a new task, request, idea, draft, or problem is received.
 
 Use it before choosing any domain workflow.
 Use it to decide:
+
 - which file to run
 - in what order to run it
 - whether a utility prompt is needed
@@ -20,22 +23,30 @@ Use it to decide:
 ## 3. EXECUTION
 
 ### 3.1 INPUT
+
 Expected input:
+
 - user request
 - optional context
 - optional draft / idea / plan / asset
 - optional constraints
 
 Available referenced files:
+
 - `WORKFLOW_OS_v1.md`
 - `WORKFLOW_FREELANCING_v1.md`
 - `WORKFLOW_PRODUCTS_v1.md`
 - `WORKFLOW_CONTENT_v1.md`
 - `WORKFLOW_EXECUTION_v1.md`
 - `WORKFLOW_INVESTING_v1.md`
+- `WORKFLOW_PENTEST_WEB_v1.md`
+- `WORKFLOW_PENTEST_MOBILE_v1.md`
+- `WORKFLOW_PENTEST_API_v1.md`
+- `WORKFLOW_PENTEST_INFRA_v1.md`
 - `UTILITY_PROMPTS_v1.md`
 
 ### 3.2 DECISION RULE
+
 Apply this routing order exactly.
 
 1. If the request is vague, conflicted, or underspecified, start with `WORKFLOW_OS_v1.md`.
@@ -44,12 +55,17 @@ Apply this routing order exactly.
 4. If the request is about hooks, copy, messaging, content strategy, posts, persuasion, or conversion, run `WORKFLOW_CONTENT_v1.md`.
 5. If the request is about confusion, procrastination, prioritization, momentum, focus, or task simplification, run `WORKFLOW_EXECUTION_v1.md`.
 6. If the request is about stocks, watchlists, trade setup, market interpretation, or investing process, run `WORKFLOW_INVESTING_v1.md`.
-7. If the request is not a primary workflow but needs rewriting, compression, restructuring, leverage analysis, blind-spot analysis, or tone adaptation, run `UTILITY_PROMPTS_v1.md` only after a primary workflow has produced a main output.
-8. If multiple domains appear in one request, choose one primary workflow first, complete the main output there, then use one secondary workflow only if it directly improves the same deliverable.
-9. Never start with `UTILITY_PROMPTS_v1.md` when a domain workflow clearly applies.
-10. Never run more than one optimization pass unless explicitly requested.
+7. If the request is about web application security, XSS, SQL injection, OWASP, or web pentesting, run `WORKFLOW_PENTEST_WEB_v1.md`.
+8. If the request is about mobile app security, iOS/Android security, MASVS, or mobile pentesting, run `WORKFLOW_PENTEST_MOBILE_v1.md`.
+9. If the request is about API security, REST/GraphQL endpoints, OWASP API Top 10, or API pentesting, run `WORKFLOW_PENTEST_API_v1.md`.
+10. If the request is about infrastructure security, network pentesting, cloud security, container security, or MITRE ATT&CK, run `WORKFLOW_PENTEST_INFRA_v1.md`.
+11. If the request is not a primary workflow but needs rewriting, compression, restructuring, leverage analysis, blind-spot analysis, or tone adaptation, run `UTILITY_PROMPTS_v1.md` only after a primary workflow has produced a main output.
+12. If multiple domains appear in one request, choose one primary workflow first, complete the main output there, then use one secondary workflow only if it directly improves the same deliverable.
+13. Never start with `UTILITY_PROMPTS_v1.md` when a domain workflow clearly applies.
+14. Never run more than one optimization pass unless explicitly requested.
 
 ### 3.3 SEQUENCE
+
 Follow this sequence on every run.
 
 1. Parse the request into:
@@ -67,11 +83,13 @@ Follow this sequence on every run.
 8. End with one immediate next concrete step.
 
 Fallback sequence:
+
 1. Run `WORKFLOW_OS_v1.md` if the request does not map cleanly.
 2. Use its routing logic to select the primary domain file.
 3. Resume the standard sequence above.
 
 ### 3.4 COMMAND FORMAT
+
 Use these command formats internally when deciding what to run next.
 
 ```text
@@ -81,21 +99,31 @@ RUN: WORKFLOW_PRODUCTS_v1 -> build product / validation / offer / first-sale out
 RUN: WORKFLOW_CONTENT_v1 -> build copy / hooks / content / persuasion output
 RUN: WORKFLOW_EXECUTION_v1 -> build focus / priority / action / sprint output
 RUN: WORKFLOW_INVESTING_v1 -> build analysis / watchlist / trade / system output
+RUN: WORKFLOW_PENTEST_WEB_v1 -> assess web app security / vulnerabilities / OWASP findings
+RUN: WORKFLOW_PENTEST_MOBILE_v1 -> assess mobile app security / iOS Android / MASVS findings
+RUN: WORKFLOW_PENTEST_API_v1 -> assess API security / REST GraphQL / OWASP API findings
+RUN: WORKFLOW_PENTEST_INFRA_v1 -> assess infrastructure security / cloud network containers
 RUN: UTILITY_PROMPTS_v1 -> improve clarity / persuasion / structure / leverage / compression
 ```
 
 Allowed chaining patterns:
+
 ```text
 OS -> FREELANCING
 OS -> PRODUCTS
 OS -> CONTENT
 OS -> EXECUTION
 OS -> INVESTING
+OS -> PENTEST-WEB
+OS -> PENTEST-MOBILE
+OS -> PENTEST-API
+OS -> PENTEST-INFRA
 PRIMARY WORKFLOW -> UTILITY
 OS -> PRIMARY WORKFLOW -> UTILITY
 ```
 
 Disallowed chaining patterns:
+
 ```text
 UTILITY -> PRIMARY WORKFLOW
 UTILITY -> UTILITY -> UTILITY
@@ -104,6 +132,7 @@ any chain that produces multiple unrelated deliverables in one run
 ```
 
 ### 3.5 OPERATING RULES
+
 - Always choose the smallest sufficient workflow path.
 - Always produce one main output, not a bundle of loosely related outputs.
 - Always prefer a domain workflow over a generic utility prompt.
@@ -118,6 +147,7 @@ any chain that produces multiple unrelated deliverables in one run
 ## 4. OUTPUT
 
 ### 4.1 RESPONSE SHAPE
+
 Every execution should produce this response shape:
 
 ```text
@@ -142,6 +172,7 @@ Immediate next action:
 ```
 
 ### 4.2 OUTPUT RULES
+
 - `Primary workflow selected` must contain exactly one primary file name.
 - `Reason` must explain the routing logic in one concise paragraph.
 - `Main deliverable` must contain the actual useful output, not just a description of what would be done.
@@ -151,7 +182,9 @@ Immediate next action:
 - If the task was unclear, say that routing started from `WORKFLOW_OS_v1.md`.
 
 ### 4.3 COMPLETION RULE
+
 A run is complete only when:
+
 1. one primary workflow has been selected,
 2. one main output has been produced,
 3. at most one utility pass has been applied,

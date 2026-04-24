@@ -20,7 +20,20 @@ export function registerFrontdoorPrompt(server: McpServer): void {
           .default('auto')
           .describe('Override the mode selection'),
         preferred_domain: z
-          .enum(['auto', 'os', 'freelancing', 'products', 'content', 'execution', 'investing', 'utility'])
+          .enum([
+            'auto',
+            'os',
+            'freelancing',
+            'products',
+            'content',
+            'execution',
+            'investing',
+            'utility',
+            'pentest-web',
+            'pentest-mobile',
+            'pentest-api',
+            'pentest-infra',
+          ])
           .default('auto')
           .describe('Override the domain selection'),
       },

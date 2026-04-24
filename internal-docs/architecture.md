@@ -2,12 +2,12 @@
 
 ## What This Is
 
-`workflow-os-mcp` is a Model Context Protocol (MCP) server that wraps seven authoritative workflow Markdown files as runtime-accessible resources, prompts, and tools. It does not contain its own intelligence — it exposes the v1 workflow files so any MCP client (Claude Desktop, API clients) can route tasks through a structured execution framework.
+`workflow-os-mcp` is a Model Context Protocol (MCP) server that wraps eleven authoritative workflow Markdown files as runtime-accessible resources, prompts, and tools. It does not contain its own intelligence — it exposes the v1 workflow files so any MCP client (Claude Desktop, API clients) can route tasks through a structured execution framework.
 
 ## Core Design Principle
 
 ```
-Source of Truth: /workflows/*.md (7 domain files + 1 dispatcher)
+Source of Truth: /workflows/*.md (11 domain files + 1 dispatcher + 1 design reference)
          ↓
 MCP Layer: Resources + Prompts + Tools
          ↓
@@ -29,10 +29,10 @@ The server wraps; it does not replace. The Markdown files remain authoritative.
 
 The server supports two transports selected by `MCP_TRANSPORT`:
 
-| Transport | Use Case | Entry Point |
-|---|---|---|
-| `stdio` (default) | Claude Desktop, local development | `src/transports/stdio.ts` |
-| `http` | Docker, Kubernetes, always-on deployment | `src/transports/http.ts` |
+| Transport         | Use Case                                 | Entry Point               |
+| ----------------- | ---------------------------------------- | ------------------------- |
+| `stdio` (default) | Claude Desktop, local development        | `src/transports/stdio.ts` |
+| `http`            | Docker, Kubernetes, always-on deployment | `src/transports/http.ts`  |
 
 HTTP transport uses `StreamableHTTPServerTransport` (stateless per-request) — no sticky sessions required.
 
@@ -120,13 +120,13 @@ workflow://{domain}/v1/execution/sequence      ← subsection
 workflow://{domain}/v1/output/response-shape   ← subsection
 ```
 
-## The 6 Modes × 7 Domains Grid
+## The 6 Modes × 11 Domains Grid
 
-|              | os | freelancing | products | content | execution | investing | utility |
-|---|---|---|---|---|---|---|---|
-| clarify      | ✓  | ✓           | ✓        | ✓       | ✓         | ✓         | ✓       |
-| strategy     | ✓  | ✓           | ✓        | ✓       | ✓         | ✓         | ✓       |
-| build        | ✓  | ✓           | ✓        | ✓       | ✓         | ✓         | ✓       |
-| persuasion   | ✓  | ✓           | ✓        | ✓       | ✓         | ✓         | ✓       |
-| execution    | ✓  | ✓           | ✓        | ✓       | ✓         | ✓         | ✓       |
-| review       | ✓  | ✓           | ✓        | ✓       | ✓         | ✓         | ✓       |
+|            | os  | freelancing | products | content | execution | investing | utility | pentest-web | pentest-mobile | pentest-api | pentest-infra |
+| ---------- | --- | ----------- | -------- | ------- | --------- | --------- | ------- | ----------- | -------------- | ----------- | ------------- |
+| clarify    | ✓   | ✓           | ✓        | ✓       | ✓         | ✓         | ✓       | ✓           | ✓              | ✓           | ✓             |
+| strategy   | ✓   | ✓           | ✓        | ✓       | ✓         | ✓         | ✓       | ✓           | ✓              | ✓           | ✓             |
+| build      | ✓   | ✓           | ✓        | ✓       | ✓         | ✓         | ✓       | ✓           | ✓              | ✓           | ✓             |
+| persuasion | ✓   | ✓           | ✓        | ✓       | ✓         | ✓         | ✓       | ✓           | ✓              | ✓           | ✓             |
+| execution  | ✓   | ✓           | ✓        | ✓       | ✓         | ✓         | ✓       | ✓           | ✓              | ✓           | ✓             |
+| review     | ✓   | ✓           | ✓        | ✓       | ✓         | ✓         | ✓       | ✓           | ✓              | ✓           | ✓             |

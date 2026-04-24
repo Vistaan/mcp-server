@@ -103,6 +103,11 @@ You must accurately reflect these product facts:
   - `workflow://investing/v1`
   - `workflow://utility/v1`
   - `workflow://execute-referencing/v1`
+  - `workflow://design-reference/v1`
+  - `workflow://pentest-web/v1`
+  - `workflow://pentest-mobile/v1`
+  - `workflow://pentest-api/v1`
+  - `workflow://pentest-infra/v1`
 - It supports generic MCP client configuration patterns for:
   - Codex app
   - Codex VS Code extension

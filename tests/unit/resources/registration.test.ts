@@ -42,7 +42,7 @@ describe('resource registration', () => {
 
     registerStaticResources(server as never);
 
-    expect(server.registerResource).toHaveBeenCalledTimes(9);
+    expect(server.registerResource).toHaveBeenCalledTimes(13);
 
     const result = await resources[0]!.handler(new URL('workflow://os/v1'), {});
     expect(result.contents[0]).toEqual({ uri: 'workflow://os/v1', text: 'workflow body' });
@@ -102,6 +102,6 @@ describe('resource registration', () => {
 
     registerResources(server as never);
 
-    expect(server.registerResource).toHaveBeenCalledTimes(10);
+    expect(server.registerResource).toHaveBeenCalledTimes(14);
   });
 });

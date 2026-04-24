@@ -661,9 +661,9 @@ workflow://{domain}/v1/output/completion-rule
   <span class="hljs-attr">&quot;task&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;string (required)&quot;</span><span class="hljs-punctuation">,</span>
   <span class="hljs-attr">&quot;goal&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;string (optional)&quot;</span><span class="hljs-punctuation">,</span>
   <span class="hljs-attr">&quot;audience&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;string (optional)&quot;</span><span class="hljs-punctuation">,</span>
-  <span class="hljs-attr">&quot;constraints&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;string&quot;</span><span class="hljs-punctuation">]</span> <span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;constraints&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;string&quot;</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
   <span class="hljs-attr">&quot;preferred_mode&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;auto | clarify | strategy | build | persuasion | execution | review&quot;</span><span class="hljs-punctuation">,</span>
-  <span class="hljs-attr">&quot;preferred_domain&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;auto | os | freelancing | products | content | execution | investing | utility&quot;</span>
+  <span class="hljs-attr">&quot;preferred_domain&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;auto | os | freelancing | products | content | execution | investing | utility | pentest-web | pentest-mobile | pentest-api | pentest-infra&quot;</span>
 <span class="hljs-punctuation">}</span>
 </code></pre>
 <hr>
@@ -677,7 +677,7 @@ workflow://{domain}/v1/output/completion-rule
   <span class="hljs-attr">&quot;audience&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;string (optional)&quot;</span><span class="hljs-punctuation">,</span>
   <span class="hljs-attr">&quot;constraints&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;string&quot;</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
   <span class="hljs-attr">&quot;preferred_mode&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;auto | clarify | strategy | build | persuasion | execution | review&quot;</span><span class="hljs-punctuation">,</span>
-  <span class="hljs-attr">&quot;preferred_domain&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;auto | os | freelancing | products | content | execution | investing | utility&quot;</span>
+  <span class="hljs-attr">&quot;preferred_domain&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;auto | os | freelancing | products | content | execution | investing | utility | pentest-web | pentest-mobile | pentest-api | pentest-infra&quot;</span>
 <span class="hljs-punctuation">}</span>
 </code></pre>
 <p><strong>Output:</strong></p>
@@ -747,9 +747,7 @@ workflow://{domain}/v1/output/completion-rule
 <pre class="hljs"><code class="hljs language-json"><span class="hljs-punctuation">{</span>
   <span class="hljs-attr">&quot;utility_name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;blind_spot_finder&quot;</span><span class="hljs-punctuation">,</span>
   <span class="hljs-attr">&quot;revised_content&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;...&quot;</span><span class="hljs-punctuation">,</span>
-  <span class="hljs-attr">&quot;issues_found&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
-    <span class="hljs-string">&quot;Potential hidden assumption: target audience and proof level may be underspecified.&quot;</span>
-  <span class="hljs-punctuation">]</span>
+  <span class="hljs-attr">&quot;issues_found&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;Potential hidden assumption: target audience and proof level may be underspecified.&quot;</span><span class="hljs-punctuation">]</span>
 <span class="hljs-punctuation">}</span>
 </code></pre>
 <p>Available <code>utility_name</code> values:

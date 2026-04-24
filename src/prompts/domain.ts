@@ -149,4 +149,96 @@ export function registerDomainPrompts(server: McpServer): void {
       ],
     }),
   );
+
+  server.registerPrompt(
+    'run_pentest_web_workflow',
+    {
+      title: 'Run Web App Pentest Workflow',
+      description: 'Run the web application penetration testing workflow following OWASP standards.',
+      argsSchema: {
+        task: z.string().min(1).describe('Web application security assessment task'),
+        stage: completable(z.string().default('auto'), (value: string | undefined) =>
+          ['auto', ...DOMAIN_SEQUENCES['pentest-web']].filter((s) => s.startsWith(value ?? '')),
+        ),
+        target: z.string().optional().describe('Target URL or application name'),
+      },
+    },
+    ({ task, stage, target }) => ({
+      messages: [
+        {
+          role: 'user',
+          content: { type: 'text', text: buildPromptText('review', 'pentest-web', task, { stage, target }) },
+        },
+      ],
+    }),
+  );
+
+  server.registerPrompt(
+    'run_pentest_mobile_workflow',
+    {
+      title: 'Run Mobile App Pentest Workflow',
+      description: 'Run the mobile application penetration testing workflow following OWASP MASVS.',
+      argsSchema: {
+        task: z.string().min(1).describe('Mobile application security assessment task'),
+        stage: completable(z.string().default('auto'), (value: string | undefined) =>
+          ['auto', ...DOMAIN_SEQUENCES['pentest-mobile']].filter((s) => s.startsWith(value ?? '')),
+        ),
+        platform: z.enum(['iOS', 'Android', 'both']).default('both').describe('Target mobile platform'),
+      },
+    },
+    ({ task, stage, platform }) => ({
+      messages: [
+        {
+          role: 'user',
+          content: { type: 'text', text: buildPromptText('review', 'pentest-mobile', task, { stage, platform }) },
+        },
+      ],
+    }),
+  );
+
+  server.registerPrompt(
+    'run_pentest_api_workflow',
+    {
+      title: 'Run API Pentest Workflow',
+      description: 'Run the API penetration testing workflow following OWASP API Security Top 10.',
+      argsSchema: {
+        task: z.string().min(1).describe('API security assessment task'),
+        stage: completable(z.string().default('auto'), (value: string | undefined) =>
+          ['auto', ...DOMAIN_SEQUENCES['pentest-api']].filter((s) => s.startsWith(value ?? '')),
+        ),
+        spec: z.string().optional().describe('OpenAPI/Swagger/GraphQL spec or API documentation'),
+      },
+    },
+    ({ task, stage, spec }) => ({
+      messages: [
+        {
+          role: 'user',
+          content: { type: 'text', text: buildPromptText('review', 'pentest-api', task, { stage, spec }) },
+        },
+      ],
+    }),
+  );
+
+  server.registerPrompt(
+    'run_pentest_infra_workflow',
+    {
+      title: 'Run Infrastructure Pentest Workflow',
+      description: 'Run the infrastructure penetration testing workflow following PTES and MITRE ATT&CK.',
+      argsSchema: {
+        task: z.string().min(1).describe('Infrastructure security assessment task'),
+        stage: completable(z.string().default('auto'), (value: string | undefined) =>
+          ['auto', ...DOMAIN_SEQUENCES['pentest-infra']].filter((s) => s.startsWith(value ?? '')),
+        ),
+        assets: z.string().optional().describe('IP ranges, hostnames, cloud accounts, or container clusters'),
+      },
+    },
+    ({ task, stage, assets }) => ({
+      messages: [
+        {
+          role: 'user',
+          content: { type: 'text', text: buildPromptText('review', 'pentest-infra', task, { stage, assets }) },
+        },
+      ],
+    }),
+  );
 }

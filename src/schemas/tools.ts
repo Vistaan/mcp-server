@@ -11,13 +11,38 @@ export const routeTaskInputSchema = z.object({
   constraints: z.array(z.string()).default([]),
   preferred_mode: z.enum(['auto', 'clarify', 'strategy', 'build', 'persuasion', 'execution', 'review']).default('auto'),
   preferred_domain: z
-    .enum(['auto', 'os', 'freelancing', 'products', 'content', 'execution', 'investing', 'utility'])
+    .enum([
+      'auto',
+      'os',
+      'freelancing',
+      'products',
+      'content',
+      'execution',
+      'investing',
+      'utility',
+      'pentest-web',
+      'pentest-mobile',
+      'pentest-api',
+      'pentest-infra',
+    ])
     .default('auto'),
 });
 
 export const routeTaskOutputSchema = z.object({
   mode: z.enum(['clarify', 'strategy', 'build', 'persuasion', 'execution', 'review']),
-  domain: z.enum(['os', 'freelancing', 'products', 'content', 'execution', 'investing', 'utility']),
+  domain: z.enum([
+    'os',
+    'freelancing',
+    'products',
+    'content',
+    'execution',
+    'investing',
+    'utility',
+    'pentest-web',
+    'pentest-mobile',
+    'pentest-api',
+    'pentest-infra',
+  ]),
   confidence: z.number(),
   reason: z.string(),
   sequence: z.array(z.string()),
@@ -30,7 +55,19 @@ export const routeTaskOutputSchema = z.object({
 // ---------------------------------------------------------------------------
 
 export const selectDomainWorkflowInputSchema = z.object({
-  domain: z.enum(['os', 'freelancing', 'products', 'content', 'execution', 'investing', 'utility']),
+  domain: z.enum([
+    'os',
+    'freelancing',
+    'products',
+    'content',
+    'execution',
+    'investing',
+    'utility',
+    'pentest-web',
+    'pentest-mobile',
+    'pentest-api',
+    'pentest-infra',
+  ]),
   stage: z.string().optional(),
 });
 
@@ -48,7 +85,19 @@ export const selectDomainWorkflowOutputSchema = z.object({
 
 export const runWorkflowSequenceInputSchema = z.object({
   mode: z.enum(['clarify', 'strategy', 'build', 'persuasion', 'execution', 'review']),
-  domain: z.enum(['os', 'freelancing', 'products', 'content', 'execution', 'investing', 'utility']),
+  domain: z.enum([
+    'os',
+    'freelancing',
+    'products',
+    'content',
+    'execution',
+    'investing',
+    'utility',
+    'pentest-web',
+    'pentest-mobile',
+    'pentest-api',
+    'pentest-infra',
+  ]),
   task: z.string().min(1),
   context: z.string().optional(),
   stage: z.string().default('auto'),
@@ -58,7 +107,19 @@ export const runWorkflowSequenceInputSchema = z.object({
 
 export const runWorkflowSequenceOutputSchema = z.object({
   mode: z.enum(['clarify', 'strategy', 'build', 'persuasion', 'execution', 'review']),
-  domain: z.enum(['os', 'freelancing', 'products', 'content', 'execution', 'investing', 'utility']),
+  domain: z.enum([
+    'os',
+    'freelancing',
+    'products',
+    'content',
+    'execution',
+    'investing',
+    'utility',
+    'pentest-web',
+    'pentest-mobile',
+    'pentest-api',
+    'pentest-infra',
+  ]),
   stage: z.string(),
   workflow_reference: z.string(),
   stage_outcome: z.string(),

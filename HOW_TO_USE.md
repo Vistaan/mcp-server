@@ -190,6 +190,10 @@ Full workflow resources:
 - `workflow://utility/v1`
 - `workflow://execute-referencing/v1`
 - `workflow://design-reference/v1`
+- `workflow://pentest-web/v1`
+- `workflow://pentest-mobile/v1`
+- `workflow://pentest-api/v1`
+- `workflow://pentest-infra/v1`
 
 ### DESIGN.md Reference Resource
 
@@ -206,6 +210,17 @@ The spec covers:
 - All 8 sections: Overview, Colors, Typography, Layout, Elevation & Depth, Shapes, Components, Do's and Don'ts
 - Token types: Color, Dimension, Typography, Token References
 - Component property tokens and variants
+
+### Penetration Testing Resources
+
+Four dedicated penetration testing workflow resources are available:
+
+- **`workflow://pentest-web/v1`** — Web Application Penetration Testing following OWASP Testing Guide, OWASP Top 10, WSTG, NIST SP 800-115, and PTES
+- **`workflow://pentest-mobile/v1`** — Mobile Application Penetration Testing following OWASP MASVS, OWASP Mobile Top 10, MSTG, and NIST SP 800-163
+- **`workflow://pentest-api/v1`** — API Penetration Testing following OWASP API Security Top 10, NIST SP 800-115, and RFC standards
+- **`workflow://pentest-infra/v1`** — Infrastructure Penetration Testing following PTES, CIS Benchmarks, NIST SP 800-115, and MITRE ATT&CK
+
+Use these when conducting security assessments, vulnerability identification, or generating client-ready penetration test reports.
 
 Section resources follow this template:
 

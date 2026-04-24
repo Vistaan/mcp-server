@@ -136,6 +136,10 @@ After adding the server to a client:
    - `workflow://utility/v1`
    - `workflow://execute-referencing/v1`
    - `workflow://design-reference/v1`
+   - `workflow://pentest-web/v1`
+   - `workflow://pentest-mobile/v1`
+   - `workflow://pentest-api/v1`
+   - `workflow://pentest-infra/v1`
 
 ## Recommended Usage Pattern
 

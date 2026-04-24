@@ -8,15 +8,15 @@ Per-module walkthrough of the `src/` tree.
 
 Pure TypeScript types. No imports except other type files. Safe to import from anywhere.
 
-| Export            | Description                                                                                          |
-| ----------------- | ---------------------------------------------------------------------------------------------------- |
-| `Mode`            | Union: `'clarify' \| 'strategy' \| 'build' \| 'persuasion' \| 'execution' \| 'review'`               |
-| `Domain`          | Union: `'os' \| 'freelancing' \| 'products' \| 'content' \| 'execution' \| 'investing' \| 'utility'` |
-| `RouteDomain`     | `Domain \| 'auto'`                                                                                   |
-| `RouteResult`     | Full routing result shape                                                                            |
-| `ResourceDef`     | MCP resource registration descriptor                                                                 |
-| `SectionSegment`  | Heading → key → titleSuffix mapping for subsection URIs                                              |
-| `ToolEnvelope<T>` | Wraps any T into `{ content: [{type:'text', text}], structuredContent: T }`                          |
+| Export            | Description                                                                                                                                                                   |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Mode`            | Union: `'clarify' \| 'strategy' \| 'build' \| 'persuasion' \| 'execution' \| 'review'`                                                                                        |
+| `Domain`          | Union: `'os' \| 'freelancing' \| 'products' \| 'content' \| 'execution' \| 'investing' \| 'utility' \| 'pentest-web' \| 'pentest-mobile' \| 'pentest-api' \| 'pentest-infra'` |
+| `RouteDomain`     | `Domain \| 'auto'`                                                                                                                                                            |
+| `RouteResult`     | Full routing result shape                                                                                                                                                     |
+| `ResourceDef`     | MCP resource registration descriptor                                                                                                                                          |
+| `SectionSegment`  | Heading → key → titleSuffix mapping for subsection URIs                                                                                                                       |
+| `ToolEnvelope<T>` | Wraps any T into `{ content: [{type:'text', text}], structuredContent: T }`                                                                                                   |
 
 ---
 
@@ -45,7 +45,7 @@ Static registry. No logic. All data used by routing, resources, and prompts live
 | `DOMAIN_SEQUENCES` | Ordered stage arrays per domain                      |
 | `MODE_TO_PROMPT`   | Mode → prompt name mapping                           |
 | `SECTION_SEGMENTS` | Heading → key pairs for subsection resource template |
-| `STATIC_RESOURCES` | `ResourceDef[]` for all 9 static resources           |
+| `STATIC_RESOURCES` | `ResourceDef[]` for all 13 static resources          |
 
 ---
 
@@ -105,7 +105,7 @@ File I/O boundary. The only module that reads from disk.
 
 ## `src/resources/static.ts`
 
-Registers 9 static resources via `server.registerResource()`. Calls `readWorkflowFile` in each handler.
+Registers 13 static resources via `server.registerResource()`. Calls `readWorkflowFile` in each handler.
 
 ## `src/resources/sections.ts`
 

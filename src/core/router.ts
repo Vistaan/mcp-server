@@ -4,7 +4,10 @@ import type { Domain, Mode, RouteResult } from '../schemas/types.js';
 import { routeTaskInputSchema } from '../schemas/tools.js';
 import { DOMAIN_SEQUENCES } from './catalog.js';
 
-type SignalDefinition<TLabel extends string> = Record<TLabel, Array<{ pattern: RegExp; weight: number; label: string }>>;
+type SignalDefinition<TLabel extends string> = Record<
+  TLabel,
+  Array<{ pattern: RegExp; weight: number; label: string }>
+>;
 
 type RankedChoice<TLabel extends string> = {
   label: TLabel;
@@ -40,6 +43,54 @@ const DOMAIN_SIGNALS: SignalDefinition<Domain> = {
   utility: [
     { pattern: /\b(rewrite|compress|tighten|simplify|adapt)\b/, weight: 4, label: 'utility language' },
     { pattern: /\b(optimi[sz]e|blind spot|leverage|improve)\b/, weight: 3, label: 'optimization language' },
+  ],
+  'pentest-web': [
+    {
+      pattern: /\b(web app|owasp|xss|sql injection|csrf|web security|pentest web)\b/,
+      weight: 5,
+      label: 'web pentest language',
+    },
+    {
+      pattern: /\b(web application|vulnerability assessment|security audit|wstg)\b/,
+      weight: 4,
+      label: 'web security language',
+    },
+  ],
+  'pentest-mobile': [
+    {
+      pattern: /\b(mobile app|ios security|android security|masvs|mstg|pentest mobile)\b/,
+      weight: 5,
+      label: 'mobile pentest language',
+    },
+    {
+      pattern: /\b(mobile penetration|apk|ipa|app security|mobile audit)\b/,
+      weight: 4,
+      label: 'mobile security language',
+    },
+  ],
+  'pentest-api': [
+    {
+      pattern: /\b(api security|api pentest|owasp api|bola|idor|rest api|graphql security)\b/,
+      weight: 5,
+      label: 'api pentest language',
+    },
+    {
+      pattern: /\b(api vulnerability|endpoint security|api audit|swagger security)\b/,
+      weight: 4,
+      label: 'api security language',
+    },
+  ],
+  'pentest-infra': [
+    {
+      pattern: /\b(infrastructure|network pentest|cloud security|cis benchmark|mitre att&ck|ptes)\b/,
+      weight: 5,
+      label: 'infra pentest language',
+    },
+    {
+      pattern: /\b(server security|container security|kubernetes security|cloud audit)\b/,
+      weight: 4,
+      label: 'infra security language',
+    },
   ],
 };
 
@@ -90,9 +141,15 @@ export function routeTask(input: z.infer<typeof routeTaskInputSchema>): RouteRes
 
   const domainResult = input.preferred_domain !== 'auto' ? explicitChoice(input.preferred_domain) : scoreDomain(text);
   const inferredDomain = domainResult.label;
-  const modeResult = input.preferred_mode !== 'auto' ? explicitChoice(input.preferred_mode) : scoreMode(text, inferredDomain);
+  const modeResult =
+    input.preferred_mode !== 'auto' ? explicitChoice(input.preferred_mode) : scoreMode(text, inferredDomain);
   const inferredMode = modeResult.label;
-  const confidence = deriveConfidence(domainResult.score, modeResult.score, domainResult.evidence.length, modeResult.evidence.length);
+  const confidence = deriveConfidence(
+    domainResult.score,
+    modeResult.score,
+    domainResult.evidence.length,
+    modeResult.evidence.length,
+  );
   if (confidence < 0.7) {
     metrics.increment('route_low_confidence', { domain: inferredDomain, mode: inferredMode });
   }
@@ -127,7 +184,10 @@ export function buildRouteReason(
 ): string {
   const domainEvidence = details?.domainEvidence?.slice(0, 2).join(', ');
   const modeEvidence = details?.modeEvidence?.slice(0, 2).join(', ');
-  const evidence = [domainEvidence ? `domain evidence: ${domainEvidence}` : undefined, modeEvidence ? `mode evidence: ${modeEvidence}` : undefined]
+  const evidence = [
+    domainEvidence ? `domain evidence: ${domainEvidence}` : undefined,
+    modeEvidence ? `mode evidence: ${modeEvidence}` : undefined,
+  ]
     .filter(Boolean)
     .join('; ');
   return `Detected ${mode} mode for the ${domain} domain from task language: ${text.slice(0, 160) || 'n/a'}${evidence ? ` (${evidence})` : ''}`;
@@ -169,18 +229,20 @@ function rankSignals<TLabel extends string>(
   definitions: SignalDefinition<TLabel>,
   fallback: TLabel,
 ): RankedChoice<TLabel> {
-  const rankedChoices = (Object.entries(definitions) as Array<[TLabel, SignalDefinition<TLabel>[TLabel]]>).map(([label, signals]) => {
-    const evidence: string[] = [];
-    const score = signals.reduce((total: number, signal) => {
-      if (signal.pattern.test(text)) {
-        evidence.push(signal.label);
-        return total + signal.weight;
-      }
-      return total;
-    }, 0);
+  const rankedChoices = (Object.entries(definitions) as Array<[TLabel, SignalDefinition<TLabel>[TLabel]]>).map(
+    ([label, signals]) => {
+      const evidence: string[] = [];
+      const score = signals.reduce((total: number, signal) => {
+        if (signal.pattern.test(text)) {
+          evidence.push(signal.label);
+          return total + signal.weight;
+        }
+        return total;
+      }, 0);
 
-    return { label, score, evidence };
-  });
+      return { label, score, evidence };
+    },
+  );
 
   rankedChoices.sort((left, right) => {
     if (right.score !== left.score) {
@@ -200,6 +262,7 @@ function rankSignals<TLabel extends string>(
 function defaultModeForDomain(domain: Domain): Mode {
   if (domain === 'content') return 'persuasion';
   if (domain === 'execution') return 'execution';
+  if (domain.startsWith('pentest-')) return 'review';
   return 'build';
 }
 
@@ -207,7 +270,13 @@ function explicitChoice<TLabel extends string>(label: TLabel): RankedChoice<TLab
   return { label, score: 10, evidence: ['explicit preference'] };
 }
 
-function deriveConfidence(domainScore: number, modeScore: number, domainEvidenceCount: number, modeEvidenceCount: number): number {
-  const raw = 0.45 + Math.min(0.5, domainScore * 0.03 + modeScore * 0.03 + domainEvidenceCount * 0.04 + modeEvidenceCount * 0.04);
+function deriveConfidence(
+  domainScore: number,
+  modeScore: number,
+  domainEvidenceCount: number,
+  modeEvidenceCount: number,
+): number {
+  const raw =
+    0.45 + Math.min(0.5, domainScore * 0.03 + modeScore * 0.03 + domainEvidenceCount * 0.04 + modeEvidenceCount * 0.04);
   return Number(raw.toFixed(2));
 }

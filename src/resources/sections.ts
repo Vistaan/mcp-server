@@ -8,7 +8,19 @@ import { extractMarkdownSection, readWorkflowFile } from './loader.js';
 import { WorkflowResourceError } from './errors.js';
 
 const sectionResourceParamsSchema = z.object({
-  domain: z.enum(['os', 'freelancing', 'products', 'content', 'execution', 'investing', 'utility']),
+  domain: z.enum([
+    'os',
+    'freelancing',
+    'products',
+    'content',
+    'execution',
+    'investing',
+    'utility',
+    'pentest-web',
+    'pentest-mobile',
+    'pentest-api',
+    'pentest-infra',
+  ]),
   sectionGroup: z.string().min(1),
   sectionName: z.string().min(1),
 });

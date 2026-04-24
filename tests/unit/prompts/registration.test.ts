@@ -51,7 +51,7 @@ describe('prompt registration', () => {
 
     registerDomainPrompts(server as never);
 
-    expect(server.registerPrompt).toHaveBeenCalledTimes(6);
+    expect(server.registerPrompt).toHaveBeenCalledTimes(10);
     expect(
       prompts.get('run_freelancing_workflow')?.({ task: 'get clients', stage: 'offer', context: 'design' }).messages[0]
         ?.content.text,
@@ -118,6 +118,6 @@ describe('prompt registration', () => {
 
     registerPrompts(server as never);
 
-    expect(server.registerPrompt).toHaveBeenCalledTimes(13);
+    expect(server.registerPrompt).toHaveBeenCalledTimes(17);
   });
 });
