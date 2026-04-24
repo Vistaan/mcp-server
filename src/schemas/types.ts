@@ -18,7 +18,7 @@ export type RouteResult = {
 
 export type ResourceDef = {
   id: string;
-  domain: Domain | 'execute-referencing';
+  domain: Domain | 'execute-referencing' | 'design-reference';
   uri: string;
   fileName: string;
   title: string;

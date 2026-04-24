@@ -13,7 +13,10 @@ vi.mock('../../../src/resources/loader.js', () => ({
   extractMarkdownSection: extractMarkdownSectionMock,
 }));
 
-type ResourceHandler = (uri: URL, params: Record<string, unknown>) => Promise<{
+type ResourceHandler = (
+  uri: URL,
+  params: Record<string, unknown>,
+) => Promise<{
   contents: Array<{ uri: string; text: string }>;
 }>;
 
@@ -39,7 +42,7 @@ describe('resource registration', () => {
 
     registerStaticResources(server as never);
 
-    expect(server.registerResource).toHaveBeenCalledTimes(8);
+    expect(server.registerResource).toHaveBeenCalledTimes(9);
 
     const result = await resources[0]!.handler(new URL('workflow://os/v4'), {});
     expect(result.contents[0]).toEqual({ uri: 'workflow://os/v4', text: 'workflow body' });
@@ -53,8 +56,9 @@ describe('resource registration', () => {
     expect(server.registerResource).toHaveBeenCalledTimes(1);
 
     const section = resources[0]!;
-    const listResult = await (section.target as { _callbacks: { list: () => Promise<{ resources: unknown[] }> } })
-      ._callbacks.list();
+    const listResult = await (
+      section.target as { _callbacks: { list: () => Promise<{ resources: unknown[] }> } }
+    )._callbacks.list();
     const result = await section.handler(new URL('workflow://os/v4/execution/input'), {
       domain: 'os',
       sectionGroup: 'execution',
@@ -68,9 +72,11 @@ describe('resource registration', () => {
   it('throws for unsupported or unknown section requests', async () => {
     const { resources } = createResourceServer();
 
-    registerSectionResources({ registerResource: vi.fn((id: string, target: unknown, _meta: unknown, handler: ResourceHandler) => {
-      resources.push({ id, target, handler });
-    }) } as never);
+    registerSectionResources({
+      registerResource: vi.fn((id: string, target: unknown, _meta: unknown, handler: ResourceHandler) => {
+        resources.push({ id, target, handler });
+      }),
+    } as never);
 
     const section = resources[0]!;
 
@@ -96,6 +102,6 @@ describe('resource registration', () => {
 
     registerResources(server as never);
 
-    expect(server.registerResource).toHaveBeenCalledTimes(9);
+    expect(server.registerResource).toHaveBeenCalledTimes(10);
   });
 });

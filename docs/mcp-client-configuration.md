@@ -117,6 +117,8 @@ After adding the server to a client:
    - `workflow://execution/v4`
    - `workflow://investing/v4`
    - `workflow://utility/v4`
+   - `workflow://execute-referencing/v4`
+   - `workflow://design-reference/v4`
 
 ## Recommended Usage Pattern
 

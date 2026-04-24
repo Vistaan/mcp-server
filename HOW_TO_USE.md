@@ -55,10 +55,10 @@ In HTTP mode, interactive API docs are available at `/docs`, and the raw OpenAPI
 
 ## Environment Variables
 
-| Variable | Default | Meaning |
-|---|---|---|
-| `MCP_TRANSPORT` | `stdio` | Transport mode: `stdio` or `http` |
-| `MCP_PORT` | defaults to `3000` | HTTP port when using HTTP transport |
+| Variable        | Default              | Meaning                                     |
+| --------------- | -------------------- | ------------------------------------------- |
+| `MCP_TRANSPORT` | `stdio`              | Transport mode: `stdio` or `http`           |
+| `MCP_PORT`      | defaults to `3000`   | HTTP port when using HTTP transport         |
 | `WORKFLOW_ROOT` | `./workflows` bundle | Override workflow markdown source directory |
 
 ## Main Tools
@@ -189,6 +189,23 @@ Full workflow resources:
 - `workflow://investing/v4`
 - `workflow://utility/v4`
 - `workflow://execute-referencing/v4`
+- `workflow://design-reference/v4`
+
+### DESIGN.md Reference Resource
+
+The `workflow://design-reference/v4` resource contains the full Google DESIGN.md specification. Use this when:
+
+- Building UI components that need to follow a design system
+- Creating or validating DESIGN.md files for your projects
+- Understanding design tokens (colors, typography, spacing, components)
+- Ensuring WCAG accessibility compliance in designs
+
+The spec covers:
+
+- YAML front matter for design tokens
+- All 8 sections: Overview, Colors, Typography, Layout, Elevation & Depth, Shapes, Components, Do's and Don'ts
+- Token types: Color, Dimension, Typography, Token References
+- Component property tokens and variants
 
 Section resources follow this template:
 

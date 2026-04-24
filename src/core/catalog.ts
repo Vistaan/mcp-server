@@ -1,7 +1,7 @@
 import type { Domain, ResourceDef, SectionSegment } from '../schemas/types.js';
 import type { Mode } from '../schemas/types.js';
 
-export const DOMAIN_FILES: Record<Domain | 'execute-referencing', string> = {
+export const DOMAIN_FILES: Record<Domain | 'execute-referencing' | 'design-reference', string> = {
   os: 'WORKFLOW_OS_v4.md',
   freelancing: 'WORKFLOW_FREELANCING_v4.md',
   products: 'WORKFLOW_PRODUCTS_v4.md',
@@ -10,6 +10,7 @@ export const DOMAIN_FILES: Record<Domain | 'execute-referencing', string> = {
   investing: 'WORKFLOW_INVESTING_v4.md',
   utility: 'UTILITY_PROMPTS_v4.md',
   'execute-referencing': 'WORKFLOW_EXECUTE_REFERENCING_v4.md',
+  'design-reference': 'DESIGN_MD_REFERENCE.md',
 };
 
 export const DOMAIN_URI_MAP: Record<Domain, string> = {
@@ -217,6 +218,15 @@ export const STATIC_RESOURCES: ResourceDef[] = [
     fileName: DOMAIN_FILES['execute-referencing'],
     title: 'Workflow Execute Referencing v4',
     description: 'Dispatcher/orchestration policy for the seven v4 workflow files.',
+    mimeType: 'text/markdown',
+  },
+  {
+    id: 'design-md-reference',
+    domain: 'design-reference',
+    uri: 'workflow://design-reference/v4',
+    fileName: DOMAIN_FILES['design-reference'],
+    title: 'DESIGN.md Reference',
+    description: 'Google DESIGN.md open-source specification reference.',
     mimeType: 'text/markdown',
   },
 ];
