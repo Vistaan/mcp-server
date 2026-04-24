@@ -3,7 +3,12 @@ import { buildAppliedSequence, normalizeStage } from '../core/normalizer.js';
 import { inferUtilityIssues, makeNextAction } from '../core/output.js';
 import type { Domain } from '../schemas/types.js';
 import { extractMarkdownSection, readWorkflowFile } from '../resources/loader.js';
-import type { UtilityExecutionCommand, UtilityExecutionResult, WorkflowExecutionCommand, WorkflowExecutionResult } from './types.js';
+import type {
+  UtilityExecutionCommand,
+  UtilityExecutionResult,
+  WorkflowExecutionCommand,
+  WorkflowExecutionResult,
+} from './types.js';
 
 type WorkflowBlueprint = {
   purpose: string;
@@ -27,10 +32,16 @@ export async function executeWorkflow(command: WorkflowExecutionCommand): Promis
   const stage = normalizeStage(command.domain, command.stage);
   const blueprint = await loadWorkflowBlueprint(command.domain);
   const appliedSequence = buildAppliedSequence(command.domain, stage, DOMAIN_SEQUENCES[command.domain]);
-  const focusStage = stage === 'auto' ? appliedSequence[0] ?? 'auto' : stage;
+  const focusStage = stage === 'auto' ? (appliedSequence[0] ?? 'auto') : stage;
   const contextText = command.context?.trim();
   const focusSummary = contextText ? `${command.task} (${contextText})` : command.task;
-  const recommendations = buildWorkflowRecommendations(command.domain, focusStage, focusSummary, blueprint, appliedSequence);
+  const recommendations = buildWorkflowRecommendations(
+    command.domain,
+    focusStage,
+    focusSummary,
+    blueprint,
+    appliedSequence,
+  );
   const supportingNotes = buildSupportingNotes(command.domain, focusStage, blueprint, contextText);
 
   return {
@@ -48,7 +59,9 @@ export async function executeWorkflow(command: WorkflowExecutionCommand): Promis
     supportingNotes,
     appliedSequence,
     optimizationApplied: command.optimizeOnce,
-    nextAction: command.nextActionRequired ? makeNextAction(command.domain, focusSummary, []) : 'No next action requested.',
+    nextAction: command.nextActionRequired
+      ? makeNextAction(command.domain, focusSummary, [])
+      : 'No next action requested.',
   };
 }
 
@@ -72,7 +85,9 @@ export function applyUtility(command: UtilityExecutionCommand): UtilityExecution
       changesApplied.push('Adjusted the tone to be more direct and professional.');
       break;
     case 'structure_rebuild':
-      revisedContent = sentenceList(normalized).map((line) => `- ${line}`).join('\n');
+      revisedContent = sentenceList(normalized)
+        .map((line) => `- ${line}`)
+        .join('\n');
       changesApplied.push('Rebuilt the asset into a scan-friendly structure.');
       break;
     case 'audience_rewrite':
@@ -176,10 +191,14 @@ function buildWorkflowRecommendations(
 ): string[] {
   const sequenceLead = blueprint.sequence[0] ?? 'Start with the first workflow step.';
   return [
-    sentence(`Focus the ${domain} workflow on ${focusStage === 'auto' ? 'the earliest unresolved stage' : focusStage} for: ${task}`),
+    sentence(
+      `Focus the ${domain} workflow on ${focusStage === 'auto' ? 'the earliest unresolved stage' : focusStage} for: ${task}`,
+    ),
     sentence(`Decision rule: ${blueprint.decisionRule}`),
     sentence(`Execution input to preserve: ${blueprint.input}`),
-    sentence(`Sequence to run now: ${(appliedSequence.length > 0 ? appliedSequence : DOMAIN_SEQUENCES[domain]).join(' -> ')}`),
+    sentence(
+      `Sequence to run now: ${(appliedSequence.length > 0 ? appliedSequence : DOMAIN_SEQUENCES[domain]).join(' -> ')}`,
+    ),
     sentence(`Keep the output aligned to: ${blueprint.outputRules}`),
     sentence(`Completion bar: ${blueprint.completionRule}`),
     sentence(`If the task is still underspecified, start with: ${sequenceLead}`),
@@ -194,8 +213,12 @@ function buildSupportingNotes(
 ): string[] {
   return [
     sentence(`Primary input boundary: ${blueprint.input}`),
-    sentence(`Stage objective for ${focusStage === 'auto' ? domain : focusStage}: ${describeStageOutcome(domain, focusStage, blueprint.purpose)}`),
-    contextText ? sentence(`Context carried into execution: ${contextText}`) : sentence('No extra context was provided beyond the task statement.'),
+    sentence(
+      `Stage objective for ${focusStage === 'auto' ? domain : focusStage}: ${describeStageOutcome(domain, focusStage, blueprint.purpose)}`,
+    ),
+    contextText
+      ? sentence(`Context carried into execution: ${contextText}`)
+      : sentence('No extra context was provided beyond the task statement.'),
   ];
 }
 
@@ -203,7 +226,8 @@ function describeStageOutcome(domain: Domain, focusStage: string, subject: strin
   const normalizedSubject = subject.trim() || 'the request';
   switch (domain) {
     case 'products':
-      if (focusStage === 'validate') return `Confirm buyer pain, demand signal, and why ${normalizedSubject} is worth building`;
+      if (focusStage === 'validate')
+        return `Confirm buyer pain, demand signal, and why ${normalizedSubject} is worth building`;
       if (focusStage === 'pricing') return `Set a price that is easy to justify for ${normalizedSubject}`;
       if (focusStage === 'offer') return `Package ${normalizedSubject} into a clear and buyable offer`;
       break;
@@ -217,7 +241,8 @@ function describeStageOutcome(domain: Domain, focusStage: string, subject: strin
       if (focusStage === 'do_now') return `Reduce ${normalizedSubject} to the smallest actionable next step`;
       break;
     case 'investing':
-      if (focusStage === 'trade_setup') return `Define exact entry, exit, and invalidation rules for ${normalizedSubject}`;
+      if (focusStage === 'trade_setup')
+        return `Define exact entry, exit, and invalidation rules for ${normalizedSubject}`;
       break;
     case 'utility':
       return `Improve one dimension of ${normalizedSubject} without reopening the full workflow`;
@@ -233,7 +258,11 @@ function utilityOperationLabel(utilityName: string): string {
 }
 
 function normalizeWhitespace(content: string): string {
-  return content.replace(/\r\n/g, '\n').replace(/[ \t]+/g, ' ').replace(/\n{3,}/g, '\n\n').trim();
+  return content
+    .replace(/\r\n/g, '\n')
+    .replace(/[ \t]+/g, ' ')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
 }
 
 function stripFiller(content: string): string {

@@ -51,24 +51,24 @@ const expressMock = vi.fn(() => ({
       docsUseArgs = args;
     }
   }),
-    get: vi.fn((path: string, handler: typeof healthHandler) => {
-      if (path === '/') {
-        rootHandler = handler as typeof rootHandler;
-      } else if (path === '/docs-api.json') {
-        docsJsonHandler = handler;
-      } else if (path === '/livez') {
-        livezHandler = handler;
-      } else if (path === '/readyz') {
-        readyzHandler = handler;
-      } else if (path === '/health') {
-        healthHandler = handler;
-      } else if (path === '/metrics') {
-        metricsHandler = handler;
-      } else if (path === '/metrics/prometheus') {
-        metricsPrometheusHandler = handler;
-      } else if (path === '/mcp') {
-        getMcpHandler = handler as typeof getMcpHandler;
-      }
+  get: vi.fn((path: string, handler: typeof healthHandler) => {
+    if (path === '/') {
+      rootHandler = handler as typeof rootHandler;
+    } else if (path === '/docs-api.json') {
+      docsJsonHandler = handler;
+    } else if (path === '/livez') {
+      livezHandler = handler;
+    } else if (path === '/readyz') {
+      readyzHandler = handler;
+    } else if (path === '/health') {
+      healthHandler = handler;
+    } else if (path === '/metrics') {
+      metricsHandler = handler;
+    } else if (path === '/metrics/prometheus') {
+      metricsPrometheusHandler = handler;
+    } else if (path === '/mcp') {
+      getMcpHandler = handler as typeof getMcpHandler;
+    }
   }),
   post: vi.fn((path: string, handler: typeof postMcpHandler) => {
     if (path === '/mcp') {
@@ -204,7 +204,11 @@ describe('HTTP transport', () => {
     );
     const [docsJsonCall] = docsRes.json.mock.calls as unknown[][];
     const [docsSpecArg] = docsJsonCall ?? [];
-    const docsSpec = docsSpecArg as { openapi: string; paths: Record<string, unknown>; servers: Array<{ url: string }> };
+    const docsSpec = docsSpecArg as {
+      openapi: string;
+      paths: Record<string, unknown>;
+      servers: Array<{ url: string }>;
+    };
     expect(docsSpec.openapi).toBe('3.1.0');
     expect(docsSpec.servers[0]?.url).toBe('http://localhost:8080');
     expect(docsSpec.paths).toHaveProperty('/health');
@@ -399,7 +403,10 @@ describe('HTTP transport', () => {
     const res = createResponse();
     res.headersSent = true;
 
-    postMcpHandler?.({ body: undefined, method: 'POST', path: '/mcp', aborted: false, on: vi.fn(), off: vi.fn(), setTimeout: vi.fn() }, res);
+    postMcpHandler?.(
+      { body: undefined, method: 'POST', path: '/mcp', aborted: false, on: vi.fn(), off: vi.fn(), setTimeout: vi.fn() },
+      res,
+    );
     await flushAsyncWork();
 
     const connectLogCall = errorMock.mock.calls[0] as [string, Record<string, unknown>] | undefined;
@@ -442,7 +449,10 @@ describe('HTTP transport', () => {
     expect(healthRes.status).toHaveBeenCalledWith(503);
 
     const res = createResponse();
-    postMcpHandler?.({ body: {}, method: 'POST', path: '/mcp', aborted: false, on: vi.fn(), off: vi.fn(), setTimeout: vi.fn() }, res);
+    postMcpHandler?.(
+      { body: {}, method: 'POST', path: '/mcp', aborted: false, on: vi.fn(), off: vi.fn(), setTimeout: vi.fn() },
+      res,
+    );
     await flushAsyncWork();
 
     expect(res.status).toHaveBeenCalledWith(503);
@@ -465,7 +475,15 @@ describe('HTTP transport', () => {
 
     createHttpApp();
 
-    const req = { body: {}, method: 'POST', path: '/mcp', aborted: false, on: vi.fn(), off: vi.fn(), setTimeout: vi.fn() };
+    const req = {
+      body: {},
+      method: 'POST',
+      path: '/mcp',
+      aborted: false,
+      on: vi.fn(),
+      off: vi.fn(),
+      setTimeout: vi.fn(),
+    };
     const res = createResponse();
     postMcpHandler?.(req, res);
     await flushAsyncWork();
@@ -491,7 +509,10 @@ describe('HTTP transport', () => {
     createHttpApp();
 
     const res = createResponse();
-    postMcpHandler?.({ body: {}, method: 'POST', path: '/mcp', aborted: false, on: vi.fn(), off: vi.fn(), setTimeout: vi.fn() }, res);
+    postMcpHandler?.(
+      { body: {}, method: 'POST', path: '/mcp', aborted: false, on: vi.fn(), off: vi.fn(), setTimeout: vi.fn() },
+      res,
+    );
     await flushAsyncWork();
 
     const timeoutLogCall = errorMock.mock.calls[0] as [string, Record<string, unknown>] | undefined;

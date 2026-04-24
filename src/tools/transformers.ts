@@ -31,7 +31,9 @@ export function buildRouteTaskResult(route: RouteResult) {
   });
 }
 
-export function buildSelectDomainWorkflowResult(output: ParsedOutput<z.infer<typeof selectDomainWorkflowOutputSchema>>) {
+export function buildSelectDomainWorkflowResult(
+  output: ParsedOutput<z.infer<typeof selectDomainWorkflowOutputSchema>>,
+) {
   return buildValidatedToolResult(selectDomainWorkflowOutputSchema, output);
 }
 

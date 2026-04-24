@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { buildApplyUtilityPromptResult, buildGenerateNextActionResult, buildRouteTaskResult, buildRunWorkflowSequenceResult, buildSelectDomainWorkflowResult } from '../../../src/tools/transformers.js';
+import {
+  buildApplyUtilityPromptResult,
+  buildGenerateNextActionResult,
+  buildRouteTaskResult,
+  buildRunWorkflowSequenceResult,
+  buildSelectDomainWorkflowResult,
+} from '../../../src/tools/transformers.js';
 
 describe('tool transformers', () => {
   it('maps route results into the public DTO contract', () => {
